@@ -485,4 +485,4 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   print(i)
   print(cor.test(as.data.frame(subset(tree_diversity, Dist < 6000))[, i], subset(tree_diversity, Dist < 6000)$Dist))
 }
-
+# change something 
