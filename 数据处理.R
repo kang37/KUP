@@ -9,7 +9,7 @@ library(dunn.test)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
-Ward_faclev <- c("Uky¨­-ku", "Saky¨­-ku", "Kita-ku", "Kamigy¨­-ku", "Nakagy¨­-ku", "Shimogy¨­-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishiky¨­-ku")
+Ward_faclev <- c("UkyÂ¨Â­-ku", "SakyÂ¨Â­-ku", "Kita-ku", "KamigyÂ¨Â­-ku", "NakagyÂ¨Â­-ku", "ShimogyÂ¨Â­-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "NishikyÂ¨Â­-ku")
 Dist_level_faclev <- c("Center", "Cen-Mid", "Mid_Sub", "Suburban")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
 Plot_pub_pri_level_faclev <- c("Private area", "Public area")
@@ -485,4 +485,3 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   print(i)
   print(cor.test(as.data.frame(subset(tree_diversity, Dist < 6000))[, i], subset(tree_diversity, Dist < 6000)$Dist))
 }
-# change something 
