@@ -1,0 +1,1230 @@
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 20.9658, df = 10, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.581171
+         |     0.5611
+         |
+Kamigy身- |   0.018865  -0.521720
+         |     0.9849     0.6019
+         |
+ Kita-ku |  -0.582138  -0.887366  -0.492590
+         |     0.5605     0.3749     0.6223
+         |
+Minami-k |   0.914972   0.067904   0.768522   1.273024
+         |     0.3602     0.9459     0.4422     0.2030
+         |
+Nakagy身- |  -0.417821  -0.756913  -0.394947  -0.056670  -0.958563
+         |     0.6761     0.4491     0.6929     0.9548     0.3378
+         |
+Nishiky身 |  -0.429792  -0.799554  -0.363427   0.153362  -1.170649   0.157873
+         |     0.6673     0.4240     0.7163     0.8781     0.2417     0.8746
+         |
+Saky身-ku |  -2.486005  -1.851560  -1.917886  -1.482240  -2.676827  -0.855036
+         |    0.0129*     0.0641     0.0551     0.1383    0.0074*     0.3925
+         |
+Shimogy身 |   2.039012   0.715870   1.694641   2.286029   0.839155   1.632538
+         |    0.0414*     0.4741     0.0901    0.0223*     0.4014     0.1026
+         |
+ Uky身-ku |   0.658378  -0.200859   0.505843   1.100215  -0.371918   0.767387
+         |     0.5103     0.8408     0.6130     0.2712     0.7100     0.4429
+         |
+Yamashin |  -0.472889  -0.823475  -0.409211   0.070299  -1.170721   0.103550
+         |     0.6363     0.4102     0.6824     0.9440     0.2417     0.9175
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.723027
+         |     0.0849
+         |
+Shimogy身 |   2.208319   3.926880
+         |    0.0272*    0.0001*
+         |
+ Uky身-ku |   0.977715   2.881129  -1.382278
+         |     0.3282    0.0040*     0.1669
+         |
+Yamashin |  -0.074549   1.487182  -2.140300  -0.977799
+         |     0.9406     0.1370    0.0323*     0.3282
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 20.9658, df = 10, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.581171
+         |     0.5611
+         |
+Kamigy身- |   0.018865  -0.521720
+         |     0.9849     0.6019
+         |
+ Kita-ku |  -0.582138  -0.887366  -0.492590
+         |     0.5605     0.3749     0.6223
+         |
+Minami-k |   0.914972   0.067904   0.768522   1.273024
+         |     0.3602     0.9459     0.4422     0.2030
+         |
+Nakagy身- |  -0.417821  -0.756913  -0.394947  -0.056670  -0.958563
+         |     0.6761     0.4491     0.6929     0.9548     0.3378
+         |
+Nishiky身 |  -0.429792  -0.799554  -0.363427   0.153362  -1.170649   0.157873
+         |     0.6673     0.4240     0.7163     0.8781     0.2417     0.8746
+         |
+Saky身-ku |  -2.486005  -1.851560  -1.917886  -1.482240  -2.676827  -0.855036
+         |    0.0129*     0.0641     0.0551     0.1383    0.0074*     0.3925
+         |
+Shimogy身 |   2.039012   0.715870   1.694641   2.286029   0.839155   1.632538
+         |    0.0414*     0.4741     0.0901    0.0223*     0.4014     0.1026
+         |
+ Uky身-ku |   0.658378  -0.200859   0.505843   1.100215  -0.371918   0.767387
+         |     0.5103     0.8408     0.6130     0.2712     0.7100     0.4429
+         |
+Yamashin |  -0.472889  -0.823475  -0.409211   0.070299  -1.170721   0.103550
+         |     0.6363     0.4102     0.6824     0.9440     0.2417     0.9175
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.723027
+         |     0.0849
+         |
+Shimogy身 |   2.208319   3.926880
+         |    0.0272*    0.0001*
+         |
+ Uky身-ku |   0.977715   2.881129  -1.382278
+         |     0.3282    0.0040*     0.1669
+         |
+Yamashin |  -0.074549   1.487182  -2.140300  -0.977799
+         |     0.9406     0.1370    0.0323*     0.3282
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.809, df = 3, p-value = 0.19
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   1.153822
+         |     0.2486
+         |
+ Mid-Sub |   0.304247  -0.860742
+         |     0.7609     0.3894
+         |
+Suburban |  -1.424305  -2.171695  -1.613326
+         |     0.1544    0.0299*     0.1067
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.809, df = 3, p-value = 0.19
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   1.153822
+         |     0.2486
+         |
+ Mid-Sub |   0.304247  -0.860742
+         |     0.7609     0.3894
+         |
+Suburban |  -1.424305  -2.171695  -1.613326
+         |     0.1544    0.0299*     0.1067
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 29.5355, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.507886
+         |     0.6115
+         |
+     Ind |  -0.331831   0.269062
+         |     0.7400     0.7879
+         |
+  R high |  -2.484821  -1.615407  -2.667213
+         |    0.0130*     0.1062    0.0076*
+         |
+   R low |  -3.944383  -2.935652  -4.467933  -2.124907
+         |    0.0001*    0.0033*    0.0000*    0.0336*
+         |
+  R resi |  -2.094376  -1.272327  -2.172630   0.536078   2.618937
+         |    0.0362*     0.2033    0.0298*     0.5919    0.0088*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 29.5355, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.507886
+         |     0.6115
+         |
+     Ind |  -0.331831   0.269062
+         |     0.7400     0.7879
+         |
+  R high |  -2.484821  -1.615407  -2.667213
+         |    0.0130*     0.1062    0.0076*
+         |
+   R low |  -3.944383  -2.935652  -4.467933  -2.124907
+         |    0.0001*    0.0033*    0.0000*    0.0336*
+         |
+  R resi |  -2.094376  -1.272327  -2.172630   0.536078   2.618937
+         |    0.0362*     0.2033    0.0298*     0.5919    0.0088*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 0.0172, df = 1, p-value = 0.9
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |  -0.131102
+         |     0.8957
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 0.0172, df = 1, p-value = 0.9
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |  -0.131102
+         |     0.8957
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 14.156, df = 10, p-value = 0.17
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.500151
+         |     0.6170
+         |
+Kamigy身- |   0.518646  -0.141199
+         |     0.6040     0.8877
+         |
+ Kita-ku |  -0.398746  -0.704270  -0.786379
+         |     0.6901     0.4813     0.4316
+         |
+Minami-k |   0.161864  -0.342236  -0.274138   0.453193
+         |     0.8714     0.7322     0.7840     0.6504
+         |
+Nakagy身- |  -0.364878  -0.655413  -0.652545  -0.113173  -0.428986
+         |     0.7152     0.5122     0.5140     0.9099     0.6679
+         |
+Nishiky身 |   0.058183  -0.446504  -0.426784   0.409004  -0.105467   0.382535
+         |     0.9536     0.6552     0.6695     0.6825     0.9160     0.7021
+         |
+Saky身-ku |  -1.828697  -1.434465  -1.912773  -1.119611  -1.460318  -0.571573
+         |     0.0674     0.1514     0.0558     0.2629     0.1442     0.5676
+         |
+Shimogy身 |   1.946620   0.733612   1.197885   2.054102   1.410552   1.527357
+         |     0.0516     0.4632     0.2310    0.0400*     0.1584     0.1267
+         |
+ Uky身-ku |   0.821064  -0.032777   0.168077   1.069643   0.459378   0.805630
+         |     0.4116     0.9739     0.8665     0.2848     0.6460     0.4205
+         |
+Yamashin |   0.173158  -0.360065  -0.300512   0.486530  -0.005045   0.442648
+         |     0.8625     0.7188     0.7638     0.6266     0.9960     0.6580
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.639140
+         |     0.1012
+         |
+Shimogy身 |   1.730877   3.332864
+         |     0.0835    0.0009*
+         |
+ Uky身-ku |   0.673720   2.453551  -1.166573
+         |     0.5005    0.0141*     0.2434
+         |
+Yamashin |   0.109248   1.611925  -1.524162  -0.509193
+         |     0.9130     0.1070     0.1275     0.6106
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 14.156, df = 10, p-value = 0.17
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.500151
+         |     0.6170
+         |
+Kamigy身- |   0.518646  -0.141199
+         |     0.6040     0.8877
+         |
+ Kita-ku |  -0.398746  -0.704270  -0.786379
+         |     0.6901     0.4813     0.4316
+         |
+Minami-k |   0.161864  -0.342236  -0.274138   0.453193
+         |     0.8714     0.7322     0.7840     0.6504
+         |
+Nakagy身- |  -0.364878  -0.655413  -0.652545  -0.113173  -0.428986
+         |     0.7152     0.5122     0.5140     0.9099     0.6679
+         |
+Nishiky身 |   0.058183  -0.446504  -0.426784   0.409004  -0.105467   0.382535
+         |     0.9536     0.6552     0.6695     0.6825     0.9160     0.7021
+         |
+Saky身-ku |  -1.828697  -1.434465  -1.912773  -1.119611  -1.460318  -0.571573
+         |     0.0674     0.1514     0.0558     0.2629     0.1442     0.5676
+         |
+Shimogy身 |   1.946620   0.733612   1.197885   2.054102   1.410552   1.527357
+         |     0.0516     0.4632     0.2310    0.0400*     0.1584     0.1267
+         |
+ Uky身-ku |   0.821064  -0.032777   0.168077   1.069643   0.459378   0.805630
+         |     0.4116     0.9739     0.8665     0.2848     0.6460     0.4205
+         |
+Yamashin |   0.173158  -0.360065  -0.300512   0.486530  -0.005045   0.442648
+         |     0.8625     0.7188     0.7638     0.6266     0.9960     0.6580
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.639140
+         |     0.1012
+         |
+Shimogy身 |   1.730877   3.332864
+         |     0.0835    0.0009*
+         |
+ Uky身-ku |   0.673720   2.453551  -1.166573
+         |     0.5005    0.0141*     0.2434
+         |
+Yamashin |   0.109248   1.611925  -1.524162  -0.509193
+         |     0.9130     0.1070     0.1275     0.6106
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.0789, df = 3, p-value = 0.38
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   1.160557
+         |     0.2458
+         |
+ Mid-Sub |  -0.629608  -1.675555
+         |     0.5290     0.0938
+         |
+Suburban |  -0.397769  -1.227532   0.049538
+         |     0.6908     0.2196     0.9605
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.0789, df = 3, p-value = 0.38
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   1.160557
+         |     0.2458
+         |
+ Mid-Sub |  -0.629608  -1.675555
+         |     0.5290     0.0938
+         |
+Suburban |  -0.397769  -1.227532   0.049538
+         |     0.6908     0.2196     0.9605
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 24.5974, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.408001
+         |     0.6833
+         |
+     Ind |  -0.575386  -0.063551
+         |     0.5650     0.9493
+         |
+  R high |  -2.345667  -1.609922  -2.164499
+         |    0.0190*     0.1074    0.0304*
+         |
+   R low |  -3.738414  -2.868657  -3.890521  -2.027134
+         |    0.0002*    0.0041*    0.0001*    0.0426*
+         |
+  R resi |  -2.032110  -1.334821  -1.769966   0.427198   2.416530
+         |    0.0421*     0.1819     0.0767     0.6692    0.0157*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 24.5974, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.408001
+         |     0.6833
+         |
+     Ind |  -0.575386  -0.063551
+         |     0.5650     0.9493
+         |
+  R high |  -2.345667  -1.609922  -2.164499
+         |    0.0190*     0.1074    0.0304*
+         |
+   R low |  -3.738414  -2.868657  -3.890521  -2.027134
+         |    0.0002*    0.0041*    0.0001*    0.0426*
+         |
+  R resi |  -2.032110  -1.334821  -1.769966   0.427198   2.416530
+         |    0.0421*     0.1819     0.0767     0.6692    0.0157*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.4885, df = 1, p-value = 0.06
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   1.867740
+         |     0.0618
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.4885, df = 1, p-value = 0.06
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   1.867740
+         |     0.0618
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 11.4743, df = 10, p-value = 0.32
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.566554
+         |     0.5710
+         |
+Kamigy身- |   0.633864  -0.131545
+         |     0.5262     0.8953
+         |
+ Kita-ku |  -0.103740  -0.595651  -0.647527
+         |     0.9174     0.5514     0.5173
+         |
+Minami-k |  -0.018613  -0.517037  -0.520382   0.063199
+         |     0.9851     0.6051     0.6028     0.9496
+         |
+Nakagy身- |  -0.001573  -0.430457  -0.389764   0.058776   0.010519
+         |     0.9987     0.6669     0.6967     0.9531     0.9916
+         |
+Nishiky身 |   0.249790  -0.402006  -0.377666   0.308703   0.206333   0.142483
+         |     0.8027     0.6877     0.7057     0.7575     0.8365     0.8867
+         |
+Saky身-ku |  -1.309124  -1.234894  -1.630439  -0.982037  -0.911564  -0.668171
+         |     0.1905     0.2169     0.1030     0.3261     0.3620     0.5040
+         |
+Shimogy身 |   1.877385   0.630266   1.043153   1.751497   1.510005   1.151575
+         |     0.0605     0.5285     0.2969     0.0799     0.1310     0.2495
+         |
+ Uky身-ku |   1.114898   0.064613   0.294016   1.047903   0.848544   0.615255
+         |     0.2649     0.9485     0.7687     0.2947     0.3961     0.5384
+         |
+Yamashin |   0.820223  -0.032847   0.138567   0.810217   0.661595   0.494352
+         |     0.4121     0.9738     0.8898     0.4178     0.5082     0.6211
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.380090
+         |     0.1676
+         |
+Shimogy身 |   1.513308   2.867096
+         |     0.1302    0.0041*
+         |
+ Uky身-ku |   0.758006   2.279552  -0.868235
+         |     0.4484    0.0226*     0.3853
+         |
+Yamashin |   0.538816   1.846121  -0.927021  -0.146723
+         |     0.5900     0.0649     0.3539     0.8833
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 11.4743, df = 10, p-value = 0.32
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.566554
+         |     0.5710
+         |
+Kamigy身- |   0.633864  -0.131545
+         |     0.5262     0.8953
+         |
+ Kita-ku |  -0.103740  -0.595651  -0.647527
+         |     0.9174     0.5514     0.5173
+         |
+Minami-k |  -0.018613  -0.517037  -0.520382   0.063199
+         |     0.9851     0.6051     0.6028     0.9496
+         |
+Nakagy身- |  -0.001573  -0.430457  -0.389764   0.058776   0.010519
+         |     0.9987     0.6669     0.6967     0.9531     0.9916
+         |
+Nishiky身 |   0.249790  -0.402006  -0.377666   0.308703   0.206333   0.142483
+         |     0.8027     0.6877     0.7057     0.7575     0.8365     0.8867
+         |
+Saky身-ku |  -1.309124  -1.234894  -1.630439  -0.982037  -0.911564  -0.668171
+         |     0.1905     0.2169     0.1030     0.3261     0.3620     0.5040
+         |
+Shimogy身 |   1.877385   0.630266   1.043153   1.751497   1.510005   1.151575
+         |     0.0605     0.5285     0.2969     0.0799     0.1310     0.2495
+         |
+ Uky身-ku |   1.114898   0.064613   0.294016   1.047903   0.848544   0.615255
+         |     0.2649     0.9485     0.7687     0.2947     0.3961     0.5384
+         |
+Yamashin |   0.820223  -0.032847   0.138567   0.810217   0.661595   0.494352
+         |     0.4121     0.9738     0.8898     0.4178     0.5082     0.6211
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.380090
+         |     0.1676
+         |
+Shimogy身 |   1.513308   2.867096
+         |     0.1302    0.0041*
+         |
+ Uky身-ku |   0.758006   2.279552  -0.868235
+         |     0.4484    0.0226*     0.3853
+         |
+Yamashin |   0.538816   1.846121  -0.927021  -0.146723
+         |     0.5900     0.0649     0.3539     0.8833
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.0091, df = 3, p-value = 0.39
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   0.778379
+         |     0.4363
+         |
+ Mid-Sub |  -1.087286  -1.699353
+         |     0.2769     0.0893
+         |
+Suburban |  -0.195242  -0.757152   0.568972
+         |     0.8452     0.4490     0.5694
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 3.0091, df = 3, p-value = 0.39
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   0.778379
+         |     0.4363
+         |
+ Mid-Sub |  -1.087286  -1.699353
+         |     0.2769     0.0893
+         |
+Suburban |  -0.195242  -0.757152   0.568972
+         |     0.8452     0.4490     0.5694
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 22.9418, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.029388
+         |     0.9766
+         |
+     Ind |  -0.644269  -0.550562
+         |     0.5194     0.5819
+         |
+  R high |  -2.210522  -1.939563  -1.902256
+         |    0.0271*     0.0524     0.0571
+         |
+   R low |  -3.532794  -3.129847  -3.543934  -1.924235
+         |    0.0004*    0.0017*    0.0004*     0.0543
+         |
+  R resi |  -2.123068  -1.864157  -1.791654   0.104427   2.001042
+         |    0.0337*     0.0623     0.0732     0.9168    0.0454*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 22.9418, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.029388
+         |     0.9766
+         |
+     Ind |  -0.644269  -0.550562
+         |     0.5194     0.5819
+         |
+  R high |  -2.210522  -1.939563  -1.902256
+         |    0.0271*     0.0524     0.0571
+         |
+   R low |  -3.532794  -3.129847  -3.543934  -1.924235
+         |    0.0004*    0.0017*    0.0004*     0.0543
+         |
+  R resi |  -2.123068  -1.864157  -1.791654   0.104427   2.001042
+         |    0.0337*     0.0623     0.0732     0.9168    0.0454*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.0203, df = 1, p-value = 0.04
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.005063
+         |    0.0450*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.0203, df = 1, p-value = 0.04
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.005063
+         |    0.0450*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 9.9127, df = 10, p-value = 0.45
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.693062
+         |     0.4883
+         |
+Kamigy身- |   0.714150  -0.198442
+         |     0.4751     0.8427
+         |
+ Kita-ku |   0.164902  -0.559144  -0.499214
+         |     0.8690     0.5761     0.6176
+         |
+Minami-k |  -0.076650  -0.667000  -0.633976  -0.196168
+         |     0.9389     0.5048     0.5261     0.8445
+         |
+Nakagy身- |   0.358528  -0.253469  -0.108523   0.243012   0.368743
+         |     0.7199     0.7999     0.9136     0.8080     0.7123
+         |
+Nishiky身 |   0.435252  -0.418581  -0.301598   0.226828   0.400374  -0.097965
+         |     0.6634     0.6755     0.7630     0.8206     0.6889     0.9220
+         |
+Saky身-ku |  -1.007711  -1.206888  -1.480025  -0.999099  -0.639660  -0.873181
+         |     0.3136     0.2275     0.1389     0.3177     0.5224     0.3826
+         |
+Shimogy身 |   1.766899   0.446496   0.883119   1.433820   1.471777   0.753462
+         |     0.0772     0.6552     0.3772     0.1516     0.1411     0.4512
+         |
+ Uky身-ku |   1.286747   0.036598   0.355614   0.946364   1.031351   0.360837
+         |     0.1982     0.9708     0.7221     0.3440     0.3024     0.7182
+         |
+Yamashin |   0.919909  -0.090338   0.152624   0.673232   0.790687   0.220096
+         |     0.3576     0.9280     0.8787     0.5008     0.4291     0.8258
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.303591
+         |     0.1924
+         |
+Shimogy身 |   1.263017   2.526962
+         |     0.2066    0.0115*
+         |
+ Uky身-ku |   0.739903   2.179992  -0.628332
+         |     0.4594    0.0293*     0.5298
+         |
+Yamashin |   0.476162   1.707912  -0.749489  -0.194235
+         |     0.6340     0.0877     0.4536     0.8460
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 9.9127, df = 10, p-value = 0.45
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |   0.693062
+         |     0.4883
+         |
+Kamigy身- |   0.714150  -0.198442
+         |     0.4751     0.8427
+         |
+ Kita-ku |   0.164902  -0.559144  -0.499214
+         |     0.8690     0.5761     0.6176
+         |
+Minami-k |  -0.076650  -0.667000  -0.633976  -0.196168
+         |     0.9389     0.5048     0.5261     0.8445
+         |
+Nakagy身- |   0.358528  -0.253469  -0.108523   0.243012   0.368743
+         |     0.7199     0.7999     0.9136     0.8080     0.7123
+         |
+Nishiky身 |   0.435252  -0.418581  -0.301598   0.226828   0.400374  -0.097965
+         |     0.6634     0.6755     0.7630     0.8206     0.6889     0.9220
+         |
+Saky身-ku |  -1.007711  -1.206888  -1.480025  -0.999099  -0.639660  -0.873181
+         |     0.3136     0.2275     0.1389     0.3177     0.5224     0.3826
+         |
+Shimogy身 |   1.766899   0.446496   0.883119   1.433820   1.471777   0.753462
+         |     0.0772     0.6552     0.3772     0.1516     0.1411     0.4512
+         |
+ Uky身-ku |   1.286747   0.036598   0.355614   0.946364   1.031351   0.360837
+         |     0.1982     0.9708     0.7221     0.3440     0.3024     0.7182
+         |
+Yamashin |   0.919909  -0.090338   0.152624   0.673232   0.790687   0.220096
+         |     0.3576     0.9280     0.8787     0.5008     0.4291     0.8258
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |  -1.303591
+         |     0.1924
+         |
+Shimogy身 |   1.263017   2.526962
+         |     0.2066    0.0115*
+         |
+ Uky身-ku |   0.739903   2.179992  -0.628332
+         |     0.4594    0.0293*     0.5298
+         |
+Yamashin |   0.476162   1.707912  -0.749489  -0.194235
+         |     0.6340     0.0877     0.4536     0.8460
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 2.688, df = 3, p-value = 0.44
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   0.600819
+         |     0.5480
+         |
+ Mid-Sub |  -1.126488  -1.560302
+         |     0.2600     0.1187
+         |
+Suburban |   0.024560  -0.422381   0.812522
+         |     0.9804     0.6727     0.4165
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 2.688, df = 3, p-value = 0.44
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |   0.600819
+         |     0.5480
+         |
+ Mid-Sub |  -1.126488  -1.560302
+         |     0.2600     0.1187
+         |
+Suburban |   0.024560  -0.422381   0.812522
+         |     0.9804     0.6727     0.4165
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 19.2503, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.174911
+         |     0.8611
+         |
+     Ind |  -0.637727  -0.381429
+         |     0.5237     0.7029
+         |
+  R high |  -2.125255  -1.690300  -1.804200
+         |    0.0336*     0.0910     0.0712
+         |
+   R low |  -3.253508  -2.708501  -3.205216  -1.646590
+         |    0.0011*    0.0068*    0.0013*     0.0996
+         |
+  R resi |  -2.255070  -1.810037  -1.965216  -0.206155   1.424910
+         |    0.0241*     0.0703    0.0494*     0.8367     0.1542
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 19.2503, df = 5, p-value = 0
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |  -0.174911
+         |     0.8611
+         |
+     Ind |  -0.637727  -0.381429
+         |     0.5237     0.7029
+         |
+  R high |  -2.125255  -1.690300  -1.804200
+         |    0.0336*     0.0910     0.0712
+         |
+   R low |  -3.253508  -2.708501  -3.205216  -1.646590
+         |    0.0011*    0.0068*    0.0013*     0.0996
+         |
+  R resi |  -2.255070  -1.810037  -1.965216  -0.206155   1.424910
+         |    0.0241*     0.0703    0.0494*     0.8367     0.1542
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.061, df = 1, p-value = 0.04
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.015199
+         |    0.0439*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 4.061, df = 1, p-value = 0.04
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.015199
+         |    0.0439*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 13.1864, df = 10, p-value = 0.21
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |  -0.058384
+         |     0.9534
+         |
+Kamigy身- |   0.216245   0.180414
+         |     0.8288     0.8568
+         |
+ Kita-ku |   1.563536   0.911771   1.061936
+         |     0.1179     0.3619     0.2883
+         |
+Minami-k |  -1.239315  -0.719656  -1.224096  -2.281683
+         |     0.2152     0.4717     0.2209    0.0225*
+         |
+Nakagy身- |   1.514483   1.117712   1.220436   0.459202   2.154297
+         |     0.1299     0.2637     0.2223     0.6461    0.0312*
+         |
+Nishiky身 |   1.361045   0.775637   0.873479  -0.241686   2.138812  -0.635332
+         |     0.1735     0.4380     0.3824     0.8090    0.0325*     0.5252
+         |
+Saky身-ku |   1.770200   0.880430   1.077104  -0.148152   2.426997  -0.589895
+         |     0.0767     0.3786     0.2814     0.8822    0.0152*     0.5553
+         |
+Shimogy身 |  -0.615727  -0.318487  -0.691262  -1.761833   0.542931  -1.746133
+         |     0.5381     0.7501     0.4894     0.0781     0.5872     0.0808
+         |
+ Uky身-ku |   0.543925   0.348258   0.237040  -0.912975   1.535117  -1.102893
+         |     0.5865     0.7276     0.8126     0.3613     0.1248     0.2701
+         |
+Yamashin |   1.089455   0.663915   0.694507  -0.373990   1.921523  -0.721444
+         |     0.2760     0.5067     0.4874     0.7084     0.0547     0.4706
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |   0.130845
+         |     0.8959
+         |
+Shimogy身 |  -1.599910  -1.861123
+         |     0.1096     0.0627
+         |
+ Uky身-ku |  -0.702047  -0.923738   0.976237
+         |     0.4826     0.3556     0.3289
+         |
+Yamashin |  -0.151480  -0.290279   1.394677   0.511066
+         |     0.8796     0.7716     0.1631     0.6093
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 13.1864, df = 10, p-value = 0.21
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |   Fushimi-   Higashiy   Kamigy身-    Kita-ku   Minami-k   Nakagy身-
+---------+------------------------------------------------------------------
+Higashiy |  -0.058384
+         |     0.9534
+         |
+Kamigy身- |   0.216245   0.180414
+         |     0.8288     0.8568
+         |
+ Kita-ku |   1.563536   0.911771   1.061936
+         |     0.1179     0.3619     0.2883
+         |
+Minami-k |  -1.239315  -0.719656  -1.224096  -2.281683
+         |     0.2152     0.4717     0.2209    0.0225*
+         |
+Nakagy身- |   1.514483   1.117712   1.220436   0.459202   2.154297
+         |     0.1299     0.2637     0.2223     0.6461    0.0312*
+         |
+Nishiky身 |   1.361045   0.775637   0.873479  -0.241686   2.138812  -0.635332
+         |     0.1735     0.4380     0.3824     0.8090    0.0325*     0.5252
+         |
+Saky身-ku |   1.770200   0.880430   1.077104  -0.148152   2.426997  -0.589895
+         |     0.0767     0.3786     0.2814     0.8822    0.0152*     0.5553
+         |
+Shimogy身 |  -0.615727  -0.318487  -0.691262  -1.761833   0.542931  -1.746133
+         |     0.5381     0.7501     0.4894     0.0781     0.5872     0.0808
+         |
+ Uky身-ku |   0.543925   0.348258   0.237040  -0.912975   1.535117  -1.102893
+         |     0.5865     0.7276     0.8126     0.3613     0.1248     0.2701
+         |
+Yamashin |   1.089455   0.663915   0.694507  -0.373990   1.921523  -0.721444
+         |     0.2760     0.5067     0.4874     0.7084     0.0547     0.4706
+Col Mean-|
+Row Mean |   Nishiky身   Saky身-ku   Shimogy身    Uky身-ku
+---------+--------------------------------------------
+Saky身-ku |   0.130845
+         |     0.8959
+         |
+Shimogy身 |  -1.599910  -1.861123
+         |     0.1096     0.0627
+         |
+ Uky身-ku |  -0.702047  -0.923738   0.976237
+         |     0.4826     0.3556     0.3289
+         |
+Yamashin |  -0.151480  -0.290279   1.394677   0.511066
+         |     0.8796     0.7716     0.1631     0.6093
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 9.8159, df = 3, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |  -0.496394
+         |     0.6196
+         |
+ Mid-Sub |  -0.895618  -0.284998
+         |     0.3705     0.7756
+         |
+Suburban |   2.448706   2.627203   3.046420
+         |    0.0143*    0.0086*    0.0023*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 9.8159, df = 3, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |    Cen-Mid     Center    Mid-Sub
+---------+---------------------------------
+  Center |  -0.496394
+         |     0.6196
+         |
+ Mid-Sub |  -0.895618  -0.284998
+         |     0.3705     0.7756
+         |
+Suburban |   2.448706   2.627203   3.046420
+         |    0.0143*    0.0086*    0.0023*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 8.6522, df = 5, p-value = 0.12
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |   0.582526
+         |     0.5602
+         |
+     Ind |  -0.136098  -0.759787
+         |     0.8917     0.4474
+         |
+  R high |   1.027601   0.223164   1.393862
+         |     0.3041     0.8234     0.1634
+         |
+   R low |   1.536083   0.682677   1.993369   0.776719
+         |     0.1245     0.4948    0.0462*     0.4373
+         |
+  R resi |  -0.059205  -0.762471   0.113905  -1.683798  -2.471857
+         |     0.9528     0.4458     0.9093     0.0922    0.0134*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 8.6522, df = 5, p-value = 0.12
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |        Com   Com neig        Ind     R high      R low
+---------+-------------------------------------------------------
+Com neig |   0.582526
+         |     0.5602
+         |
+     Ind |  -0.136098  -0.759787
+         |     0.8917     0.4474
+         |
+  R high |   1.027601   0.223164   1.393862
+         |     0.3041     0.8234     0.1634
+         |
+   R low |   1.536083   0.682677   1.993369   0.776719
+         |     0.1245     0.4948    0.0462*     0.4373
+         |
+  R resi |  -0.059205  -0.762471   0.113905  -1.683798  -2.471857
+         |     0.9528     0.4458     0.9093     0.0922    0.0134*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 5.7688, df = 1, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.401823
+         |    0.0163*
+
+alpha = 0.05
+Reject Ho if p <= alpha
+  Kruskal-Wallis rank sum test
+
+data: x and group
+Kruskal-Wallis chi-squared = 5.7688, df = 1, p-value = 0.02
+
+
+                           Comparison of x by group                            
+                                (No adjustment)                                
+Col Mean-|
+Row Mean |          N
+---------+-----------
+       Y |   2.401823
+         |    0.0163*
+
+alpha = 0.05
+Reject Ho if p <= alpha
