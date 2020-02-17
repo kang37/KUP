@@ -9,48 +9,63 @@ library(dunn.test)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
-Ward_faclev <- c("Uky¨­-ku", "Saky¨­-ku", "Kita-ku", "Kamigy¨­-ku", "Nakagy¨­-ku", "Shimogy¨­-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishiky¨­-ku")
+Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
 Dist_level_faclev <- c("Center", "Cen-Mid", "Mid_Sub", "Suburban")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
-Plot_pub_pri_level_faclev <- c("Private area", "Public area")
 
-# get the data
-plot_info <- read.csv("In_Plot_info.csv", stringsAsFactors = FALSE) %>%
+## get data
+# data of all_plot_info part 2-1
+all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>%
   mutate(Dist_level = NA)
-plot_info$Dist_level[plot_info$Dist < 2000] <- "1"
-plot_info$Dist_level[plot_info$Dist >= 2000 & plot_info$Dist < 4000] <- "2"
-plot_info$Dist_level[plot_info$Dist >= 4000 & plot_info$Dist < 6000] <- "3"
-plot_info$Dist_level[plot_info$Dist >= 6000 & plot_info$Dist < 8000] <- "4"
-plot_info$Dist_level[plot_info$Dist >= 8000 & plot_info$Dist < 10000] <- "5"
-plot_info <- 
-  plot_info %>% mutate(Dist_level = factor(Dist_level, levels = c("1", "2", "3", "4", "5"))) %>% 
-  mutate(Ward = factor(Ward, levels = Ward_faclev), 
+all_plot_info$Dist_level[all_plot_info$Dist < 2000] <- "1"
+all_plot_info$Dist_level[all_plot_info$Dist >= 2000 & all_plot_info$Dist < 4000] <- "2"
+all_plot_info$Dist_level[all_plot_info$Dist >= 4000 & all_plot_info$Dist < 6000] <- "3"
+all_plot_info$Dist_level[all_plot_info$Dist >= 6000 & all_plot_info$Dist < 8000] <- "4"
+all_plot_info$Dist_level[all_plot_info$Dist >= 8000] <- "5"
+all_plot_info <- all_plot_info %>% 
+  mutate(Dist_level = factor(Dist_level, levels = c("1", "2", "3", "4", "5")), 
+         Ward = factor(Ward, levels = Ward_faclev), 
          Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
-plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
+
+# data of all_plant_info
+all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
 all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
   filter(Plot_ID != 67) %>% 
-  left_join(plant_info, by = "Species_CN") %>%
-  left_join(plot_info,by = "Plot_ID")
+  left_join(all_plant_info, by = "Species_CN") %>%
+  left_join(all_plot_info,by = "Plot_ID")
+all_plant_data$Landuse_subclass <- NULL
+all_plant_data$Landuse_agg <- NULL
+
+# data of trees
 tree_data <- all_plant_data %>% 
   subset(Tree_shrub == "Tree")
+  
+# data of shrubs
 shrub_data <- all_plant_data %>% 
   subset(Tree_shrub == "Shrub")
 
+# data of tree_plant_info
 tree_plant_info <- all_plant_data %>% filter(Tree_shrub == "Tree") %>% 
   select(Species_CN) %>% 
   unique() %>% 
-  left_join(plant_info, by = "Species_CN")
+  left_join(all_plant_info, by = "Species_CN")
+
+# data of shrub info
 shrub_plant_info <- all_plant_data %>% filter(Tree_shrub == "Shrub") %>% 
   select(Species_CN) %>% 
   unique() %>% 
-  left_join(plant_info, by = "Species_CN")
+  left_join(all_plant_info, by = "Species_CN")
 
-plot_info <- all_plant_data %>% group_by(Plot_ID) %>% 
+# data of all_plot_info part 2-2
+all_plot_info <- all_plant_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(Plot_pub_pri = sum(ifelse(Pub_pri == "Public", 1, 0)/n())) %>%
-  left_join(plot_info, by = "Plot_ID") %>%
+  left_join(all_plot_info, by = "Plot_ID") %>%
   mutate(Plot_pub_pri_level = ifelse(Plot_pub_pri ==1, "Public area", 
                                      ifelse(Plot_pub_pri ==0, "Private area", NA))) %>% 
   mutate(Plot_pub_pri_level = factor(Plot_pub_pri_level, levels = Plot_pub_pri_level_faclev))
+all_plot_info$Plot_pub_pri <- NULL
+
+# data of tree_diversity
 tree_diversity <- all_plant_data %>% 
   filter(Tree_shrub == "Tree") %>% 
   select(Plot_ID, Species_CN, Stem) %>%
@@ -61,7 +76,29 @@ tree_diversity <- all_plant_data %>%
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(plot_info,by = "Plot_ID")
+  left_join(all_plot_info,by = "Plot_ID")
+
+tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
+tree_diversity_perc_nonpot <- tree_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Stem, 0)/sum(Stem)))
+tree_diversity_perc_private <- tree_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Stem, 0)/sum(Stem)))
+tree_diversity_perc_nonstreet <- tree_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
+tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
+
+tree_diversity <- tree_diversity %>% mutate(
+  perc_planted = tree_diversity_perc_planted$perc, 
+  perc_nonpot = tree_diversity_perc_nonpot$perc, 
+  perc_private = tree_diversity_perc_private$perc, 
+  perc_nonstreet = tree_diversity_perc_nonstreet$perc, 
+  perc_native = tree_diversity_perc_native$perc
+)
+rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private, tree_diversity_perc_nonstreet, tree_diversity_perc_native)
+
+# data of shrub_diversity
 shrub_diversity <- all_plant_data %>% 
   filter(Tree_shrub == "Shrub") %>% 
   select(Plot_ID, Species_CN, Area) %>%
@@ -72,7 +109,27 @@ shrub_diversity <- all_plant_data %>%
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(plot_info,by = "Plot_ID")
+  left_join(all_plot_info,by = "Plot_ID")
+
+shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
+shrub_diversity_perc_nonpot <- shrub_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Area, 0)/sum(Area)))
+shrub_diversity_perc_private <- shrub_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Area, 0)/sum(Area)))
+shrub_diversity_perc_nonstreet <- shrub_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Area, 0)/sum(Area)))
+shrub_diversity_perc_native <- shrub_data %>% group_by(Plot_ID) %>% 
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
+
+shrub_diversity <- shrub_diversity %>% mutate(
+  perc_planted = shrub_diversity_perc_planted$perc, 
+  perc_nonpot = shrub_diversity_perc_nonpot$perc, 
+  perc_private = shrub_diversity_perc_private$perc, 
+  perc_nonstreet = shrub_diversity_perc_nonstreet$perc, 
+  perc_native = shrub_diversity_perc_native$perc
+)
+rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
 # analysis begin
 # the total species, genera and families of all plants
@@ -188,7 +245,7 @@ stressplot(mds_plot_data)
 mds_plot_point_data <- mds_plot_data$points %>%
   as.data.frame() %>%
   mutate(Plot_ID = mds_plot_ID) %>% 
-  left_join(plot_info, by = "Plot_ID")
+  left_join(all_plot_info, by = "Plot_ID")
 mds_plot <- mapply(.myplot, atr = c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level"), SIMPLIFY = FALSE)
 Rmisc::multiplot(plotlist = mds_plot, layout = matrix(1:4, nrow = 2))
 
@@ -239,7 +296,7 @@ stressplot(mds_plot_data)
 mds_plot_point_data <- mds_plot_data$points %>%
   as.data.frame() %>%
   mutate(Plot_ID = mds_plot_ID) %>% 
-  left_join(plot_info, by = "Plot_ID")
+  left_join(all_plot_info, by = "Plot_ID")
 mds_plot <- mapply(.myplot, atr = c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level"), SIMPLIFY = FALSE)
 Rmisc::multiplot(plotlist = mds_plot, layout = matrix(1:4, nrow = 2))
 
@@ -458,7 +515,7 @@ for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
 # percentage of exotic species ~ distance
 tree_data_percex <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(percex = sum(Nt_ex == "ex")/n()) %>%
-  left_join(plot_info, by = "Plot_ID") %>%
+  left_join(all_plot_info, by = "Plot_ID") %>%
   as.data.frame()
 ggplot(tree_data_percex, aes(Dist, percex)) + geom_point(aes(color = Landuse_class), size = 3) + geom_smooth(method = "lm")
 ggplot(tree_data_percex, aes(Landuse_class, percex)) + geom_boxplot()
@@ -485,3 +542,22 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   print(i)
   print(cor.test(as.data.frame(subset(tree_diversity, Dist < 6000))[, i], subset(tree_diversity, Dist < 6000)$Dist))
 }
+
+# tree attr vs. distance
+par(mfrow = c(2,3))
+plot(tree_diversity$Dist, tree_diversity$perc_planted)
+plot(tree_diversity$Dist, tree_diversity$perc_nonpot)
+plot(tree_diversity$Dist, tree_diversity$perc_private)
+plot(tree_diversity$Dist, tree_diversity$perc_nonstreet)
+plot(tree_diversity$Dist, tree_diversity$perc_native)
+par(opar)
+
+# shrub attr vs. distance
+par(mfrow = c(2,3))
+plot(shrub_diversity$Dist, shrub_diversity$perc_planted)
+plot(shrub_diversity$Dist, shrub_diversity$perc_nonpot)
+plot(shrub_diversity$Dist, shrub_diversity$perc_private)
+plot(shrub_diversity$Dist, shrub_diversity$perc_nonstreet)
+plot(shrub_diversity$Dist, shrub_diversity$perc_native)
+par(opar)
+
