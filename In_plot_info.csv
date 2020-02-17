@@ -1,62 +1,62 @@
 Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
-290,Shimogy身-ku,Com,Com,Com,981.0992622
-295,Shimogy身-ku,Com,Com,Com,812.9847367
-291,Shimogy身-ku,Com,Com,Com,835.6660625
-299,Nakagy身-ku,Com,Com,Com,968.0513842
-285,Shimogy身-ku,Com,Com,Com,446.7280048
-298,Shimogy身-ku,Com,Com,Com,194.6626688
+290,Shimogyo-ku,Com,Com,Com,981.0992622
+295,Shimogyo-ku,Com,Com,Com,812.9847367
+291,Shimogyo-ku,Com,Com,Com,835.6660625
+299,Nakagyo-ku,Com,Com,Com,968.0513842
+285,Shimogyo-ku,Com,Com,Com,446.7280048
+298,Shimogyo-ku,Com,Com,Com,194.6626688
 281,Higashiyama-ku,Com,Com,Com,484.9808929
-283,Shimogy身-ku,Com,Com,Com,1614.089052
-284,Shimogy身-ku,Com,Com,Com,1673.011077
-300,Shimogy身-ku,Com,Com,Com,1048.263986
+283,Shimogyo-ku,Com,Com,Com,1614.089052
+284,Shimogyo-ku,Com,Com,Com,1673.011077
+300,Shimogyo-ku,Com,Com,Com,1048.263986
 304,Higashiyama-ku,Com,Com,Com,528.4844911
-297,Nakagy身-ku,Com,Com,Com,1337.740385
-303,Kamigy身-ku,Com,Com,Com,2420.051954
-286,Shimogy身-ku,Com,Com,Com,794.796839
-293,Shimogy身-ku,Com,Com,Com,1479.198308
-301,Shimogy身-ku,Com,Com,Com,2423.260713
-305,Shimogy身-ku,Com,Com,Com,2417.552007
+297,Nakagyo-ku,Com,Com,Com,1337.740385
+303,Kamigyo-ku,Com,Com,Com,2420.051954
+286,Shimogyo-ku,Com,Com,Com,794.796839
+293,Shimogyo-ku,Com,Com,Com,1479.198308
+301,Shimogyo-ku,Com,Com,Com,2423.260713
+305,Shimogyo-ku,Com,Com,Com,2417.552007
 296,Higashiyama-ku,Com,Com,Com,760.3410192
-306,Nakagy身-ku,Com,Com,Com,546.1424596
+306,Nakagyo-ku,Com,Com,Com,546.1424596
 282,Minami-ku,Com,Com,Com,2755.402977
-287,Shimogy身-ku,Com,Com,Com,2068.326629
-288,Shimogy身-ku,Com,Com,Com,3225.222617
+287,Shimogyo-ku,Com,Com,Com,2068.326629
+288,Shimogyo-ku,Com,Com,Com,3225.222617
 289,Fushimi-ku,Com,Com,Com,6709.705154
 292,Minami-ku,Com,Com,Com,3024.408939
-294,Shimogy身-ku,Com,Com,Com,2766.052025
+294,Shimogyo-ku,Com,Com,Com,2766.052025
 302,Fushimi-ku,Com,Com,Com,6317.572946
-275,Shimogy身-ku,Com neigh,Com neigh,Com,1424.094264
+275,Shimogyo-ku,Com neigh,Com neigh,Com,1424.094264
 277,Higashiyama-ku,Com neigh,Com neigh,Com,1007.359101
-269,Saky身-ku,Com neigh,Com neigh,Com,2128.748853
-274,Saky身-ku,Com neigh,Com neigh,Com,978.9493716
+269,Sakyo-ku,Com neigh,Com neigh,Com,2128.748853
+274,Sakyo-ku,Com neigh,Com neigh,Com,978.9493716
 259,Yamashina-ku,Com neigh,Com neigh,Com,3266.649138
 268,Yamashina-ku,Com neigh,Com neigh,Com,3811.523665
 279,Yamashina-ku,Com neigh,Com neigh,Com,4776.728063
 260,Kita-ku,Com neigh,Com neigh,Com,4232.190397
-261,Shimogy身-ku,Com neigh,Com neigh,Com,1799.452641
-270,Shimogy身-ku,Com neigh,Com neigh,Com,1744.119941
-264,Shimogy身-ku,Com neigh,Com neigh,Com,1490.301575
-276,Shimogy身-ku,Com neigh,Com neigh,Com,1894.904525
-273,Nakagy身-ku,Com neigh,Com neigh,Com,1481.385072
-267,Nakagy身-ku,Com neigh,Com neigh,Com,1857.806151
+261,Shimogyo-ku,Com neigh,Com neigh,Com,1799.452641
+270,Shimogyo-ku,Com neigh,Com neigh,Com,1744.119941
+264,Shimogyo-ku,Com neigh,Com neigh,Com,1490.301575
+276,Shimogyo-ku,Com neigh,Com neigh,Com,1894.904525
+273,Nakagyo-ku,Com neigh,Com neigh,Com,1481.385072
+267,Nakagyo-ku,Com neigh,Com neigh,Com,1857.806151
 262,Minami-ku,Com neigh,Com neigh,Com,3521.249871
-263,Nishiky身-ku,Com neigh,Com neigh,Com,7260.010603
+263,Nishikyo-ku,Com neigh,Com neigh,Com,7260.010603
 265,Fushimi-ku,Com neigh,Com neigh,Com,7224.891051
-266,Nakagy身-ku,Com neigh,Com neigh,Com,2671.097
+266,Nakagyo-ku,Com neigh,Com neigh,Com,2671.097
 271,Yamashina-ku,Com neigh,Com neigh,Com,4664.345889
-272,Shimogy身-ku,Com neigh,Com neigh,Com,2541.408143
-278,Shimogy身-ku,Com neigh,Com neigh,Com,2078.288388
-280,Nishiky身-ku,Com neigh,Com neigh,Com,6965.978584
-316,Shimogy身-ku,Ind quasi,Ind,Ind,3228.419674
-320,Nakagy身-ku,Ind quasi,Ind,Ind,3250.283363
+272,Shimogyo-ku,Com neigh,Com neigh,Com,2541.408143
+278,Shimogyo-ku,Com neigh,Com neigh,Com,2078.288388
+280,Nishikyo-ku,Com neigh,Com neigh,Com,6965.978584
+316,Shimogyo-ku,Ind quasi,Ind,Ind,3228.419674
+320,Nakagyo-ku,Ind quasi,Ind,Ind,3250.283363
 222,Minami-ku,Ind,Ind,Ind,4685.710914
 227,Minami-ku,Ind,Ind,Ind,5407.453244
 229,Minami-ku,Ind,Ind,Ind,7518.823809
 243,Minami-ku,Ind,Ind,Ind,5189.516501
 310,Minami-ku,Ind quasi,Ind,Ind,6932.616897
-315,Uky身-ku,Ind quasi,Ind,Ind,6806.567889
-232,Uky身-ku,Ind,Ind,Ind,4939.272888
-314,Uky身-ku,Ind quasi,Ind,Ind,4040.682616
+315,Ukyo-ku,Ind quasi,Ind,Ind,6806.567889
+232,Ukyo-ku,Ind,Ind,Ind,4939.272888
+314,Ukyo-ku,Ind quasi,Ind,Ind,4040.682616
 252,Fushimi-ku,Ind exc,Ind,Ind,8565.036534
 254,Fushimi-ku,Ind exc,Ind,Ind,9573.956704
 257,Fushimi-ku,Ind exc,Ind,Ind,9766.710806
@@ -77,24 +77,24 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 337,Fushimi-ku,Ind quasi,Ind,Ind,6610.852823
 339,Fushimi-ku,Ind quasi,Ind,Ind,7451.792367
 342,Kita-ku,Ind quasi,Ind,Ind,6701.914358
-325,Shimogy身-ku,Ind quasi,Ind,Ind,3102.582763
-326,Saky身-ku,Ind quasi,Ind,Ind,3631.043504
+325,Shimogyo-ku,Ind quasi,Ind,Ind,3102.582763
+326,Sakyo-ku,Ind quasi,Ind,Ind,3631.043504
 309,Kita-ku,Ind quasi,Ind,Ind,4330.421139
-311,Kamigy身-ku,Ind quasi,Ind,Ind,4046.587452
-317,Kamigy身-ku,Ind quasi,Ind,Ind,4125.123044
-332,Kamigy身-ku,Ind quasi,Ind,Ind,3924.76966
-327,Kamigy身-ku,Ind quasi,Ind,Ind,2748.76612
-343,Nakagy身-ku,Ind quasi,Ind,Ind,2920.411297
-217,Uky身-ku,Ind,Ind,Ind,4389.120723
-234,Nakagy身-ku,Ind,Ind,Ind,3943.611883
-244,Uky身-ku,Ind,Ind,Ind,5156.562444
+311,Kamigyo-ku,Ind quasi,Ind,Ind,4046.587452
+317,Kamigyo-ku,Ind quasi,Ind,Ind,4125.123044
+332,Kamigyo-ku,Ind quasi,Ind,Ind,3924.76966
+327,Kamigyo-ku,Ind quasi,Ind,Ind,2748.76612
+343,Nakagyo-ku,Ind quasi,Ind,Ind,2920.411297
+217,Ukyo-ku,Ind,Ind,Ind,4389.120723
+234,Nakagyo-ku,Ind,Ind,Ind,3943.611883
+244,Ukyo-ku,Ind,Ind,Ind,5156.562444
 237,Minami-ku,Ind,Ind,Ind,4928.234108
 239,Minami-ku,Ind,Ind,Ind,5804.093171
 240,Minami-ku,Ind,Ind,Ind,7419.926971
 318,Minami-ku,Ind quasi,Ind,Ind,7053.945864
 331,Minami-ku,Ind quasi,Ind,Ind,7403.769991
-230,Uky身-ku,Ind,Ind,Ind,4271.934533
-334,Uky身-ku,Ind quasi,Ind,Ind,3838.99222
+230,Ukyo-ku,Ind,Ind,Ind,4271.934533
+334,Ukyo-ku,Ind quasi,Ind,Ind,3838.99222
 255,Fushimi-ku,Ind exc,Ind,Ind,9716.114661
 321,Fushimi-ku,Ind quasi,Ind,Ind,9135.365621
 218,Fushimi-ku,Ind,Ind,Ind,4296.908061
@@ -107,18 +107,18 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 245,Fushimi-ku,Ind,Ind,Ind,9047.644231
 329,Fushimi-ku,Ind quasi,Ind,Ind,12427.70636
 341,Kita-ku,Ind quasi,Ind,Ind,4193.456668
-308,Kamigy身-ku,Ind quasi,Ind,Ind,2728.848164
-345,Kamigy身-ku,Ind quasi,Ind,Ind,3805.606235
-340,Kamigy身-ku,Ind quasi,Ind,Ind,3432.079493
-344,Kamigy身-ku,Ind quasi,Ind,Ind,3675.267926
+308,Kamigyo-ku,Ind quasi,Ind,Ind,2728.848164
+345,Kamigyo-ku,Ind quasi,Ind,Ind,3805.606235
+340,Kamigyo-ku,Ind quasi,Ind,Ind,3432.079493
+344,Kamigyo-ku,Ind quasi,Ind,Ind,3675.267926
 215,Fushimi-ku,Ind,Ind,Ind,10078.41581
 216,Minami-ku,Ind,Ind,Ind,5137.963805
-220,Uky身-ku,Ind,Ind,Ind,5159.85137
+220,Ukyo-ku,Ind,Ind,Ind,5159.85137
 233,Minami-ku,Ind,Ind,Ind,7463.30782
 235,Minami-ku,Ind,Ind,Ind,3981.062962
 236,Minami-ku,Ind,Ind,Ind,6539.858641
 238,Fushimi-ku,Ind,Ind,Ind,7218.898756
-246,Uky身-ku,Ind,Ind,Ind,3916.439909
+246,Ukyo-ku,Ind,Ind,Ind,3916.439909
 247,Fushimi-ku,Ind exc,Ind,Ind,7716.632745
 248,Fushimi-ku,Ind exc,Ind,Ind,8053.009607
 249,Fushimi-ku,Ind exc,Ind,Ind,8019.774512
@@ -128,51 +128,51 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 256,Fushimi-ku,Ind exc,Ind,Ind,8498.727784
 258,Fushimi-ku,Ind exc,Ind,Ind,8479.66796
 319,Fushimi-ku,Ind quasi,Ind,Ind,7347.890702
-322,Uky身-ku,Ind quasi,Ind,Ind,4757.479742
-336,Nishiky身-ku,Ind quasi,Ind,Ind,6839.677813
-20,Saky身-ku,R high II,R high,Res,5134.330224
-19,Kamigy身-ku,R high II,R high,Res,2411.002857
-168,Nishiky身-ku,R high I,R high,Res,9533.397933
+322,Ukyo-ku,Ind quasi,Ind,Ind,4757.479742
+336,Nishikyo-ku,Ind quasi,Ind,Ind,6839.677813
+20,Sakyo-ku,R high II,R high,Res,5134.330224
+19,Kamigyo-ku,R high II,R high,Res,2411.002857
+168,Nishikyo-ku,R high I,R high,Res,9533.397933
 12,Yamashina-ku,R high II,R high,Res,5512.87542
 29,Yamashina-ku,R high II,R high,Res,5469.628842
 151,Yamashina-ku,R high I,R high,Res,6033.040232
-13,Uky身-ku,R high II,R high,Res,4540.658558
+13,Ukyo-ku,R high II,R high,Res,4540.658558
 26,Yamashina-ku,R high II,R high,Res,6293.989668
-160,Uky身-ku,R high I,R high,Res,5613.762966
-162,Uky身-ku,R high I,R high,Res,6486.401098
+160,Ukyo-ku,R high I,R high,Res,5613.762966
+162,Ukyo-ku,R high I,R high,Res,6486.401098
 174,Yamashina-ku,R high I,R high,Res,3300.664341
-27,Saky身-ku,R high II,R high,Res,5223.660073
-23,Saky身-ku,R high II,R high,Res,6931.616792
-140,Nishiky身-ku,R high I,R high,Res,9568.671796
-170,Uky身-ku,R high I,R high,Res,7831.332164
-148,Saky身-ku,R high I,R high,Res,4810.096093
-173,Saky身-ku,R high I,R high,Res,5064.183675
-22,Saky身-ku,R high II,R high,Res,3486.049406
-15,Kamigy身-ku,R high II,R high,Res,3478.822964
+27,Sakyo-ku,R high II,R high,Res,5223.660073
+23,Sakyo-ku,R high II,R high,Res,6931.616792
+140,Nishikyo-ku,R high I,R high,Res,9568.671796
+170,Ukyo-ku,R high I,R high,Res,7831.332164
+148,Sakyo-ku,R high I,R high,Res,4810.096093
+173,Sakyo-ku,R high I,R high,Res,5064.183675
+22,Sakyo-ku,R high II,R high,Res,3486.049406
+15,Kamigyo-ku,R high II,R high,Res,3478.822964
 25,Kita-ku,R high II,R high,Res,5601.540462
 138,Yamashina-ku,R high I,R high,Res,6670.276264
-172,Saky身-ku,R high I,R high,Res,3192.741347
-147,Saky身-ku,R high I,R high,Res,3262.822952
-163,Saky身-ku,R high I,R high,Res,5263.572186
-18,Saky身-ku,R high II,R high,Res,6962.817086
-136,Nishiky身-ku,R high I,R high,Res,8606.127585
-143,Nishiky身-ku,R high I,R high,Res,9393.641569
-156,Nishiky身-ku,R high I,R high,Res,9389.755468
-158,Nishiky身-ku,R high I,R high,Res,8296.027629
-164,Nishiky身-ku,R high I,R high,Res,9560.468321
-141,Nishiky身-ku,R high I,R high,Res,5799.735866
-146,Uky身-ku,R high I,R high,Res,7300.288368
-152,Uky身-ku,R high I,R high,Res,7628.994187
-159,Uky身-ku,R high I,R high,Res,6888.029092
-171,Uky身-ku,R high I,R high,Res,7191.421506
-135,Uky身-ku,R high I,R high,Res,5821.229379
-137,Uky身-ku,R high I,R high,Res,6185.715571
-165,Nishiky身-ku,R high I,R high,Res,5895.896835
-129,Nishiky身-ku,R high I,R high,Res,10110.16686
-144,Nishiky身-ku,R high I,R high,Res,9867.541995
+172,Sakyo-ku,R high I,R high,Res,3192.741347
+147,Sakyo-ku,R high I,R high,Res,3262.822952
+163,Sakyo-ku,R high I,R high,Res,5263.572186
+18,Sakyo-ku,R high II,R high,Res,6962.817086
+136,Nishikyo-ku,R high I,R high,Res,8606.127585
+143,Nishikyo-ku,R high I,R high,Res,9393.641569
+156,Nishikyo-ku,R high I,R high,Res,9389.755468
+158,Nishikyo-ku,R high I,R high,Res,8296.027629
+164,Nishikyo-ku,R high I,R high,Res,9560.468321
+141,Nishikyo-ku,R high I,R high,Res,5799.735866
+146,Ukyo-ku,R high I,R high,Res,7300.288368
+152,Ukyo-ku,R high I,R high,Res,7628.994187
+159,Ukyo-ku,R high I,R high,Res,6888.029092
+171,Ukyo-ku,R high I,R high,Res,7191.421506
+135,Ukyo-ku,R high I,R high,Res,5821.229379
+137,Ukyo-ku,R high I,R high,Res,6185.715571
+165,Nishikyo-ku,R high I,R high,Res,5895.896835
+129,Nishikyo-ku,R high I,R high,Res,10110.16686
+144,Nishikyo-ku,R high I,R high,Res,9867.541995
 150,Fushimi-ku,R high I,R high,Res,8577.433286
-153,Nishiky身-ku,R high I,R high,Res,9269.726634
-167,Nishiky身-ku,R high I,R high,Res,9435.172626
+153,Nishikyo-ku,R high I,R high,Res,9269.726634
+167,Nishikyo-ku,R high I,R high,Res,9435.172626
 17,Fushimi-ku,R high II,R high,Res,5432.434177
 16,Yamashina-ku,R high II,R high,Res,5433.252637
 21,Yamashina-ku,R high II,R high,Res,4979.492188
@@ -188,71 +188,71 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 131,Kita-ku,R high I,R high,Res,5962.582601
 133,Kita-ku,R high I,R high,Res,6509.812441
 155,Kita-ku,R high I,R high,Res,5919.749016
-31,Kamigy身-ku,R high II,R high,Res,4350.943945
+31,Kamigyo-ku,R high II,R high,Res,4350.943945
 14,Yamashina-ku,R high II,R high,Res,6070.646707
-28,Uky身-ku,R high II,R high,Res,8325.070081
-30,Nakagy身-ku,R high II,R high,Res,3879.64936
+28,Ukyo-ku,R high II,R high,Res,8325.070081
+30,Nakagyo-ku,R high II,R high,Res,3879.64936
 32,Yamashina-ku,R high II,R high,Res,6535.767575
 132,Yamashina-ku,R high I,R high,Res,3841.502336
-134,Uky身-ku,R high I,R high,Res,6456.32512
+134,Ukyo-ku,R high I,R high,Res,6456.32512
 145,Fushimi-ku,R high I,R high,Res,8681.614937
 154,Fushimi-ku,R high I,R high,Res,9054.853546
 166,Kita-ku,R high I,R high,Res,5731.282348
-169,Uky身-ku,R high I,R high,Res,7675.470722
-87,Nishiky身-ku,R low I,R low,Res,10034.94627
+169,Ukyo-ku,R high I,R high,Res,7675.470722
+87,Nishikyo-ku,R low I,R low,Res,10034.94627
 80,Fushimi-ku,R low I,R low,Res,5229.37921
 61,Kita-ku,R low I,R low,Res,6819.861934
 2,Kita-ku,R low II,R low,Res,4858.735782
-70,Uky身-ku,R low I,R low,Res,5502.41429
-72,Saky身-ku,R low I,R low,Res,7230.990957
-77,Saky身-ku,R low I,R low,Res,9425.866033
-79,Uky身-ku,R low I,R low,Res,6718.809361
-88,Saky身-ku,R low I,R low,Res,8975.65946
-95,Saky身-ku,R low I,R low,Res,9563.41681
-104,Saky身-ku,R low I,R low,Res,8027.981622
+70,Ukyo-ku,R low I,R low,Res,5502.41429
+72,Sakyo-ku,R low I,R low,Res,7230.990957
+77,Sakyo-ku,R low I,R low,Res,9425.866033
+79,Ukyo-ku,R low I,R low,Res,6718.809361
+88,Sakyo-ku,R low I,R low,Res,8975.65946
+95,Sakyo-ku,R low I,R low,Res,9563.41681
+104,Sakyo-ku,R low I,R low,Res,8027.981622
 108,Kita-ku,R low I,R low,Res,5078.99095
-113,Uky身-ku,R low I,R low,Res,4914.056457
-114,Saky身-ku,R low I,R low,Res,9478.137758
-117,Saky身-ku,R low I,R low,Res,6970.289072
-120,Uky身-ku,R low I,R low,Res,5769.970401
+113,Ukyo-ku,R low I,R low,Res,4914.056457
+114,Sakyo-ku,R low I,R low,Res,9478.137758
+117,Sakyo-ku,R low I,R low,Res,6970.289072
+120,Ukyo-ku,R low I,R low,Res,5769.970401
 123,Fushimi-ku,R low I,R low,Res,6009.484561
 126,Kita-ku,R low I,R low,Res,5116.974057
-99,Saky身-ku,R low I,R low,Res,2315.788983
-64,Saky身-ku,R low I,R low,Res,3476.06968
-124,Saky身-ku,R low I,R low,Res,4839.530014
+99,Sakyo-ku,R low I,R low,Res,2315.788983
+64,Sakyo-ku,R low I,R low,Res,3476.06968
+124,Sakyo-ku,R low I,R low,Res,4839.530014
 85,Kita-ku,R low I,R low,Res,6173.434
-90,Saky身-ku,R low I,R low,Res,5345.247174
-101,Saky身-ku,R low I,R low,Res,5550.97887
+90,Sakyo-ku,R low I,R low,Res,5345.247174
+101,Sakyo-ku,R low I,R low,Res,5550.97887
 106,Kita-ku,R low I,R low,Res,5469.397484
 82,Yamashina-ku,R low I,R low,Res,4439.442709
-62,Saky身-ku,R low I,R low,Res,4042.534926
-116,Saky身-ku,R low I,R low,Res,7541.077188
-91,Nishiky身-ku,R low I,R low,Res,6835.856076
+62,Sakyo-ku,R low I,R low,Res,4042.534926
+116,Sakyo-ku,R low I,R low,Res,7541.077188
+91,Nishikyo-ku,R low I,R low,Res,6835.856076
 107,Kita-ku,R low I,R low,Res,5814.857256
-97,Saky身-ku,R low I,R low,Res,4031.163077
-100,Saky身-ku,R low I,R low,Res,3895.934041
-111,Saky身-ku,R low I,R low,Res,4478.214323
-66,Saky身-ku,R low I,R low,Res,3619.805144
-115,Saky身-ku,R low I,R low,Res,4740.19391
+97,Sakyo-ku,R low I,R low,Res,4031.163077
+100,Sakyo-ku,R low I,R low,Res,3895.934041
+111,Sakyo-ku,R low I,R low,Res,4478.214323
+66,Sakyo-ku,R low I,R low,Res,3619.805144
+115,Sakyo-ku,R low I,R low,Res,4740.19391
 68,Kita-ku,R low I,R low,Res,5993.598634
-71,Saky身-ku,R low I,R low,Res,5183.800499
+71,Sakyo-ku,R low I,R low,Res,5183.800499
 94,Kita-ku,R low I,R low,Res,5380.996084
 121,Kita-ku,R low I,R low,Res,6081.434796
-63,Saky身-ku,R low I,R low,Res,7595.860856
-67,Saky身-ku,R low I,R low,Res,7578.253734
-83,Saky身-ku,R low I,R low,Res,6732.207335
-98,Saky身-ku,R low I,R low,Res,7502.628129
-110,Saky身-ku,R low I,R low,Res,6771.43655
-118,Saky身-ku,R low I,R low,Res,7367.649035
-6,Nishiky身-ku,R low II,R low,Res,10108.04536
-103,Nishiky身-ku,R low I,R low,Res,10433.57963
-73,Uky身-ku,R low I,R low,Res,6659.182075
-76,Nishiky身-ku,R low I,R low,Res,7579.387776
-81,Uky身-ku,R low I,R low,Res,9108.358392
-86,Uky身-ku,R low I,R low,Res,9114.894243
-119,Uky身-ku,R low I,R low,Res,7471.864229
-125,Uky身-ku,R low I,R low,Res,9111.922342
-84,Nishiky身-ku,R low I,R low,Res,9008.43729
+63,Sakyo-ku,R low I,R low,Res,7595.860856
+67,Sakyo-ku,R low I,R low,Res,7578.253734
+83,Sakyo-ku,R low I,R low,Res,6732.207335
+98,Sakyo-ku,R low I,R low,Res,7502.628129
+110,Sakyo-ku,R low I,R low,Res,6771.43655
+118,Sakyo-ku,R low I,R low,Res,7367.649035
+6,Nishikyo-ku,R low II,R low,Res,10108.04536
+103,Nishikyo-ku,R low I,R low,Res,10433.57963
+73,Ukyo-ku,R low I,R low,Res,6659.182075
+76,Nishikyo-ku,R low I,R low,Res,7579.387776
+81,Ukyo-ku,R low I,R low,Res,9108.358392
+86,Ukyo-ku,R low I,R low,Res,9114.894243
+119,Ukyo-ku,R low I,R low,Res,7471.864229
+125,Ukyo-ku,R low I,R low,Res,9111.922342
+84,Nishikyo-ku,R low I,R low,Res,9008.43729
 65,Yamashina-ku,R low I,R low,Res,4795.488205
 74,Yamashina-ku,R low I,R low,Res,6428.981114
 89,Fushimi-ku,R low I,R low,Res,6710.640914
@@ -276,10 +276,10 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 9,Fushimi-ku,R low II,R low,Res,7095.008361
 10,Fushimi-ku,R low II,R low,Res,6962.230976
 11,Kita-ku,R low II,R low,Res,4979.36964
-44,Saky身-ku,R resi II,R resi,Res,2355.527279
-194,Saky身-ku,R resi I,R resi,Res,2655.463745
-181,Shimogy身-ku,R resi I,R resi,Res,2615.422665
-51,Uky身-ku,R resi II,R resi,Res,5188.853187
+44,Sakyo-ku,R resi II,R resi,Res,2355.527279
+194,Sakyo-ku,R resi I,R resi,Res,2655.463745
+181,Shimogyo-ku,R resi I,R resi,Res,2615.422665
+51,Ukyo-ku,R resi II,R resi,Res,5188.853187
 178,Fushimi-ku,R resi I,R resi,Res,4910.858495
 34,Minami-ku,R resi II,R resi,Res,3212.939984
 35,Minami-ku,R resi II,R resi,Res,2888.177535
@@ -289,39 +289,39 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 352,Fushimi-ku,R quasi,R resi,Res,10891.12894
 353,Minami-ku,R quasi,R resi,Res,4891.003119
 207,Yamashina-ku,R resi I,R resi,Res,6367.15746
-192,Uky身-ku,R resi I,R resi,Res,6260.096991
-184,Saky身-ku,R resi I,R resi,Res,4463.643315
-212,Saky身-ku,R resi I,R resi,Res,3369.977523
-48,Saky身-ku,R resi II,R resi,Res,1952.118793
-53,Saky身-ku,R resi II,R resi,Res,1908.555353
-60,Saky身-ku,R resi II,R resi,Res,1707.053051
-54,Saky身-ku,R resi II,R resi,Res,1266.776482
-177,Saky身-ku,R resi I,R resi,Res,2597.71179
-191,Saky身-ku,R resi I,R resi,Res,3190.370274
-208,Kamigy身-ku,R resi I,R resi,Res,3968.266927
+192,Ukyo-ku,R resi I,R resi,Res,6260.096991
+184,Sakyo-ku,R resi I,R resi,Res,4463.643315
+212,Sakyo-ku,R resi I,R resi,Res,3369.977523
+48,Sakyo-ku,R resi II,R resi,Res,1952.118793
+53,Sakyo-ku,R resi II,R resi,Res,1908.555353
+60,Sakyo-ku,R resi II,R resi,Res,1707.053051
+54,Sakyo-ku,R resi II,R resi,Res,1266.776482
+177,Sakyo-ku,R resi I,R resi,Res,2597.71179
+191,Sakyo-ku,R resi I,R resi,Res,3190.370274
+208,Kamigyo-ku,R resi I,R resi,Res,3968.266927
 46,Higashiyama-ku,R resi II,R resi,Res,1382.867604
 58,Higashiyama-ku,R resi II,R resi,Res,1332.746324
 36,Yamashina-ku,R resi II,R resi,Res,5529.482912
-196,Saky身-ku,R resi I,R resi,Res,5248.884609
-47,Kamigy身-ku,R resi II,R resi,Res,2726.082027
-52,Kamigy身-ku,R resi II,R resi,Res,2506.885282
-55,Kamigy身-ku,R resi II,R resi,Res,2648.380027
-189,Kamigy身-ku,R resi I,R resi,Res,3955.69875
-198,Kamigy身-ku,R resi I,R resi,Res,2491.186743
-188,Uky身-ku,R resi I,R resi,Res,4441.804781
+196,Sakyo-ku,R resi I,R resi,Res,5248.884609
+47,Kamigyo-ku,R resi II,R resi,Res,2726.082027
+52,Kamigyo-ku,R resi II,R resi,Res,2506.885282
+55,Kamigyo-ku,R resi II,R resi,Res,2648.380027
+189,Kamigyo-ku,R resi I,R resi,Res,3955.69875
+198,Kamigyo-ku,R resi I,R resi,Res,2491.186743
+188,Ukyo-ku,R resi I,R resi,Res,4441.804781
 179,Minami-ku,R resi I,R resi,Res,7093.824679
 183,Minami-ku,R resi I,R resi,Res,5857.658827
 186,Minami-ku,R resi I,R resi,Res,5662.665975
 204,Minami-ku,R resi I,R resi,Res,6364.899724
-206,Nishiky身-ku,R resi I,R resi,Res,6338.762909
-209,Nishiky身-ku,R resi I,R resi,Res,6464.234541
-175,Uky身-ku,R resi I,R resi,Res,4328.754867
-203,Uky身-ku,R resi I,R resi,Res,5108.458661
-210,Uky身-ku,R resi I,R resi,Res,6275.026783
+206,Nishikyo-ku,R resi I,R resi,Res,6338.762909
+209,Nishikyo-ku,R resi I,R resi,Res,6464.234541
+175,Ukyo-ku,R resi I,R resi,Res,4328.754867
+203,Ukyo-ku,R resi I,R resi,Res,5108.458661
+210,Ukyo-ku,R resi I,R resi,Res,6275.026783
 176,Fushimi-ku,R resi I,R resi,Res,5477.167693
 185,Fushimi-ku,R resi I,R resi,Res,5519.029831
 45,Minami-ku,R resi II,R resi,Res,2997.441048
-187,Shimogy身-ku,R resi I,R resi,Res,2193.363103
+187,Shimogyo-ku,R resi I,R resi,Res,2193.363103
 201,Fushimi-ku,R resi I,R resi,Res,3836.755863
 57,Yamashina-ku,R resi II,R resi,Res,6108.222636
 195,Yamashina-ku,R resi I,R resi,Res,6145.428566
@@ -335,13 +335,13 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 199,Fushimi-ku,R resi I,R resi,Res,6682.149205
 213,Fushimi-ku,R resi I,R resi,Res,6687.300227
 202,Fushimi-ku,R resi I,R resi,Res,8580.090917
-197,Kamigy身-ku,R resi I,R resi,Res,2271.65049
+197,Kamigyo-ku,R resi I,R resi,Res,2271.65049
 33,Yamashina-ku,R resi II,R resi,Res,5065.590739
-39,Uky身-ku,R resi II,R resi,Res,7081.339347
-40,Nishiky身-ku,R resi II,R resi,Res,6044.767074
+39,Ukyo-ku,R resi II,R resi,Res,7081.339347
+40,Nishikyo-ku,R resi II,R resi,Res,6044.767074
 41,Minami-ku,R resi II,R resi,Res,6450.328525
 42,Fushimi-ku,R resi II,R resi,Res,8445.098299
-49,Uky身-ku,R resi II,R resi,Res,6721.751839
+49,Ukyo-ku,R resi II,R resi,Res,6721.751839
 56,Fushimi-ku,R resi II,R resi,Res,4756.677332
 59,Fushimi-ku,R resi II,R resi,Res,7321.045964
 182,Minami-ku,R resi I,R resi,Res,6614.447299
@@ -354,4 +354,4 @@ Plot_ID,Ward,Landuse_subclass,Landuse_class,Landuse_agg,Dist
 351,Fushimi-ku,R quasi,R resi,Res,8956.818313
 354,Minami-ku,R quasi,R resi,Res,4831.114306
 355,Minami-ku,R quasi,R resi,Res,6660.593825
-356,Nishiky身-ku,R quasi,R resi,Res,9871.052152
+356,Nishikyo-ku,R quasi,R resi,Res,9871.052152
