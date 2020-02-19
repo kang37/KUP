@@ -14,7 +14,7 @@ Dist_level_faclev <- c("Center", "Cen-Mid", "Mid_Sub", "Suburban")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
 
 ## get data
-# data of all_plot_info part 2-1
+# data of all_plot_info
 all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>%
   mutate(Dist_level = NA)
 all_plot_info$Dist_level[all_plot_info$Dist < 2000] <- "1"
@@ -45,30 +45,17 @@ shrub_data <- all_plant_data %>%
   subset(Tree_shrub == "Shrub")
 
 # data of tree_plant_info
-tree_plant_info <- all_plant_data %>% filter(Tree_shrub == "Tree") %>% 
-  select(Species_CN) %>% 
+tree_plant_info <- subset(all_plant_data, Tree_shrub == "Tree", select = "Species_CN") %>% 
   unique() %>% 
   left_join(all_plant_info, by = "Species_CN")
 
 # data of shrub info
-shrub_plant_info <- all_plant_data %>% filter(Tree_shrub == "Shrub") %>% 
-  select(Species_CN) %>% 
+shrub_plant_info <- subset(all_plant_data, Tree_shrub == "Shrub", select = "Species_CN") %>% 
   unique() %>% 
   left_join(all_plant_info, by = "Species_CN")
 
-# data of all_plot_info part 2-2
-all_plot_info <- all_plant_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(Plot_pub_pri = sum(ifelse(Pub_pri == "Public", 1, 0)/n())) %>%
-  left_join(all_plot_info, by = "Plot_ID") %>%
-  mutate(Plot_pub_pri_level = ifelse(Plot_pub_pri ==1, "Public area", 
-                                     ifelse(Plot_pub_pri ==0, "Private area", NA))) %>% 
-  mutate(Plot_pub_pri_level = factor(Plot_pub_pri_level, levels = Plot_pub_pri_level_faclev))
-all_plot_info$Plot_pub_pri <- NULL
-
 # data of tree_diversity
-tree_diversity <- all_plant_data %>% 
-  filter(Tree_shrub == "Tree") %>% 
-  select(Plot_ID, Species_CN, Stem) %>%
+tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem")) %>%
   pivot_wider(names_from = Species_CN, values_from = Stem, 
               values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
   mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
@@ -76,7 +63,8 @@ tree_diversity <- all_plant_data %>%
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID")
+  left_join(all_plot_info,by = "Plot_ID") %>% 
+  as.data.frame()
 
 tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
@@ -99,9 +87,7 @@ tree_diversity <- tree_diversity %>% mutate(
 rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private, tree_diversity_perc_nonstreet, tree_diversity_perc_native)
 
 # data of shrub_diversity
-shrub_diversity <- all_plant_data %>% 
-  filter(Tree_shrub == "Shrub") %>% 
-  select(Plot_ID, Species_CN, Area) %>%
+shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_CN", "Area")) %>%
   pivot_wider(names_from = Species_CN, values_from = Area, 
               values_fn = list(Area = sum), values_fill = list(Area = 0)) %>% 
   mutate(Sum_area = rowSums(.[2:ncol(.)]), 
@@ -109,7 +95,8 @@ shrub_diversity <- all_plant_data %>%
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID")
+  left_join(all_plot_info,by = "Plot_ID") %>%
+  as.data.frame()
 
 shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
@@ -543,9 +530,25 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
           geom_smooth(method = "lm") + facet_wrap( ~ Landuse_class))
 }
 
-# distance levels vs. indexes
-ggplot(tree_diversity, aes())
+# distance levels vs. indexes of tree
+plot_list_index_distlevel <- list()
+for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+  plot_list_index_distlevel <- 
+    c(plot_list_index_distlevel, 
+      list(ggplot(tree_diversity, aes_string("Dist_level", i)) + geom_boxplot()))
+  print(kruskal.test(tree_diversity[,i], tree_diversity$Dist_level))
+}
+Rmisc::multiplot(plotlist = plot_list_index_distlevel, layout = matrix(1:4, ncol = 2, byrow = TRUE))
 
+# distance levels vs. indexes of shrub
+plot_list_index_distlevel <- list()
+for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+  plot_list_index_distlevel <- 
+    c(plot_list_index_distlevel, 
+      list(ggplot(shrub_diversity, aes_string("Dist_level", i)) + geom_boxplot() + facet_wrap(~Landuse_agg)))
+  print(kruskal.test(shrub_diversity[,i], shrub_diversity$Dist_level))
+}
+Rmisc::multiplot(plotlist = plot_list_index_distlevel, layout = matrix(1:4, ncol = 2, byrow = TRUE))
 
 # the distribute of the land use types along the distance
 ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_class)
