@@ -26,6 +26,10 @@ all_plot_info <- all_plot_info %>%
   mutate(Dist_level = factor(Dist_level, levels = c("1", "2", "3", "4", "5")), 
          Ward = factor(Ward, levels = Ward_faclev), 
          Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+all_plot_info$Landscaping <- NA
+all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("道路", "高层商业", "公园", "河流", "机构", "政府团地")] <- "Public area"
+all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层私宅")] <- "Private area"
+all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层公寓", "低层商业", "工厂", "农田", "其他", "球场", "寺庙神社", "学校")] <- "Propriater area"
 
 # data of all_plant_info
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
@@ -545,14 +549,13 @@ plot_list_index_distlevel <- list()
 for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
   plot_list_index_distlevel <- 
     c(plot_list_index_distlevel, 
-      list(ggplot(shrub_diversity, aes_string("Dist_level", i)) + geom_boxplot() + facet_wrap(~Landuse_agg)))
+      list(ggplot(shrub_diversity, aes_string("Dist_level", i)) + geom_boxplot()))
   print(kruskal.test(shrub_diversity[,i], shrub_diversity$Dist_level))
 }
 Rmisc::multiplot(plotlist = plot_list_index_distlevel, layout = matrix(1:4, ncol = 2, byrow = TRUE))
 
 # the distribute of the land use types along the distance
 ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_class)
-
 
 # tree attr vs. distance
 par(mfrow = c(2,3))
@@ -562,6 +565,13 @@ plot(tree_diversity$Dist, tree_diversity$perc_private)
 plot(tree_diversity$Dist, tree_diversity$perc_nonstreet)
 plot(tree_diversity$Dist, tree_diversity$perc_native)
 par(opar)
+# test the linear model and correlation
+for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
+  print(summary(lm(tree_diversity[, i] ~ tree_diversity$Dist)))
+}
+for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
+  print(cor.test(tree_diversity[, i], tree_diversity$Dist))
+}
 
 # shrub attr vs. distance
 par(mfrow = c(2,3))
@@ -571,14 +581,27 @@ plot(shrub_diversity$Dist, shrub_diversity$perc_private)
 plot(shrub_diversity$Dist, shrub_diversity$perc_nonstreet)
 plot(shrub_diversity$Dist, shrub_diversity$perc_native)
 par(opar)
+# test the linear model and correlation
+for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
+  print(summary(lm(shrub_diversity[, i] ~ shrub_diversity$Dist)))
+}
+for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
+  print(cor.test(shrub_diversity[, i], shrub_diversity$Dist))
+}
 
 # test native or exotic plants vs. distance and land use
 x <- shrub_data %>% filter(Nt_ex == "nt")
 x <- subset(x, select = c("Plot_ID", "Species_CN", "Area"))
 x <- x %>% pivot_wider(names_from = Species_CN, values_from = Area, values_fn = list(Area = sum), values_fill = list(Area = 0))
 x$Sum_stem <- rowSums((x[, 2:52]))
+
 x$Richness <- apply(x[,2:52]>0, 1, sum)
 x <- left_join(x, all_plot_info, by = "Plot_ID")
 ggplot(x, aes(Dist, Richness)) + geom_point(aes(color = Landuse_class)) + facet_wrap(~Landuse_class) 
 rm(x)
+
+# diversity toward different directions?
+# waitting coding...
+
+
 
