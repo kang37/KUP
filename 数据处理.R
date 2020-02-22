@@ -10,8 +10,8 @@ opar <- par(no.readonly = TRUE)
 
 # define the factor levels
 Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
-Dist_level_faclev <- c("Center", "Cen-Mid", "Mid_Sub", "Suburban")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
+Landscaping_faclev <- c("Private area", "Propriater area", "Public area")
 
 ## get data
 # data of all_plot_info
@@ -28,8 +28,8 @@ all_plot_info <- all_plot_info %>%
          Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
 all_plot_info$Landscaping <- NA
 all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("道路", "高层商业", "公园", "河流", "机构", "政府团地")] <- "Public area"
-all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层私宅")] <- "Private area"
-all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层公寓", "低层商业", "工厂", "农田", "其他", "球场", "寺庙神社", "学校")] <- "Propriater area"
+all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层私宅", "私宅")] <- "Private area"
+all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("低层公寓", "高层公寓", "低层商业", "工厂", "农田", "其他", "球场", "寺庙神社", "学校")] <- "Propriater area"
 
 # data of all_plant_info
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
@@ -122,8 +122,8 @@ shrub_diversity <- shrub_diversity %>% mutate(
 )
 rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
-# analysis begin
-# the total species, genera and families of all plants
+### analysis begin
+## the total species, genera and families of all plants
 length(unique(all_plant_data$Species_CN))
 length(unique(all_plant_data$Genus))
 length(unique(all_plant_data$Family))
@@ -141,14 +141,13 @@ length(setdiff(unique(tree_data$Species_CN),
 length(setdiff(unique(shrub_data$Species_CN), 
                  unique(tree_data$Species_CN)))
 
-# top species by species and number or area
+## top species by species and number or area
 # by species
 # of all plants
-plant_info %>% group_by(Family) %>%
-  summarise(Species =n(), Prop = n()/nrow(plant_info)) %>% 
+all_plant_info %>% group_by(Family) %>%
+  dplyr::summarise(Species =n(), Prop = n()/nrow(all_plant_info)) %>% 
   arrange(desc(Prop)) %>% 
-  print() %>% 
-  ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()
+  print() %>% ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()
 # of trees by species and number/area
 # tree~species
 tree_plant_info %>% 
@@ -166,7 +165,7 @@ shrub_plant_info %>%
 shrub_data %>% 
   group_by(Family) %>% dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
   arrange(desc(Prop))
-
+# rank species or number plots 
 multiplot(
   tree_plant_info %>% 
     group_by(Family) %>% dplyr::summarise(Species = n(), Prop = n()/nrow(tree_plant_info)) %>% 
@@ -187,11 +186,10 @@ multiplot(
   layout = matrix(1:4, ncol = 2)
 )
 
-
-# attributes of the plants
+## attributes of the tree and shrub
 # the exotic vs. native regarding species
-plant_info %>% group_by(Nt_ex) %>% 
-  dplyr::summarise(n()/nrow(plant_info))
+all_plant_info %>% group_by(Nt_ex) %>% 
+  dplyr::summarise(n()/nrow(all_plant_info))
 
 # while regarding the number or area
 tree_data %>% group_by(Nt_ex) %>% 
@@ -216,129 +214,117 @@ for (i in c("Pla_spo", "Pot", "Pub_pri", "Street", "Nt_ex")) {
                  sum), ylim = c(0, 1400))
   title(main = paste("(", letters[j], ")"), adj = 0)
 }
-
-# mds graph
-
-# build the function to draw the plot
-.myplot <- function(atr) {
-  ggplot(mds_plot_point_data, aes_string(x = "MDS1", y = "MDS2", color = atr)) + geom_point()
-}
-
-# nmds plot for trees 
-set.seed(1234)
-mds_plot_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 244, 313))]
-mds_plot_selected <- tree_diversity %>% filter(Plot_ID %in% mds_plot_ID)
-mds_plot_data <- mds_plot_selected %>% 
-  select(2:143) %>%
-  metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
-mds_plot_data$stress
-stressplot(mds_plot_data)
-mds_plot_point_data <- mds_plot_data$points %>%
-  as.data.frame() %>%
-  mutate(Plot_ID = mds_plot_ID) %>% 
-  left_join(all_plot_info, by = "Plot_ID")
-mds_plot <- mapply(.myplot, atr = c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level"), SIMPLIFY = FALSE)
-Rmisc::multiplot(plotlist = mds_plot, layout = matrix(1:4, nrow = 2))
-
-# general result of ANOSIM of trees
-par(mfrow = c(2,2))
-for (i in c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level")) {
-  x <- anosim(as.data.frame(mds_plot_selected)[,c(2:143)], as.data.frame(mds_plot_selected)[,i], 
-              distance = "bray", permutations = 999)
-  cat(i, "R=", x$statistic, "p=", x$signif, "\n")
-  plot(x)
-  rm(x)
-}
 par(opar)
 
-# pairwise result of ANOSIM of trees
-x <- vector("list")
-for (i in c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level")) {
+## mds analysis
+set.seed(1234)
+all_plot_list_mds <- list()
+# nmds plot for tree
+tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 244, 313))]
+tree_mds_selected <- tree_diversity %>% filter(Plot_ID %in% tree_mds_selected_ID)
+tree_mds_metaMDS <- tree_mds_selected %>% 
+  select(2:143) %>%
+  metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
+tree_mds_metaMDS$stress
+stressplot(tree_mds_metaMDS)
+tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
+# nmds plot for shrub
+shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 164, 244))]
+shrub_mds_selected <- shrub_diversity %>% filter(Plot_ID %in% shrub_mds_selected_ID)
+shrub_mds_metaMDS <- shrub_mds_selected %>% 
+  select(2:196) %>%
+  metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
+shrub_mds_metaMDS$stress
+stressplot(shrub_mds_metaMDS)
+shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
+# mds plot for tree and shrub
+Rmisc::multiplot(plotlist = list(
+  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
+    labs(title = "Tree Land use"), 
+  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landscaping)) + geom_point(alpha = 0.7) + 
+    labs(title = "Tree Landscaping"), 
+  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
+    labs(title = "Shrub Land use"), 
+  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landscaping)) + geom_point(alpha = 0.7) + 
+    labs(title = "Shrub Landscaping")
+), layout = matrix(1:4, ncol = 2))
+# ANOSIM
+# general result of ANOSIM of tree and shrub
+set.seed(1234)
+for (i in c("Landuse_class", "Landscaping")) {
+  x <- anosim(tree_mds_selected[,c(2:143)], tree_mds_selected[,i])
+  cat("tree", i, "R=", x$statistic, "p=", x$signif, "\n")
+}
+for (i in c("Landuse_class", "Landscaping")) {
+  x <- anosim(as.data.frame(shrub_mds_selected)[,c(2:196)], shrub_mds_selected[,i])
+  cat("shrub", i, "R=", x$statistic, "p=", x$signif, "\n")
+  rm(x)
+}
+# pairwise result of ANOSIM of tree
+x <- list()
+for (i in c("Landuse_class", "Landscaping")) {
   set.seed(1234)
-  a <- combn(levels(factor(as.data.frame(mds_plot_selected)[,i])), 2)
+  a <- combn(levels(factor(tree_mds_selected[,i])), 2)
   z <- vector("list", 3)
   for (j in 1:ncol(a)) {
-    b <- mds_plot_selected %>% as.data.frame() %>% 
-      filter(mds_plot_selected[[i]] == a[1,j] | mds_plot_selected[[i]] == a[2,j]) 
+    b <- tree_mds_selected %>% 
+      filter(tree_mds_selected[[i]] == a[1,j] | tree_mds_selected[[i]] == a[2,j]) 
     c <- anosim(b[2:143], b[,i])
     z[[1]] <- c(z[[1]], as.character(a[1,j]))
     z[[2]] <- c(z[[2]], as.character(a[2,j]))
     z[[3]] <- c(z[[3]], c$signif)
   }
   y <- data.frame(comp_1 = z[[1]], comp_2 = z[[2]], p = z[[3]]) %>% 
-    mutate(comp_1 = factor(comp_1, levels = levels(factor(as.data.frame(mds_plot_selected)[,i]))), 
-           comp_2 = factor(comp_2, levels(factor(as.data.frame(mds_plot_selected)[,i]))))
+    mutate(comp_1 = factor(comp_1, levels = levels(factor(tree_mds_selected[,i]))), 
+           comp_2 = factor(comp_2, levels = levels(factor(tree_mds_selected[,i]))))
   print(y)
   x <- c(x, list(ggplot(y, aes(comp_1, comp_2)) + geom_tile(aes(fill = p)) + 
-                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.01)) + 
+                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.05)) + 
                    theme(axis.text.x = element_text(angle = 90))))
 }
 Rmisc::multiplot(plotlist = x, layout = matrix(1:4, ncol = 2))
-rm(x, y, z)
-
-# and nmds plot for shrubs
-mds_plot_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 164, 244))]
-mds_plot_selected <- shrub_diversity %>% filter(Plot_ID %in% mds_plot_ID)
-mds_plot_data <- mds_plot_selected %>% 
-  select(2:196) %>%
-  metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
-mds_plot_data$stress
-stressplot(mds_plot_data)
-mds_plot_point_data <- mds_plot_data$points %>%
-  as.data.frame() %>%
-  mutate(Plot_ID = mds_plot_ID) %>% 
-  left_join(all_plot_info, by = "Plot_ID")
-mds_plot <- mapply(.myplot, atr = c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level"), SIMPLIFY = FALSE)
-Rmisc::multiplot(plotlist = mds_plot, layout = matrix(1:4, nrow = 2))
-
-# general result of ANOSIM
-par(mfrow = c(2,2))
-for (i in c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level")) {
-  x <- anosim(as.data.frame(mds_plot_selected)[,c(2:143)], as.data.frame(mds_plot_selected)[,i], 
-              distance = "bray", permutations = 999)
-  cat(i, "R=", x$statistic, "p=", x$signif, "\n")
-  plot(x)
-  rm(x)
-}
-par(opar)
-# pairwise result of ANOSIM of shrubs
-x <- vector("list")
-for (i in c("Ward", "Dist_level", "Landuse_class", "Plot_pub_pri_level")) {
+# pairwise result of ANOSIM of shrub
+for (i in c("Landuse_class", "Landscaping")) {
   set.seed(1234)
-  a <- combn(levels(factor(as.data.frame(mds_plot_selected)[,i])), 2)
+  a <- combn(levels(factor(shrub_mds_selected[,i])), 2)
   z <- vector("list", 3)
   for (j in 1:ncol(a)) {
-    b <- mds_plot_selected %>% as.data.frame() %>% 
-      filter(mds_plot_selected[[i]] == a[1,j] | mds_plot_selected[[i]] == a[2,j]) 
+    b <- shrub_mds_selected %>% 
+      filter(shrub_mds_selected[[i]] == a[1,j] | shrub_mds_selected[[i]] == a[2,j]) 
     c <- anosim(b[2:196], b[,i])
     z[[1]] <- c(z[[1]], as.character(a[1,j]))
     z[[2]] <- c(z[[2]], as.character(a[2,j]))
     z[[3]] <- c(z[[3]], c$signif)
   }
   y <- data.frame(comp_1 = z[[1]], comp_2 = z[[2]], p = z[[3]]) %>% 
-    mutate(comp_1 = factor(comp_1, levels = levels(factor(as.data.frame(mds_plot_selected)[,i]))), 
-           comp_2 = factor(comp_2, levels(factor(as.data.frame(mds_plot_selected)[,i]))))
+    mutate(comp_1 = factor(comp_1, levels = levels(factor(shrub_mds_selected[,i]))), 
+           comp_2 = factor(comp_2, levels = levels(factor(shrub_mds_selected[,i]))))
   print(y)
   x <- c(x, list(ggplot(y, aes(comp_1, comp_2)) + geom_tile(aes(fill = p)) + 
-                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.01)) + 
+                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.05)) + 
                    theme(axis.text.x = element_text(angle = 90))))
 }
 Rmisc::multiplot(plotlist = x, layout = matrix(1:4, ncol = 2))
-rm(x, y, z)
+rm(a, b, c, x, y, z)
 
-# cor among the indexes
+## cor among the indexes
 chart.Correlation(subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Simpson", "Evenness")))
 chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Simpson", "Evenness")))
 
 
 # kruskal test & boxplot for trees
+# p-value matrix for tree
+set.seed(1234)
+boxplot_list_index_attr <- vector("list", 2)
+# for tree
 {
   pvalue_list <- vector("list", 3)
   for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-    for (j in c("Ward", "Landuse_class", "Plot_pub_pri_level")) {
+    for (j in c("Landuse_class", "Landscaping")) {
       pvalue_list[[1]] <- c(pvalue_list[[1]], i)
       pvalue_list[[2]] <- c(pvalue_list[[2]], j)
-      pvalue_list[[3]] <- c(pvalue_list[[3]], round(kruskal.test(as.data.frame(tree_diversity)[, i] ~ as.data.frame(tree_diversity)[, j])$p.value,digits = 3))
+      pvalue_list[[3]] <- c(pvalue_list[[3]], 
+                            round(kruskal.test(tree_diversity[, i] ~ tree_diversity[, j])$p.value,digits = 3))
     }
   }
 }
@@ -357,30 +343,162 @@ chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Sh
     paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
 }
 
-tree_diversity %>% subset(select = c("Sum_stem", "Richness", "Shannon", "Simpson", "Evenness", 
-                                     "Ward", "Landuse_class", "Plot_pub_pri_level")) %>% 
+boxplot_list_index_attr[[1]] <- subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping")) %>% 
   pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Ward", "Landuse_class", "Plot_pub_pri_level"), 
+  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
                names_to = "attr", values_to = "attr_value") %>% 
   mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Ward", "Landuse_class", "Plot_pub_pri_level")), 
-         attr_value = factor(attr_value, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev))) %>% 
+         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev))) %>% 
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
   scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
   geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
   theme(axis.text = element_text(angle = 90))
+# for shrub
+{
+  pvalue_list <- vector("list", 3)
+  for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+    for (j in c("Landuse_class", "Landscaping")) {
+      pvalue_list[[1]] <- c(pvalue_list[[1]], i)
+      pvalue_list[[2]] <- c(pvalue_list[[2]], j)
+      pvalue_list[[3]] <- c(pvalue_list[[3]], round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity[, j])$p.value,digits = 3))
+    }
+  }
+  }
+
+{
+  pvalue <- data.frame(index = pvalue_list[[1]],
+                       attr = pvalue_list[[2]],
+                       pvalue = pvalue_list[[3]])
+  pvalue$label <- NA
+  pvalue$label[pvalue$pvalue>0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
+  pvalue$label[pvalue$pvalue<0.05 & pvalue$pvalue>0.01] <- 
+    paste("p=", pvalue$pvalue, "*", sep = "")[pvalue$pvalue<0.05 & pvalue$pvalue>0.01]
+  pvalue$label[pvalue$pvalue<0.01 & pvalue$pvalue>0.001] <- 
+    paste("p=", pvalue$pvalue, "**", sep = "")[pvalue$pvalue<0.01 & pvalue$pvalue>0.001]
+  pvalue$label[pvalue$pvalue<0.001] <- 
+    paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
+}
+
+boxplot_list_index_attr[[2]] <- subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping")) %>% 
+  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
+               names_to = "index", values_to = "index_value") %>% 
+  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
+               names_to = "attr", values_to = "attr_value") %>% 
+  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
+         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev))) %>% 
+  na.omit() %>%
+  ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
+  facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
+  scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
+  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
+  theme(axis.text = element_text(angle = 90))
+Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
 # delete the vars
 rm(pvalue, pvalue_list)
 
+# pairwise test of diversity ~ I(landuse class + ownership)
+pairwise_list <- vector("list", 5)
+for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+  for (j in c("Landuse_class", "Landscaping")) {
+    pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                            rep("tree", 
+                                length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
+    pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                            rep(i, length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
+    pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                            rep(j, length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
+    pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                            dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons)
+    pairwise_list[[5]] <- c(pairwise_list[[5]], 
+                            dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)
+    
+  }
+}
+for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+  for (j in c("Landuse_class", "Landscaping")) {
+    pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                            rep("shrub", 
+                                length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
+    pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                            rep(i, length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
+    pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                            rep(j, length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
+    pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                            dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons)
+    pairwise_list[[5]] <- c(pairwise_list[[5]], 
+                            dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)
+    
+  }
+}
+pairwise_df <- data.frame(taxa = pairwise_list[[1]], 
+                          index = pairwise_list[[2]], 
+                          attr = pairwise_list[[3]], 
+                          comparison = pairwise_list[[4]], 
+                          p = pairwise_list[[5]]) %>% 
+  separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
+ggplot(pairwise_df, aes(comparison_1, comparison_2, fill = p)) + 
+  geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
+  scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + facet_grid(index ~ taxa + attr, scales = "free")
+
+
+tileplot_list <- list()
+for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+  for (j in c("Landuse_class", "Landscaping")) {
+    p_pairwise_df_up <- 
+      data.frame(comparison = dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons, 
+                 p = dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted) %>% 
+      separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
+    p_pairwise_df_down <- 
+      data.frame(comparison_1 = p_pairwise_df_up$comparison_2, 
+                 comparison_2 = p_pairwise_df_up$comparison_1, 
+                 p = p_pairwise_df_up$p)
+    p_pairwise_df_full <- rbind(p_pairwise_df_up, p_pairwise_df_down)
+    tileplot_list <- c(tileplot_list, 
+                       list(ggplot(p_pairwise_df_full, aes(comparison_1, comparison_2, fill = p)) + 
+                              geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
+                              scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, 
+                                                   limits = c(0, 0.05)) + 
+                              theme(axis.text.x = element_text(angle = 90)) + 
+                              labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE)))
+  }
+}
+for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+  for (j in c("Landuse_class", "Landscaping")) {
+    p_pairwise_df_up <- 
+      data.frame(comparison = dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons, 
+                 p = dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted) %>% 
+      separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
+    p_pairwise_df_down <- 
+      data.frame(comparison_1 = p_pairwise_df_up$comparison_2, 
+                 comparison_2 = p_pairwise_df_up$comparison_1, 
+                 p = p_pairwise_df_up$p)
+    p_pairwise_df_full <- rbind(p_pairwise_df_up, p_pairwise_df_down)
+    tileplot_list <- c(tileplot_list, 
+                       list(ggplot(p_pairwise_df_full, aes(comparison_1, comparison_2, fill = p)) + 
+                              geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
+                              scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, 
+                                                   limits = c(0, 0.05)) + 
+                              theme(axis.text.x = element_text(angle = 90)) + 
+                              labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE)))
+  }
+}
+Rmisc::multiplot(plotlist = tileplot_list, layout = matrix(1:16, ncol = 4, byrow = TRUE))
 # dunn test & pairwise of trees
+tileplot_list_pairwise_pvalue_diversity_attr <- list()
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   pvalue_pairwise_list <- vector("list", 2)
-  for (j in c("Ward", "Landuse_class", "Plot_pub_pri_level")) {
-    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], dunn.test(as.data.frame(tree_diversity)[, i], as.data.frame(tree_diversity)[, j])$comparisons)
-    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], dunn.test(as.data.frame(tree_diversity)[, i], as.data.frame(tree_diversity)[, j])$P.adjusted)
+  for (j in c("Landuse_class", "Landscaping")) {
+    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], 
+                                   dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons)
+    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], 
+                                   dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)
   }
   pvalue_pairwise_df_up <- 
     data.frame(comparison = pvalue_pairwise_list[[1]], p = pvalue_pairwise_list[[2]]) %>% 
@@ -389,67 +507,20 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
                                            comparison_2 = pvalue_pairwise_df_up$comparison_1, 
                                            p = pvalue_pairwise_df_up$p)
   pvalue_list_pairwise_df <- rbind(pvalue_pairwise_df_up, pvalue_pairwise_df_down) %>% 
-    mutate(comparison_1 = factor(comparison_1, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev)), 
-           comparison_2 = factor(comparison_2, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev)))
-  print(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +
-          geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
-          scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + 
-          theme(axis.text.x = element_text(angle = 90)) + 
-          labs(title = i)) + xlab(NULL) + ylab(NULL)
+    mutate(comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Landscaping_faclev)), 
+           comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Landscaping_faclev)))
+  tileplot_list_pairwise_pvalue_diversity_attr <- c(tileplot_list_pairwise_pvalue_diversity_attr, list(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) + scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + theme(axis.text.x = element_text(angle = 90)) + labs(title = i) + xlab(NULL) + ylab(NULL)))
 }
-# delete the vars
-rm(pvalue_pairwise_list, pvalue_pairwise_df_up, pvalue_pairwise_df_down, pvalue_list_pairwise_df)
-
-# kruskal test & boxplot for shrubs
-{
-  pvalue_list <- vector("list", 3)
-  for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-    for (j in c("Ward", "Landuse_class", "Plot_pub_pri_level")) {
-      pvalue_list[[1]] <- c(pvalue_list[[1]], i)
-      pvalue_list[[2]] <- c(pvalue_list[[2]], j)
-      pvalue_list[[3]] <- c(pvalue_list[[3]], round(kruskal.test(as.data.frame(shrub_diversity)[, i] ~ as.data.frame(shrub_diversity)[, j])$p.value,digits = 3))
-    }
-  }
-}
-
-{
-  pvalue <- data.frame(index = pvalue_list[[1]],
-                       attr = pvalue_list[[2]],
-                       pvalue = pvalue_list[[3]])
-  pvalue$label <- NA
-  pvalue$label[pvalue$pvalue>0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
-  pvalue$label[pvalue$pvalue<0.05 & pvalue$pvalue>0.01] <- 
-    paste("p=", pvalue$pvalue, "*", sep = "")[pvalue$pvalue<0.05 & pvalue$pvalue>0.01]
-  pvalue$label[pvalue$pvalue<0.01 & pvalue$pvalue>0.001] <- 
-    paste("p=", pvalue$pvalue, "**", sep = "")[pvalue$pvalue<0.01 & pvalue$pvalue>0.001]
-  pvalue$label[pvalue$pvalue<0.001] <- 
-    paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
-}
-
-shrub_diversity %>% subset(select = c("Sum_area", "Richness", "Shannon", "Evenness", 
-                                      "Ward", "Landuse_class", "Plot_pub_pri_level")) %>% 
-  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Ward", "Landuse_class", "Plot_pub_pri_level"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Ward", "Landuse_class", "Plot_pub_pri_level")), 
-         attr_value = factor(attr_value, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev))) %>% 
-  na.omit() %>%
-  ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
-  facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
-  scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
-  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text = element_text(angle = 90))
-# delete the vars
-rm(pvalue, pvalue_list)
-
-# dunn test & pairwise of shrubs
+Rmisc::multiplot(plotlist = tileplot_list_pairwise_pvalue_diversity_attr, layout = matrix(1:4, ncol = 2))
+# dunn test & pairwise of shrub
+tileplot_list_pairwise_pvalue_diversity_attr <- list()
 for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
   pvalue_pairwise_list <- vector("list", 2)
-  for (j in c("Ward", "Landuse_class", "Plot_pub_pri_level")) {
-    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], dunn.test(as.data.frame(shrub_diversity)[, i], as.data.frame(shrub_diversity)[, j])$comparisons)
-    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], dunn.test(as.data.frame(shrub_diversity)[, i], as.data.frame(shrub_diversity)[, j])$P.adjusted)
+  for (j in c("Ward", "Landuse_class", "Landscaping")) {
+    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], 
+                                   dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons)
+    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], 
+                                   dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)
   }
   pvalue_pairwise_df_up <- 
     data.frame(comparison = pvalue_pairwise_list[[1]], p = pvalue_pairwise_list[[2]]) %>% 
@@ -458,14 +529,11 @@ for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
                                         comparison_2 = pvalue_pairwise_df_up$comparison_1, 
                                         p = pvalue_pairwise_df_up$p)
   pvalue_list_pairwise_df <- rbind(pvalue_pairwise_df_up, pvalue_pairwise_df_down) %>% 
-    mutate(comparison_1 = factor(comparison_1, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev)), 
-           comparison_2 = factor(comparison_2, levels = c(Ward_faclev, Landuse_class_faclev, Plot_pub_pri_level_faclev)))
-  print(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +
-          geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
-          scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + 
-          theme(axis.text.x = element_text(angle = 90)) + 
-          labs(title = i)) + xlab(NULL) + ylab(NULL)
+    mutate(comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Landscaping_faclev)), 
+           comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Landscaping_faclev)))
+  tileplot_list_pairwise_pvalue_diversity_attr <- c(tileplot_list_pairwise_pvalue_diversity_attr, list(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) + scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + theme(axis.text.x = element_text(angle = 90)) + labs(title = i) + xlab(NULL) + ylab(NULL)))
 }
+Rmisc::multiplot(plotlist = tileplot_list_pairwise_pvalue_diversity_attr, layout = matrix(1:4, ncol = 2))
 # delete the vars
 rm(pvalue_pairwise_list, pvalue_pairwise_df_up, pvalue_pairwise_df_down, pvalue_list_pairwise_df)
 
@@ -516,11 +584,11 @@ summary(lm(Evenness ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = shru
 # cor between distance and indexes
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   print(i)
-  print(cor.test(as.data.frame(tree_diversity)[, i], tree_diversity$Dist))
+  print(cor.test(tree_diversity[, i], tree_diversity$Dist))
 }
 for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
   print(i)
-  print(cor.test(as.data.frame(shrub_diversity)[, i], shrub_diversity$Dist))
+  print(cor.test(shrub_diversity[, i], shrub_diversity$Dist))
 }
 
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
