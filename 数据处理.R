@@ -524,21 +524,6 @@ summary(lm(Richness ~ Dist, data = shrub_diversity))
 summary(lm(Shannon ~ Dist, data = shrub_diversity))
 summary(lm(Evenness ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = shrub_diversity))
 
-# cor between distance and indexes
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  print(i)
-  print(cor.test(tree_diversity[, i], tree_diversity$Dist))
-}
-for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-  print(i)
-  print(cor.test(shrub_diversity[, i], shrub_diversity$Dist))
-}
-
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  print(i)
-  print(cor.test(as.data.frame(subset(tree_diversity, Dist < 6000))[, i], subset(tree_diversity, Dist < 6000)$Dist))
-}
-
 # indexes ~ distance by land use classes
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   print(ggplot(tree_diversity, aes_string("Dist", i)) + geom_point() + 
