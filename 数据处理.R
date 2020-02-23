@@ -122,6 +122,27 @@ shrub_diversity <- shrub_diversity %>% mutate(
 )
 rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
+# tree diversity longer and shrub diversity longer dataset
+tree_diversity_long <- 
+  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping", "Dist")) %>% 
+  pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
+               names_to = "index", values_to = "index_value") %>% 
+  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
+               names_to = "attr", values_to = "attr_value") %>% 
+  mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
+         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev)))
+
+shrub_diversity_long <- 
+  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping", "Dist")) %>% 
+  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
+               names_to = "index", values_to = "index_value") %>% 
+  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
+               names_to = "attr", values_to = "attr_value") %>% 
+  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
+         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev)))
+
 ### analysis begin
 ## the total species, genera and families of all plants
 length(unique(all_plant_data$Species_CN))
@@ -343,14 +364,7 @@ boxplot_list_index_attr <- vector("list", 2)
     paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
 }
 
-boxplot_list_index_attr[[1]] <- subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping")) %>% 
-  pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev))) %>% 
+boxplot_list_index_attr[[1]] <- tree_diversity_long %>% 
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
@@ -383,14 +397,7 @@ boxplot_list_index_attr[[1]] <- subset(tree_diversity, select = c("Sum_stem", "R
     paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
 }
 
-boxplot_list_index_attr[[2]] <- subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Landscaping")) %>% 
-  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Landscaping"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Landscaping")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Landscaping_faclev))) %>% 
+boxplot_list_index_attr[[2]] <- shrub_diversity_long %>% 
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
@@ -401,8 +408,9 @@ Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
 # delete the vars
 rm(pvalue, pvalue_list)
 
-# pairwise test of diversity ~ I(landuse class + ownership)
+## pairwise dunn test of diversity ~ I(landuse class + ownership)
 pairwise_list <- vector("list", 5)
+# list of pairwise test of diversity and attrs of tree
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
   for (j in c("Landuse_class", "Landscaping")) {
     pairwise_list[[1]] <- c(pairwise_list[[1]], 
@@ -416,9 +424,9 @@ for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
                             dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons)
     pairwise_list[[5]] <- c(pairwise_list[[5]], 
                             dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)
-    
   }
 }
+# list of pairwise test of diversity and attrs of shrub
 for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
   for (j in c("Landuse_class", "Landscaping")) {
     pairwise_list[[1]] <- c(pairwise_list[[1]], 
@@ -435,108 +443,49 @@ for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
     
   }
 }
-pairwise_df <- data.frame(taxa = pairwise_list[[1]], 
+# data frame of pairwise test of tree and shrub
+pairwise_df_up <- data.frame(taxa = pairwise_list[[1]], 
                           index = pairwise_list[[2]], 
                           attr = pairwise_list[[3]], 
                           comparison = pairwise_list[[4]], 
                           p = pairwise_list[[5]]) %>% 
   separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-ggplot(pairwise_df, aes(comparison_1, comparison_2, fill = p)) + 
-  geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
-  scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + 
-  theme(axis.text.x = element_text(angle = 90)) + 
-  labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + facet_grid(index ~ taxa + attr, scales = "free")
-
-
-tileplot_list <- list()
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  for (j in c("Landuse_class", "Landscaping")) {
-    p_pairwise_df_up <- 
-      data.frame(comparison = dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons, 
-                 p = dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted) %>% 
-      separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-    p_pairwise_df_down <- 
-      data.frame(comparison_1 = p_pairwise_df_up$comparison_2, 
-                 comparison_2 = p_pairwise_df_up$comparison_1, 
-                 p = p_pairwise_df_up$p)
-    p_pairwise_df_full <- rbind(p_pairwise_df_up, p_pairwise_df_down)
-    tileplot_list <- c(tileplot_list, 
-                       list(ggplot(p_pairwise_df_full, aes(comparison_1, comparison_2, fill = p)) + 
-                              geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
-                              scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, 
-                                                   limits = c(0, 0.05)) + 
-                              theme(axis.text.x = element_text(angle = 90)) + 
-                              labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE)))
-  }
+pairwise_df_down <- data.frame(
+  taxa = pairwise_df_up$taxa, 
+  index = pairwise_df_up$index, 
+  attr = pairwise_df_up$attr,
+  comparison_1 = pairwise_df_up$comparison_2, 
+  comparison_2 = pairwise_df_up$comparison_1, 
+  p = pairwise_df_up$p)
+pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>% 
+  mutate(index = factor(index, levels = c("Sum_stem", "Sum_area", "Richness", "Shannon", "Evenness")), 
+         comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Landscaping_faclev)), 
+         comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Landscaping_faclev)))
+# plot the pairwise test results
+pairwise_plot_list <- list()
+for (i in c("Landuse_class", "Landscaping")) {
+  pairwise_plot_list <- c(pairwise_plot_list,
+                          list(ggplot(subset(pairwise_df, taxa == "tree" & attr == i), 
+                                      aes(comparison_1, comparison_2, fill = p))+
+                                 geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+                                 scale_fill_gradient2(high = "blue", low = "red", 
+                                                      midpoint = 0.05, limits = c(0, 0.05)) + 
+                                 theme(axis.text.x = element_text(angle = 90)) + 
+                                 xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+                                 facet_grid(index ~ attr, scales = "free", switch = "both")))
 }
-for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-  for (j in c("Landuse_class", "Landscaping")) {
-    p_pairwise_df_up <- 
-      data.frame(comparison = dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons, 
-                 p = dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted) %>% 
-      separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-    p_pairwise_df_down <- 
-      data.frame(comparison_1 = p_pairwise_df_up$comparison_2, 
-                 comparison_2 = p_pairwise_df_up$comparison_1, 
-                 p = p_pairwise_df_up$p)
-    p_pairwise_df_full <- rbind(p_pairwise_df_up, p_pairwise_df_down)
-    tileplot_list <- c(tileplot_list, 
-                       list(ggplot(p_pairwise_df_full, aes(comparison_1, comparison_2, fill = p)) + 
-                              geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) +
-                              scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, 
-                                                   limits = c(0, 0.05)) + 
-                              theme(axis.text.x = element_text(angle = 90)) + 
-                              labs(title = i) + xlab(NULL) + ylab(NULL) + guides(fill = FALSE)))
-  }
+for (i in c("Landuse_class", "Landscaping")) {
+  pairwise_plot_list <- c(pairwise_plot_list,
+                          list(ggplot(subset(pairwise_df, taxa == "shrub" & attr == i), 
+                                      aes(comparison_1, comparison_2, fill = p))+
+                                 geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+                                 scale_fill_gradient2(high = "blue", low = "red", 
+                                                      midpoint = 0.05, limits = c(0, 0.05)) + 
+                                 theme(axis.text.x = element_text(angle = 90)) + 
+                                 xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+                                 facet_grid(index ~ attr, scales = "free", switch = "both")))
 }
-Rmisc::multiplot(plotlist = tileplot_list, layout = matrix(1:16, ncol = 4, byrow = TRUE))
-# dunn test & pairwise of trees
-tileplot_list_pairwise_pvalue_diversity_attr <- list()
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  pvalue_pairwise_list <- vector("list", 2)
-  for (j in c("Landuse_class", "Landscaping")) {
-    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], 
-                                   dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons)
-    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], 
-                                   dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)
-  }
-  pvalue_pairwise_df_up <- 
-    data.frame(comparison = pvalue_pairwise_list[[1]], p = pvalue_pairwise_list[[2]]) %>% 
-    separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-  pvalue_pairwise_df_down <- data.frame(comparison_1 = pvalue_pairwise_df_up$comparison_2, 
-                                           comparison_2 = pvalue_pairwise_df_up$comparison_1, 
-                                           p = pvalue_pairwise_df_up$p)
-  pvalue_list_pairwise_df <- rbind(pvalue_pairwise_df_up, pvalue_pairwise_df_down) %>% 
-    mutate(comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Landscaping_faclev)), 
-           comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Landscaping_faclev)))
-  tileplot_list_pairwise_pvalue_diversity_attr <- c(tileplot_list_pairwise_pvalue_diversity_attr, list(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) + scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + theme(axis.text.x = element_text(angle = 90)) + labs(title = i) + xlab(NULL) + ylab(NULL)))
-}
-Rmisc::multiplot(plotlist = tileplot_list_pairwise_pvalue_diversity_attr, layout = matrix(1:4, ncol = 2))
-# dunn test & pairwise of shrub
-tileplot_list_pairwise_pvalue_diversity_attr <- list()
-for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-  pvalue_pairwise_list <- vector("list", 2)
-  for (j in c("Ward", "Landuse_class", "Landscaping")) {
-    pvalue_pairwise_list[[1]] <- c(pvalue_pairwise_list[[1]], 
-                                   dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons)
-    pvalue_pairwise_list[[2]] <- c(pvalue_pairwise_list[[2]], 
-                                   dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)
-  }
-  pvalue_pairwise_df_up <- 
-    data.frame(comparison = pvalue_pairwise_list[[1]], p = pvalue_pairwise_list[[2]]) %>% 
-    separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-  pvalue_pairwise_df_down <- data.frame(comparison_1 = pvalue_pairwise_df_up$comparison_2, 
-                                        comparison_2 = pvalue_pairwise_df_up$comparison_1, 
-                                        p = pvalue_pairwise_df_up$p)
-  pvalue_list_pairwise_df <- rbind(pvalue_pairwise_df_up, pvalue_pairwise_df_down) %>% 
-    mutate(comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Landscaping_faclev)), 
-           comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Landscaping_faclev)))
-  tileplot_list_pairwise_pvalue_diversity_attr <- c(tileplot_list_pairwise_pvalue_diversity_attr, list(ggplot(pvalue_list_pairwise_df, aes(comparison_1, comparison_2, fill = p)) + geom_tile() +geom_text(aes(label = round(p, digits = 2)), size = 3.5) + scale_fill_gradient2(high = "blue", low = "red", midpoint = 0.05, limits = c(0, 0.05)) + theme(axis.text.x = element_text(angle = 90)) + labs(title = i) + xlab(NULL) + ylab(NULL)))
-}
-Rmisc::multiplot(plotlist = tileplot_list_pairwise_pvalue_diversity_attr, layout = matrix(1:4, ncol = 2))
-# delete the vars
-rm(pvalue_pairwise_list, pvalue_pairwise_df_up, pvalue_pairwise_df_down, pvalue_list_pairwise_df)
-
+Rmisc::multiplot(plotlist = pairwise_plot_list, cols = 4)
 
 # test linear models for indexes ~ distance
 # plot indexes ~ distance
@@ -555,6 +504,7 @@ for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
 }
 multiplot(plotlist = plot_list_index_dist, layout = matrix(1:8, nrow = 2, byrow = TRUE))
 rm(plot_list_index_dist)
+
 
 # regsubsets() for tree
 par(mfrow = c(2,2))
