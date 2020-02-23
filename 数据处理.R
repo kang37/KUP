@@ -6,6 +6,7 @@ library(PerformanceAnalytics)
 library(digest)
 library(car)
 library(dunn.test)
+library(leaps)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
@@ -487,24 +488,16 @@ for (i in c("Landuse_class", "Landscaping")) {
 }
 Rmisc::multiplot(plotlist = pairwise_plot_list, cols = 4)
 
-# test linear models for indexes ~ distance
-# plot indexes ~ distance
-plot_list_index_dist <- list()
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  plot_list_index_dist <- c(plot_list_index_dist, 
-                            list(ggplot(tree_diversity, aes_string("Dist", i)) + 
-                                   geom_point(aes(color = Landuse_class), alpha = 0.5) + 
-                                   guides(color = FALSE)))
-}
-for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-  plot_list_index_dist <- c(plot_list_index_dist, 
-                            list(ggplot(shrub_diversity, aes_string("Dist", i)) + 
-                                   geom_point(aes(color = Landuse_class), alpha = 0.5) + 
-                                   guides(color = FALSE)))
-}
-multiplot(plotlist = plot_list_index_dist, layout = matrix(1:8, nrow = 2, byrow = TRUE))
-rm(plot_list_index_dist)
-
+## test linear models for indexes ~ distance
+# plot indexes ~ distance colored by land use class
+index_dist_plot_list <- vector("list", 2)
+index_dist_plot_list[[1]] <- na.omit(tree_diversity_long) %>% 
+  subset(attr_value %in% Landuse_class_faclev) %>%
+  ggplot(aes(Dist, index_value)) + geom_point(aes(color = attr_value)) + facet_wrap( ~ index, nrow = 1, scales = "free")
+index_dist_plot_list[[2]] <- na.omit(shrub_diversity_long) %>% 
+  subset(attr_value %in% Landuse_class_faclev) %>%
+  ggplot(aes(Dist, index_value)) + geom_point(aes(color = attr_value)) + facet_wrap( ~ index, nrow = 1, scales = "free")
+Rmisc::multiplot(plotlist = index_dist_plot_list)
 
 # regsubsets() for tree
 par(mfrow = c(2,2))
