@@ -524,12 +524,6 @@ summary(lm(Richness ~ Dist, data = shrub_diversity))
 summary(lm(Shannon ~ Dist, data = shrub_diversity))
 summary(lm(Evenness ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = shrub_diversity))
 
-# indexes ~ distance by land use classes
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  print(ggplot(tree_diversity, aes_string("Dist", i)) + geom_point() + 
-          geom_smooth(method = "lm") + facet_wrap( ~ Landuse_class))
-}
-
 # distance levels vs. indexes of tree
 plot_list_index_distlevel <- list()
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
