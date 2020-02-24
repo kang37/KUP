@@ -528,48 +528,6 @@ summary(lm(Evenness ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = shru
 # the distribute of the land use types along the distance
 ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_class)
 
-# tree attr ~ distance
-par(mfrow = c(2,3))
-plot(tree_diversity$Dist, tree_diversity$perc_planted)
-plot(tree_diversity$Dist, tree_diversity$perc_nonpot)
-plot(tree_diversity$Dist, tree_diversity$perc_private)
-plot(tree_diversity$Dist, tree_diversity$perc_nonstreet)
-plot(tree_diversity$Dist, tree_diversity$perc_native)
-par(opar)
-
-par(mfrow = c(2,3))
-for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
-  plot(regsubsets(tree_diversity[[i]] ~ Dist + I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), 
-                  data = tree_diversity), scale = "adjr2", main = i)
-}
-
-summary(lm(perc_planted ~ Dist + I(Dist^2) + I(Dist^3), data = tree_diversity))
-summary(lm(perc_nonpot ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = tree_diversity))
-summary(lm(perc_private ~ I(Dist^2), data = tree_diversity))
-summary(lm(perc_nonstreet ~ Dist, data = tree_diversity))
-summary(lm(perc_native ~ I(Dist^4) + I(Dist^5), data = tree_diversity))
-
-# shrub attr vs. distance
-par(mfrow = c(2,3))
-plot(shrub_diversity$Dist, shrub_diversity$perc_planted)
-plot(shrub_diversity$Dist, shrub_diversity$perc_nonpot)
-plot(shrub_diversity$Dist, shrub_diversity$perc_private)
-plot(shrub_diversity$Dist, shrub_diversity$perc_nonstreet)
-plot(shrub_diversity$Dist, shrub_diversity$perc_native)
-par(opar)
-
-par(mfrow = c(2,3))
-for (i in c("perc_planted", "perc_nonpot", "perc_private", "perc_nonstreet", "perc_native")) {
-  plot(regsubsets(shrub_diversity[[i]] ~ Dist + I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), 
-                  data = shrub_diversity), scale = "adjr2", main = i)
-}
-
-summary(lm(perc_planted ~ I(Dist^2) + I(Dist^5), data = shrub_diversity))
-summary(lm(perc_nonpot ~ I(Dist^2), data = shrub_diversity))
-summary(lm(perc_private ~ I(Dist^3) + I(Dist^4) + I(Dist^5), data = shrub_diversity))
-summary(lm(perc_nonstreet ~ Dist + I(Dist^2), data = shrub_diversity))
-summary(lm(perc_native ~ I(Dist^5), data = shrub_diversity))
-
 
 
 
