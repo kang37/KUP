@@ -36,7 +36,6 @@ all_plot_info$Landscaping[all_plot_info$Landuse_detail %in% c("µÍ²ã¹«Ô¢", "¸ß²ã¹
 # data of all_plant_info
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
 all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
-  filter(Plot_ID != 67) %>% 
   left_join(all_plant_info, by = "Species_CN") %>%
   left_join(all_plot_info,by = "Plot_ID")
 all_plant_data$Landuse_subclass <- NULL
@@ -489,7 +488,7 @@ for (i in c("Landuse_class", "Landscaping")) {
 }
 Rmisc::multiplot(plotlist = pairwise_plot_list, cols = 4)
 
-## test linear models for indexes ~ distance
+## models for diversity indexes ~ distance
 # plot indexes ~ distance colored by land use class
 index_dist_plot_list <- vector("list", 2)
 index_dist_plot_list[[1]] <- na.omit(tree_diversity_long) %>% 
@@ -524,11 +523,30 @@ summary(lm(Sum_area ~ I(Dist^2), data = shrub_diversity))
 summary(lm(Richness ~ Dist, data = shrub_diversity))
 summary(lm(Shannon ~ Dist, data = shrub_diversity))
 summary(lm(Evenness ~ I(Dist^2) + I(Dist^3) + I(Dist^4) + I(Dist^5), data = shrub_diversity))
-
 # the distribute of the land use types along the distance
 ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_class)
 
+# discussion: plot plant attr vs. land use
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
 
 
-
-
+# discussion: plot plant attr vs. land ownership
+tree_data %>% group_by(Landscaping) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
+tree_data %>% group_by(Landscaping) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landscaping) %>% 
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landscaping) %>% 
+  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
+tree_data %>% group_by(Landscaping) %>% 
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
