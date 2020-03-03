@@ -44,7 +44,10 @@ all_plant_data$Landuse_agg <- NULL
 # data of trees
 tree_data <- all_plant_data %>% 
   subset(Tree_shrub == "Tree")
-  
+
+# data of native trees
+tree_native_data <- subset(tree_data, Nt_ex == "nt")
+
 # data of shrubs
 shrub_data <- all_plant_data %>% 
   subset(Tree_shrub == "Shrub")
@@ -549,10 +552,11 @@ summary(lm(perc_private ~ I(Dist^3) + I(Dist^4) + I(Dist^5), data = shrub_divers
 summary(lm(perc_nonstreet ~ Dist + I(Dist^2), data = shrub_diversity))
 summary(lm(perc_native ~ I(Dist^5), data = shrub_diversity))
 # significant p: perc_planted ~ dist, perc_private ~ dist, perc_native ~ dist
+
 # the distribute of the land use types along the distance
 ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_class)
-
-
+ggplot(tree_diversity, aes(Dist)) + geom_histogram(binwidth = 1000) + facet_wrap(~ Landuse_agg)
+ggplot(tree_diversity, aes(Dist_level)) + geom_bar() + facet_wrap(~ Landuse_agg)
 
 ## models for plot plant attr ~ distance & distance level
 # plot plant attr ~ distance colored by land use class
@@ -621,6 +625,12 @@ tree_data %>% group_by(Landuse_class) %>%
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
 
 
+#
+tree_data %>% group_by(Landuse_class) %>% 
+  dplyr::summarise(total = n(), perc_street = sum(Street == "Street")/n())
+
+
+
 # discussion: plot plant attr vs. land ownership
 tree_data %>% group_by(Landscaping) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
@@ -644,4 +654,34 @@ tree_data %>% group_by(Dist_level) %>%
 tree_data %>% group_by(Dist_level) %>% 
   dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
 tree_data %>% group_by(Dist_level) %>% 
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
+
+# following mess ...
+# native species % along urban gradient? 
+tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem")) %>%
+  pivot_wider(names_from = Species_CN, values_from = Stem, 
+              values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
+  mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
+         Richness = apply(.[2:ncol(.)]>0, 1, sum),
+         Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
+         Simpson = diversity(.[2:ncol(.)], index = "simpson"),
+         Evenness = Shannon / log(Richness)) %>%
+  left_join(all_plot_info,by = "Plot_ID") %>% 
+  as.data.frame()
+
+tree_absent <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem")) %>% 
+  pivot_wider(names_from = Species_CN, values_from = Stem, 
+              values_fn = list(Stem = mean), values_fill = list(Stem = 0)) %>% 
+  mutate(Richness = apply(.[2:ncol(.)]>0, 1, sum)) %>% 
+  left_join(all_plot_info, by = "Plot_ID")
+
+tree_absent <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Nt_ex")) %>% unique() %>% 
+  group_by(Plot_ID) %>% dplyr::summarise(perc_native = sum(Nt_ex == "nt")/n()) %>% 
+  left_join(all_plot_info, by = "Plot_ID")
+
+  as.data.frame() %>% 
+
+
+
+tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
