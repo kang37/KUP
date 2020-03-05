@@ -8,6 +8,7 @@ library(car)
 library(dunn.test)
 library(leaps)
 library(gvlma)
+library(BiodiversityR)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
@@ -210,6 +211,57 @@ multiplot(
     labs(title = "shrub~area")+ ylim(0, 0.2), # why missing value? where?
   layout = matrix(1:4, ncol = 2)
 )
+
+## rank ahundance plot
+# the rank abundance plot by land use types of trees: omit site 279
+tree_rankabun_list <- vector("list", 5)
+for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
+  tree_rankabun_ori <- as.data.frame(rankabundance(subset(tree_diversity[which(!tree_diversity$Plot_ID %in% 279),], Landuse_class == i)[2:143]))
+  tree_rankabun_list[[1]] <- c(tree_rankabun_list[[1]], rownames(tree_rankabun_ori))
+  tree_rankabun_list[[2]] <- c(tree_rankabun_list[[2]], tree_rankabun_ori$rank)
+  tree_rankabun_list[[3]] <- c(tree_rankabun_list[[3]], tree_rankabun_ori$abundance)
+  tree_rankabun_list[[4]] <- c(tree_rankabun_list[[4]], tree_rankabun_ori$proportion)
+  tree_rankabun_list[[5]] <- c(tree_rankabun_list[[5]], rep(i, nrow(tree_rankabun_ori)))
+}
+tree_rankabun_df <- data.frame(
+  Species_CN = tree_rankabun_list[[1]], 
+  rank = tree_rankabun_list[[2]], 
+  abundance = tree_rankabun_list[[3]], 
+  proportion = tree_rankabun_list[[4]], 
+  Landuse_class = tree_rankabun_list[[5]]
+)
+tree_rankabun_df[tree_rankabun_df == 0] <- NA
+ggplot(tree_rankabun_df, aes(rank, proportion, label = Species_CN)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_text(aes(label = ifelse(rank<4, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
+  facet_wrap(~Landuse_class, nrow = 1)
+rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df)
+
+# the rank abundance plot by land use types of shrubs
+shrub_rankabun_list <- vector("list", 5)
+for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
+  shrub_rankabun_ori <- as.data.frame(rankabundance(subset(shrub_diversity, Landuse_class == i)[2:143]))
+  shrub_rankabun_list[[1]] <- c(shrub_rankabun_list[[1]], rownames(shrub_rankabun_ori))
+  shrub_rankabun_list[[2]] <- c(shrub_rankabun_list[[2]], shrub_rankabun_ori$rank)
+  shrub_rankabun_list[[3]] <- c(shrub_rankabun_list[[3]], shrub_rankabun_ori$abundance)
+  shrub_rankabun_list[[4]] <- c(shrub_rankabun_list[[4]], shrub_rankabun_ori$proportion)
+  shrub_rankabun_list[[5]] <- c(shrub_rankabun_list[[5]], rep(i, nrow(shrub_rankabun_ori)))
+}
+shrub_rankabun_df <- data.frame(
+  Species_CN = shrub_rankabun_list[[1]], 
+  rank = shrub_rankabun_list[[2]], 
+  abundance = shrub_rankabun_list[[3]], 
+  proportion = shrub_rankabun_list[[4]], 
+  Landuse_class = shrub_rankabun_list[[5]]
+)
+shrub_rankabun_df[shrub_rankabun_df == 0] <- NA
+ggplot(shrub_rankabun_df, aes(rank, proportion, label = Species_CN)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_text(aes(label = ifelse(rank<4, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
+  facet_wrap(~Landuse_class, nrow = 1)
+rm(shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
 
 ## attributes of the tree and shrub
 # the exotic vs. native regarding species
