@@ -263,6 +263,37 @@ ggplot(shrub_rankabun_df, aes(rank, proportion, label = Species_CN)) +
   facet_wrap(~Landuse_class, nrow = 1)
 rm(shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
 
+
+## Species accumulation curve 
+par(mfrow = c(1,2))
+# Species accumulation curve for trees
+plot(specaccum(subset(tree_diversity, Landuse_class == "Com")[,2:143]), col = "red", lty = 1, 
+     ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
+plot(specaccum(subset(tree_diversity, Landuse_class == "Com neigh")[,2:143]),col = "red", lty = 2, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(tree_diversity, Landuse_class == "R low")[,2:143]), col = "blue", lty = 1, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(tree_diversity, Landuse_class == "R high")[,2:143]), col = "blue", lty = 2, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(tree_diversity, Landuse_class == "R resi")[,2:143]), col = "blue", lty = 3, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(tree_diversity, Landuse_class == "Ind")[,2:143]), col = "black", lty = 1, 
+     ci.lty = 0, add = T)
+# Species accumulation curve for shrubs
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Com")[,2:143]), col = "red", lty = 1, 
+     ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Com neigh")[,2:143]),col = "red", lty = 2, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R low")[,2:143]), col = "blue", lty = 1, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R high")[,2:143]), col = "blue", lty = 2, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R resi")[,2:143]), col = "blue", lty = 3, 
+     ci.lty = 0, add = T)
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Ind")[,2:143]), col = "black", lty = 1, 
+     ci.lty = 0, add = T)
+par(opar)
+
 ## attributes of the tree and shrub
 # the exotic vs. native regarding species
 all_plant_info %>% group_by(Nt_ex) %>% 
@@ -275,16 +306,16 @@ shrub_data %>% group_by(Nt_ex) %>%
   dplyr::summarise(sum(Area)/sum(shrub_data$Area))
 
 # the graph of attributes of the plants
-par(mfrow= c(2,5), cex.axis = 1.5)
+par(mfrow= c(2,3), cex.axis = 1.5)
 j <- 0
-for (i in c("Pla_spo", "Pot", "Pub_pri", "Street", "Nt_ex")) {
+for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   j <- j + 1
   barplot(tapply(subset(all_plant_data, Tree_shrub == "Tree")[, "Stem"], 
                  subset(all_plant_data, Tree_shrub == "Tree")[, i], 
                  sum), ylim = c(0, 1400))
   title(main = paste("(", letters[j], ")"), adj = 0)
 }
-for (i in c("Pla_spo", "Pot", "Pub_pri", "Street", "Nt_ex")) {
+for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   j <- j + 1
   barplot(tapply(subset(all_plant_data, Tree_shrub == "Shrub")[, "Area"], 
                  subset(all_plant_data, Tree_shrub == "Shrub")[, i], 
