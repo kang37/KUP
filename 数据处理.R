@@ -148,7 +148,12 @@ shrub_diversity_long <-
          attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
          attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
 
+
+
 ### analysis begin
+
+
+
 ## general description
 # the number of species
 cat("total species:", length(unique(all_plant_data$Species_CN)), "\n", 
@@ -163,50 +168,21 @@ cat("total species:", length(unique(all_plant_data$Species_CN)), "\n",
     "Species solely for shrubs:", length(setdiff(unique(shrub_data$Species_CN), 
                                                  unique(tree_data$Species_CN))))
 
-## top species by species and number or area
-# by species
-# of all plants
-all_plant_info %>% group_by(Family) %>%
-  dplyr::summarise(Species =n(), Prop = n()/nrow(all_plant_info)) %>% 
-  arrange(desc(Prop)) %>% 
-  print() %>% ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()
-# of trees by species and number/area
-# tree~species
-tree_plant_info %>% 
-  group_by(Family) %>% dplyr::summarise(Species = n(), Prop = n()/nrow(tree_plant_info)) %>% 
-  arrange(desc(Prop)) 
-# tree~number
+# the number of trees or area of shrubs
+cat("number of trees:", nrow(tree_data), "\n", 
+    "number of tree-plot:", nrow(tree_diversity), "\n", 
+    "area of shrubs:", sum(shrub_data$Area), "\n", 
+    "number of shrub-plot:", nrow(shrub_diversity))
+
+# top species of trees by number
 tree_data %>% 
   group_by(Family) %>% dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
   arrange(desc(Prop))
-# shrub~species
-shrub_plant_info %>% 
-  group_by(Family) %>% dplyr::summarise(Species = n(), Prop = n()/nrow(shrub_plant_info)) %>% 
-  arrange(desc(Prop))
-# shrub~area
+
+# top species of shrubs by area
 shrub_data %>% 
   group_by(Family) %>% dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
   arrange(desc(Prop))
-# rank species or number plots 
-multiplot(
-  tree_plant_info %>% 
-    group_by(Family) %>% dplyr::summarise(Species = n(), Prop = n()/nrow(tree_plant_info)) %>% 
-    ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col() + 
-    labs(title = "tree~species") + ylim(0, 0.2), 
-  shrub_plant_info %>% 
-    group_by(Family) %>% dplyr::summarise(Species = n(), Prop = n()/nrow(shrub_plant_info)) %>% 
-    ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()+ 
-    labs(title = "shrub~species") + ylim(0, 0.2), 
-  tree_data %>% 
-    group_by(Family) %>% dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
-    ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()+ 
-    labs(title = "tree~number")+ ylim(0, 0.2),
-  shrub_data %>% 
-    group_by(Family) %>% dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
-    ggplot(aes(reorder(Family, -Prop), Prop)) + geom_col()+ 
-    labs(title = "shrub~area")+ ylim(0, 0.2), # why missing value? where?
-  layout = matrix(1:4, ncol = 2)
-)
 
 
 
@@ -338,8 +314,9 @@ rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df,
 ## mds analysis
 set.seed(1234)
 all_plot_list_mds <- list()
+#
 # nmds plot for tree
-tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 244, 313))]
+tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 313, 244, 67))]
 tree_mds_selected <- tree_diversity %>% filter(Plot_ID %in% tree_mds_selected_ID)
 tree_mds_metaMDS <- tree_mds_selected %>% 
   select(2:143) %>%
@@ -347,8 +324,11 @@ tree_mds_metaMDS <- tree_mds_selected %>%
 tree_mds_metaMDS$stress
 stressplot(tree_mds_metaMDS)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
+
+
+
 # nmds plot for shrub
-shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 164, 244))]
+shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 244, 164))]
 shrub_mds_selected <- shrub_diversity %>% filter(Plot_ID %in% shrub_mds_selected_ID)
 shrub_mds_metaMDS <- shrub_mds_selected %>% 
   select(2:196) %>%
@@ -356,6 +336,8 @@ shrub_mds_metaMDS <- shrub_mds_selected %>%
 shrub_mds_metaMDS$stress
 stressplot(shrub_mds_metaMDS)
 shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
+
+
 # mds plot for tree and shrub
 Rmisc::multiplot(plotlist = list(
   ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
@@ -367,8 +349,10 @@ Rmisc::multiplot(plotlist = list(
   ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_ownership)) + geom_point(alpha = 0.7) + 
     labs(title = "Shrub Land_ownership")
 ), layout = matrix(1:4, ncol = 2))
+#
 # ANOSIM
-# general result of ANOSIM of tree and shrub
+#
+# general result of ANOSIM of trees and shrubs
 set.seed(1234)
 for (i in c("Landuse_class", "Land_ownership")) {
   x <- anosim(tree_mds_selected[,c(2:143)], tree_mds_selected[,i])
@@ -379,7 +363,8 @@ for (i in c("Landuse_class", "Land_ownership")) {
   cat("shrub", i, "R=", x$statistic, "p=", x$signif, "\n")
   rm(x)
 }
-# pairwise result of ANOSIM of tree
+#
+# pairwise result of ANOSIM of trees
 x <- list()
 for (i in c("Landuse_class", "Land_ownership")) {
   set.seed(1234)
@@ -397,12 +382,13 @@ for (i in c("Landuse_class", "Land_ownership")) {
     mutate(comp_1 = factor(comp_1, levels = levels(factor(tree_mds_selected[,i]))), 
            comp_2 = factor(comp_2, levels = levels(factor(tree_mds_selected[,i]))))
   print(y)
+  write(c(i,t), file = "anosim_pairwise_result.csv", append = T)
   x <- c(x, list(ggplot(y, aes(comp_1, comp_2)) + geom_tile(aes(fill = p)) + 
                    scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.05)) + 
                    theme(axis.text.x = element_text(angle = 90))))
 }
-Rmisc::multiplot(plotlist = x, layout = matrix(1:4, ncol = 2))
-# pairwise result of ANOSIM of shrub
+#
+# pairwise result of ANOSIM of shrubs
 for (i in c("Landuse_class", "Land_ownership")) {
   set.seed(1234)
   a <- combn(levels(factor(shrub_mds_selected[,i])), 2)
