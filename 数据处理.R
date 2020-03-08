@@ -313,9 +313,8 @@ rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df,
 
 ## mds analysis
 set.seed(1234)
-all_plot_list_mds <- list()
 #
-# nmds plot for tree
+# nmds calculation for tree
 tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 313, 244, 67))]
 tree_mds_selected <- tree_diversity %>% filter(Plot_ID %in% tree_mds_selected_ID)
 tree_mds_metaMDS <- tree_mds_selected %>% 
@@ -324,10 +323,8 @@ tree_mds_metaMDS <- tree_mds_selected %>%
 tree_mds_metaMDS$stress
 stressplot(tree_mds_metaMDS)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
-
-
-
-# nmds plot for shrub
+#
+# nmds calculation for shrub
 shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 244, 164))]
 shrub_mds_selected <- shrub_diversity %>% filter(Plot_ID %in% shrub_mds_selected_ID)
 shrub_mds_metaMDS <- shrub_mds_selected %>% 
@@ -336,85 +333,112 @@ shrub_mds_metaMDS <- shrub_mds_selected %>%
 shrub_mds_metaMDS$stress
 stressplot(shrub_mds_metaMDS)
 shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
-
-
-# mds plot for tree and shrub
+#
+# mds plot for trees and shrubs
+# general Anosim of trees and shrubs
+tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:143], tree_mds_selected$Landuse_class)
+tree_landownership_anosim_result <- anosim(tree_mds_selected[2:143], tree_mds_selected$Land_ownership)
+shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:196], shrub_mds_selected$Landuse_class)
+shrub_landownership_anosim_result <- anosim(shrub_mds_selected[2:196], shrub_mds_selected$Land_ownership)
+# get statistic results as labels for the mds plots
+tree_landuseclass_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
+                                   ", R=", round(tree_landuseclass_anosim_result$statistic, digits = 3), 
+                                   ", p=", round(tree_landuseclass_anosim_result$signif, digits = 3), 
+                                   sep = "")
+tree_landownership_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
+                                    ", R=", round(tree_landownership_anosim_result$statistic, digits = 3), 
+                                    ", p=", round(tree_landownership_anosim_result$signif, digits = 3), 
+                                    sep = "")
+shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, digits = 3), 
+                                    ", R=", round(shrub_landuseclass_anosim_result$statistic, digits = 3), 
+                                    ", p=", round(shrub_landuseclass_anosim_result$signif, digits = 3), 
+                                    sep = "")
+shrub_landownership_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, digits = 3), 
+                                     ", R=", round(shrub_landownership_anosim_result$statistic, digits = 3), 
+                                     ", p=", round(shrub_landownership_anosim_result$signif, digits = 3), 
+                                     sep = "")
+# mds plots for trees and shrubs by land use types and land ownership 
 Rmisc::multiplot(plotlist = list(
   ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Tree Land use"), 
+    labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab), 
   ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_ownership)) + geom_point(alpha = 0.7) + 
-    labs(title = "Tree Land_ownership"), 
+    labs(title = "Tree - Land ownership", subtitle = tree_landownership_mds_lab), 
   ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub Land use"), 
+    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab), 
   ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_ownership)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub Land_ownership")
-), layout = matrix(1:4, ncol = 2))
+    labs(title = "Shrub - Land ownership", subtitle = shrub_landownership_mds_lab)
+), layout = matrix(1:4, nrow = 2, byrow = T))
 #
-# ANOSIM
-#
-# general result of ANOSIM of trees and shrubs
+# pairwise result of ANOSIM of trees by landuse_class
+tree_pair_anosim_list <- vector("list",3)
+tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Landuse_class)),2)[1,])
+tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Landuse_class)),2)[2,])
 set.seed(1234)
-for (i in c("Landuse_class", "Land_ownership")) {
-  x <- anosim(tree_mds_selected[,c(2:143)], tree_mds_selected[,i])
-  cat("tree", i, "R=", x$statistic, "p=", x$signif, "\n")
+for (i in 1:length(tree_pair_anosim_list[[1]])) {
+  tree_mds_selected_sub <- subset(tree_mds_selected, Landuse_class == tree_pair_anosim_list[[1]][i] |
+                                    Landuse_class == tree_pair_anosim_list[[2]][i])
+  tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
+                                  anosim(tree_mds_selected_sub[2:143], 
+                                         tree_mds_selected_sub$Landuse_class)$signif)
 }
-for (i in c("Landuse_class", "Land_ownership")) {
-  x <- anosim(as.data.frame(shrub_mds_selected)[,c(2:196)], shrub_mds_selected[,i])
-  cat("shrub", i, "R=", x$statistic, "p=", x$signif, "\n")
-  rm(x)
+tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
+                                  comp_2 = tree_pair_anosim_list[[2]], 
+                                  p = tree_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
+
+# pairwise result of ANOSIM of trees by landuse_ownership
+tree_pair_anosim_list <- vector("list",3)
+tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Land_ownership)),2)[1,])
+tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Land_ownership)),2)[2,])
+set.seed(1234)
+for (i in 1:length(tree_pair_anosim_list[[1]])) {
+  tree_mds_selected_sub <- subset(tree_mds_selected, Land_ownership == tree_pair_anosim_list[[1]][i] |
+                                    Land_ownership == tree_pair_anosim_list[[2]][i])
+  tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
+                                  anosim(tree_mds_selected_sub[2:143], 
+                                         tree_mds_selected_sub$Land_ownership)$signif)
 }
-#
-# pairwise result of ANOSIM of trees
-x <- list()
-for (i in c("Landuse_class", "Land_ownership")) {
-  set.seed(1234)
-  a <- combn(levels(factor(tree_mds_selected[,i])), 2)
-  z <- vector("list", 3)
-  for (j in 1:ncol(a)) {
-    b <- tree_mds_selected %>% 
-      filter(tree_mds_selected[[i]] == a[1,j] | tree_mds_selected[[i]] == a[2,j]) 
-    c <- anosim(b[2:143], b[,i])
-    z[[1]] <- c(z[[1]], as.character(a[1,j]))
-    z[[2]] <- c(z[[2]], as.character(a[2,j]))
-    z[[3]] <- c(z[[3]], c$signif)
-  }
-  y <- data.frame(comp_1 = z[[1]], comp_2 = z[[2]], p = z[[3]]) %>% 
-    mutate(comp_1 = factor(comp_1, levels = levels(factor(tree_mds_selected[,i]))), 
-           comp_2 = factor(comp_2, levels = levels(factor(tree_mds_selected[,i]))))
-  print(y)
-  write(c(i,t), file = "anosim_pairwise_result.csv", append = T)
-  x <- c(x, list(ggplot(y, aes(comp_1, comp_2)) + geom_tile(aes(fill = p)) + 
-                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.05)) + 
-                   theme(axis.text.x = element_text(angle = 90))))
+tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
+                                  comp_2 = tree_pair_anosim_list[[2]], 
+                                  p = tree_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
+
+# pairwise result of ANOSIM of shrubs by landuse_class
+shrub_pair_anosim_list <- vector("list",3)
+shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Landuse_class)),2)[1,])
+shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Landuse_class)),2)[2,])
+set.seed(1234)
+for (i in 1:length(shrub_pair_anosim_list[[1]])) {
+  shrub_mds_selected_sub <- subset(shrub_mds_selected, Landuse_class == shrub_pair_anosim_list[[1]][i] |
+                                     Landuse_class == shrub_pair_anosim_list[[2]][i])
+  shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
+                                   anosim(shrub_mds_selected_sub[2:196], 
+                                          shrub_mds_selected_sub$Landuse_class)$signif)
 }
-#
-# pairwise result of ANOSIM of shrubs
-for (i in c("Landuse_class", "Land_ownership")) {
-  set.seed(1234)
-  a <- combn(levels(factor(shrub_mds_selected[,i])), 2)
-  z <- vector("list", 3)
-  for (j in 1:ncol(a)) {
-    b <- shrub_mds_selected %>% 
-      filter(shrub_mds_selected[[i]] == a[1,j] | shrub_mds_selected[[i]] == a[2,j]) 
-    c <- anosim(b[2:196], b[,i])
-    z[[1]] <- c(z[[1]], as.character(a[1,j]))
-    z[[2]] <- c(z[[2]], as.character(a[2,j]))
-    z[[3]] <- c(z[[3]], c$signif)
-  }
-  y <- data.frame(comp_1 = z[[1]], comp_2 = z[[2]], p = z[[3]]) %>% 
-    mutate(comp_1 = factor(comp_1, levels = levels(factor(shrub_mds_selected[,i]))), 
-           comp_2 = factor(comp_2, levels = levels(factor(shrub_mds_selected[,i]))))
-  print(y)
-  x <- c(x, list(ggplot(y, aes(comp_1, comp_2)) + geom_tile(aes(fill = p)) + 
-                   scale_fill_gradient(high = "orange", low = "red", limit = c(0, 0.05)) + 
-                   theme(axis.text.x = element_text(angle = 90))))
+shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
+                                   comp_2 = shrub_pair_anosim_list[[2]], 
+                                   p = shrub_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
+
+# pairwise result of ANOSIM of shrubs by landuse_ownership
+shrub_pair_anosim_list <- vector("list",3)
+shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Land_ownership)),2)[1,])
+shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Land_ownership)),2)[2,])
+set.seed(1234)
+for (i in 1:length(shrub_pair_anosim_list[[1]])) {
+  shrub_mds_selected_sub <- subset(shrub_mds_selected, Land_ownership == shrub_pair_anosim_list[[1]][i] |
+                                     Land_ownership == shrub_pair_anosim_list[[2]][i])
+  shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
+                                   anosim(shrub_mds_selected_sub[2:196], 
+                                          shrub_mds_selected_sub$Land_ownership)$signif)
 }
-Rmisc::multiplot(plotlist = x, layout = matrix(1:4, ncol = 2))
-rm(a, b, c, x, y, z)
+shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
+                                   comp_2 = shrub_pair_anosim_list[[2]], 
+                                   p = shrub_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
+
+
 
 ## cor among the indexes
 chart.Correlation(subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Simpson", "Evenness")))
 chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Simpson", "Evenness")))
+
 
 
 # kruskal test & boxplot for trees
