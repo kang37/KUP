@@ -46,15 +46,15 @@ all_plant_data$Landuse_agg <- NULL
 tree_data <- all_plant_data %>% 
   subset(Tree_shrub == "Tree")
 
+# data of shrubs
+shrub_data <- all_plant_data %>% 
+  subset(Tree_shrub == "Shrub")
+
 # data of native trees
 tree_native_data <- subset(tree_data, Nt_ex == "nt")
 
 # shrub_native_data
 shrub_native_data <- subset(shrub_data, Nt_ex == "nt")
-
-# data of shrubs
-shrub_data <- all_plant_data %>% 
-  subset(Tree_shrub == "Shrub")
 
 # data of tree_plant_info
 tree_plant_info <- subset(all_plant_data, Tree_shrub == "Tree", select = "Species_CN") %>% 
@@ -217,7 +217,7 @@ shrub_diversity_long <-
 
 
 
-### analysis begin
+### analysis begins
 
 
 
@@ -508,11 +508,11 @@ chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Sh
 
 
 
-# kruskal test & boxplot for trees
+## kruskal test & boxplot for trees
 # p-value matrix for tree
 set.seed(1234)
 boxplot_list_index_attr <- vector("list", 2)
-# for tree
+#
 {
   pvalue_list <- vector("list", 3)
   for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
@@ -530,13 +530,13 @@ boxplot_list_index_attr <- vector("list", 2)
                        attr = pvalue_list[[2]],
                        pvalue = pvalue_list[[3]])
   pvalue$label <- NA
-  pvalue$label[pvalue$pvalue>0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
-  pvalue$label[pvalue$pvalue<0.05 & pvalue$pvalue>0.01] <- 
-    paste("p=", pvalue$pvalue, "*", sep = "")[pvalue$pvalue<0.05 & pvalue$pvalue>0.01]
-  pvalue$label[pvalue$pvalue<0.01 & pvalue$pvalue>0.001] <- 
-    paste("p=", pvalue$pvalue, "**", sep = "")[pvalue$pvalue<0.01 & pvalue$pvalue>0.001]
-  pvalue$label[pvalue$pvalue<0.001] <- 
-    paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
+  pvalue$label[pvalue$pvalue >= 0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
+  pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01], "*", sep = "")
+  pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001], "**", sep = "")
+  pvalue$label[pvalue$pvalue < 0.001] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.001], "***", sep = "")
 }
 
 boxplot_list_index_attr[[1]] <- tree_diversity_long %>% 
@@ -545,7 +545,8 @@ boxplot_list_index_attr[[1]] <- tree_diversity_long %>%
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
   scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
   geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text = element_text(angle = 90))
+  theme(axis.text = element_text(angle = 90)) + 
+  labs(title = "(a)", x = NULL, y = NULL)
 # for shrub
 {
   pvalue_list <- vector("list", 3)
@@ -563,25 +564,28 @@ boxplot_list_index_attr[[1]] <- tree_diversity_long %>%
                        attr = pvalue_list[[2]],
                        pvalue = pvalue_list[[3]])
   pvalue$label <- NA
-  pvalue$label[pvalue$pvalue>0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
-  pvalue$label[pvalue$pvalue<0.05 & pvalue$pvalue>0.01] <- 
-    paste("p=", pvalue$pvalue, "*", sep = "")[pvalue$pvalue<0.05 & pvalue$pvalue>0.01]
-  pvalue$label[pvalue$pvalue<0.01 & pvalue$pvalue>0.001] <- 
-    paste("p=", pvalue$pvalue, "**", sep = "")[pvalue$pvalue<0.01 & pvalue$pvalue>0.001]
-  pvalue$label[pvalue$pvalue<0.001] <- 
-    paste("p=", pvalue$pvalue, "***", sep = "")[pvalue$pvalue<0.001]
+  pvalue$label[pvalue$pvalue >= 0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
+  pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01], "*", sep = "")
+  pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001], "**", sep = "")
+  pvalue$label[pvalue$pvalue < 0.001] <- 
+    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.001], "***", sep = "")
 }
-
+#
 boxplot_list_index_attr[[2]] <- shrub_diversity_long %>% 
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
   scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
   geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text = element_text(angle = 90))
+  theme(axis.text = element_text(angle = 90)) + 
+  labs(title = "(b)", x = NULL, y = NULL)
 Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
 # delete the vars
 rm(pvalue, pvalue_list)
+
+
 
 ## pairwise dunn test of diversity ~ I(landuse class + ownership)
 pairwise_list <- vector("list", 5)
