@@ -44,11 +44,11 @@ all_plant_data$Landuse_agg <- NULL
 
 # data of trees
 tree_data <- all_plant_data %>% 
-  subset(Tree_shrub == "Tree")
+  subset(Tree_shrub == "tree")
 
 # data of shrubs
 shrub_data <- all_plant_data %>% 
-  subset(Tree_shrub == "Shrub")
+  subset(Tree_shrub == "shrub")
 
 # data of native trees
 tree_native_data <- subset(tree_data, Nt_ex == "nt")
@@ -57,12 +57,12 @@ tree_native_data <- subset(tree_data, Nt_ex == "nt")
 shrub_native_data <- subset(shrub_data, Nt_ex == "nt")
 
 # data of tree_plant_info
-tree_plant_info <- subset(all_plant_data, Tree_shrub == "Tree", select = "Species_CN") %>% 
+tree_plant_info <- subset(all_plant_data, Tree_shrub == "tree", select = "Species_CN") %>% 
   unique() %>% 
   left_join(all_plant_info, by = "Species_CN")
 
 # data of shrub info
-shrub_plant_info <- subset(all_plant_data, Tree_shrub == "Shrub", select = "Species_CN") %>% 
+shrub_plant_info <- subset(all_plant_data, Tree_shrub == "shrub", select = "Species_CN") %>% 
   unique() %>% 
   left_join(all_plant_info, by = "Species_CN")
 
@@ -196,7 +196,7 @@ rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shru
 
 # tree diversity longer and shrub diversity longer dataset
 tree_diversity_long <- 
-  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership", "Dist")) %>% 
+  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
   pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
   pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
@@ -206,7 +206,7 @@ tree_diversity_long <-
          attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
 
 shrub_diversity_long <- 
-  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership", "Dist")) %>% 
+  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
   pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
   pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
@@ -215,7 +215,26 @@ shrub_diversity_long <-
          attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
          attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
 
+# tree native diversity longer and shrub native diversity longer dataset
+tree_native_diversity_long <- 
+  subset(tree_native_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
+               names_to = "index", values_to = "index_value") %>% 
+  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+               names_to = "attr", values_to = "attr_value") %>% 
+  mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
+         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
 
+shrub_native_diversity_long <- 
+  subset(shrub_native_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
+               names_to = "index", values_to = "index_value") %>% 
+  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+               names_to = "attr", values_to = "attr_value") %>% 
+  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
+         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
 
 ### analysis begins
 
@@ -269,15 +288,15 @@ par(mfrow= c(2,3), cex.axis = 1.5)
 j <- 0
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   j <- j + 1
-  barplot(tapply(subset(all_plant_data, Tree_shrub == "Tree")[, "Stem"], 
-                 subset(all_plant_data, Tree_shrub == "Tree")[, i], 
+  barplot(tapply(subset(all_plant_data, Tree_shrub == "tree")[, "Stem"], 
+                 subset(all_plant_data, Tree_shrub == "tree")[, i], 
                  sum), ylim = c(0, 1400))
   title(main = paste("(", letters[j], ")"), adj = 0)
 }
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   j <- j + 1
-  barplot(tapply(subset(all_plant_data, Tree_shrub == "Shrub")[, "Area"], 
-                 subset(all_plant_data, Tree_shrub == "Shrub")[, i], 
+  barplot(tapply(subset(all_plant_data, Tree_shrub == "shrub")[, "Area"], 
+                 subset(all_plant_data, Tree_shrub == "shrub")[, i], 
                  sum), ylim = c(0, 1400))
   title(main = paste("(", letters[j], ")"), adj = 0)
 }
@@ -377,6 +396,7 @@ Rmisc::multiplot(plotlist = c(
 ))
 rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df, 
    shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
+
 
 ## mds analysis
 set.seed(1234)
@@ -508,8 +528,8 @@ chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Sh
 
 
 
-## kruskal test & boxplot for trees
-# p-value matrix for tree
+## kruskal test & boxplot for trees 
+# p-value matrix for tree 
 set.seed(1234)
 boxplot_list_index_attr <- vector("list", 2)
 #
