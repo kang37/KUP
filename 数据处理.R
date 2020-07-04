@@ -14,25 +14,12 @@ opar <- par(no.readonly = TRUE)
 # define the factor levels
 Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
-Land_ownership_faclev <- c("Private area", "Propriater area", "Public area")
 
 ## get data
 # data of all_plot_info
-all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>%
-  mutate(Dist_level = NA)
-all_plot_info$Dist_level[all_plot_info$Dist < 2000] <- "1"
-all_plot_info$Dist_level[all_plot_info$Dist >= 2000 & all_plot_info$Dist < 4000] <- "2"
-all_plot_info$Dist_level[all_plot_info$Dist >= 4000 & all_plot_info$Dist < 6000] <- "3"
-all_plot_info$Dist_level[all_plot_info$Dist >= 6000 & all_plot_info$Dist < 8000] <- "4"
-all_plot_info$Dist_level[all_plot_info$Dist >= 8000] <- "5"
-all_plot_info <- all_plot_info %>% 
-  mutate(Dist_level = factor(Dist_level, levels = c("1", "2", "3", "4", "5")), 
-         Ward = factor(Ward, levels = Ward_faclev), 
+all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
+  mutate(Ward = factor(Ward, levels = Ward_faclev), 
          Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
-all_plot_info$Land_ownership <- NA
-all_plot_info$Land_ownership[all_plot_info$Landuse_detail %in% c("道路", "高层商业", "公园", "河流", "机构", "政府团地")] <- "Public area"
-all_plot_info$Land_ownership[all_plot_info$Landuse_detail %in% c("低层私宅", "私宅")] <- "Private area"
-all_plot_info$Land_ownership[all_plot_info$Landuse_detail %in% c("低层公寓", "高层公寓", "低层商业", "工厂", "农田", "其他", "球场", "寺庙神社", "学校")] <- "Propriater area"
 
 # data of all_plant_info
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
@@ -56,16 +43,6 @@ tree_native_data <- subset(tree_data, Nt_ex == "nt")
 # shrub_native_data
 shrub_native_data <- subset(shrub_data, Nt_ex == "nt")
 
-# data of tree_plant_info
-tree_plant_info <- subset(all_plant_data, Tree_shrub == "tree", select = "Species_CN") %>% 
-  unique() %>% 
-  left_join(all_plant_info, by = "Species_CN")
-
-# data of shrub info
-shrub_plant_info <- subset(all_plant_data, Tree_shrub == "shrub", select = "Species_CN") %>% 
-  unique() %>% 
-  left_join(all_plant_info, by = "Species_CN")
-
 # data of tree_diversity
 tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem")) %>%
   pivot_wider(names_from = Species_CN, values_from = Stem, 
@@ -77,7 +54,6 @@ tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem"))
          Evenness = Shannon / log(Richness)) %>%
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
-
 tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
 tree_diversity_perc_nonpot <- tree_data %>% group_by(Plot_ID) %>% 
@@ -88,7 +64,6 @@ tree_diversity_perc_nonstreet <- tree_data %>% group_by(Plot_ID) %>%
   dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
 tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
-
 tree_diversity <- tree_diversity %>% mutate(
   perc_planted = tree_diversity_perc_planted$perc, 
   perc_nonpot = tree_diversity_perc_nonpot$perc, 
@@ -109,7 +84,6 @@ tree_native_diversity <- subset(tree_native_data, select = c("Plot_ID", "Species
          Evenness = Shannon / log(Richness)) %>%
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
-
 tree_native_diversity_perc_planted <- tree_native_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
 tree_native_diversity_perc_nonpot <- tree_native_data %>% group_by(Plot_ID) %>% 
@@ -120,7 +94,6 @@ tree_native_diversity_perc_nonstreet <- tree_native_data %>% group_by(Plot_ID) %
   dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
 tree_native_diversity_perc_native <- tree_native_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
-
 tree_native_diversity <- tree_native_diversity %>% mutate(
   perc_planted = tree_native_diversity_perc_planted$perc, 
   perc_nonpot = tree_native_diversity_perc_nonpot$perc, 
@@ -141,7 +114,6 @@ shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_CN", "Area"
          Evenness = Shannon / log(Richness)) %>%
   left_join(all_plot_info,by = "Plot_ID") %>%
   as.data.frame()
-
 shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
 shrub_diversity_perc_nonpot <- shrub_data %>% group_by(Plot_ID) %>% 
@@ -152,7 +124,6 @@ shrub_diversity_perc_nonstreet <- shrub_data %>% group_by(Plot_ID) %>%
   dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Area, 0)/sum(Area)))
 shrub_diversity_perc_native <- shrub_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
-
 shrub_diversity <- shrub_diversity %>% mutate(
   perc_planted = shrub_diversity_perc_planted$perc, 
   perc_nonpot = shrub_diversity_perc_nonpot$perc, 
@@ -173,7 +144,6 @@ shrub_native_diversity <- subset(shrub_native_data, select = c("Plot_ID", "Speci
          Evenness = Shannon / log(Richness)) %>%
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
-
 shrub_native_diversity_perc_planted <- shrub_native_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
 shrub_native_diversity_perc_nonpot <- shrub_native_data %>% group_by(Plot_ID) %>% 
@@ -184,7 +154,6 @@ shrub_native_diversity_perc_nonstreet <- shrub_native_data %>% group_by(Plot_ID)
   dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Area, 0)/sum(Area)))
 shrub_native_diversity_perc_native <- shrub_native_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
-
 shrub_native_diversity <- shrub_native_diversity %>% mutate(
   perc_planted = shrub_native_diversity_perc_planted$perc, 
   perc_nonpot = shrub_native_diversity_perc_nonpot$perc, 
@@ -196,45 +165,47 @@ rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shru
 
 # tree diversity longer and shrub diversity longer dataset
 tree_diversity_long <- 
-  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
   pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+  pivot_longer(cols = c("Landuse_class"), 
                names_to = "attr", values_to = "attr_value") %>% 
   mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
+         attr = factor(attr, levels = c("Landuse_class")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
 
 shrub_diversity_long <- 
-  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
   pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+  pivot_longer(cols = c("Landuse_class"), 
                names_to = "attr", values_to = "attr_value") %>% 
   mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
+         attr = factor(attr, levels = c("Landuse_class")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
 
 # tree native diversity longer and shrub native diversity longer dataset
 tree_native_diversity_long <- 
-  subset(tree_native_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  subset(tree_native_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
   pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+  pivot_longer(cols = c("Landuse_class"), 
                names_to = "attr", values_to = "attr_value") %>% 
   mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
+         attr = factor(attr, levels = c("Landuse_class")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
 
 shrub_native_diversity_long <- 
-  subset(shrub_native_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class", "Land_ownership")) %>% 
+  subset(shrub_native_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
   pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class", "Land_ownership"), 
+  pivot_longer(cols = c("Landuse_class"), 
                names_to = "attr", values_to = "attr_value") %>% 
   mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class", "Land_ownership")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
+         attr = factor(attr, levels = c("Landuse_class")), 
+         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
+
+
 
 ### analysis begins
 
@@ -273,7 +244,7 @@ shrub_data %>%
 
 
 ## attributes of the tree and shrub
-# the exotic vs. native regarding species
+# the exotic vs. native by species
 all_plant_info %>% group_by(Nt_ex) %>% 
   dplyr::summarise(n()/nrow(all_plant_info))
 
