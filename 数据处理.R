@@ -6,14 +6,16 @@ library(PerformanceAnalytics)
 library(digest)
 library(car)
 library(dunn.test)
-library(leaps)
-library(gvlma)
 library(BiodiversityR)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
 Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
+number_tree_species <- length(unique(tree_data$Species_CN))
+number_shrub_species <- length(unique(shrub_data$Species_CN))
+number_tree_native_species <- length(unique(tree_native_data$Species_CN))
+number_shrub_native_species <- length(unique(shrub_native_data$Species_CN))
 
 ## get data
 # data of all_plot_info
@@ -278,30 +280,30 @@ par(opar)
 ## Species accumulation curve 
 par(mfrow = c(1,2))
 # Species accumulation curve for trees
-plot(specaccum(subset(tree_diversity, Landuse_class == "Com")[,2:143]), col = "red", lty = 1, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "Com")[,2:(number_tree_species+1)]), col = "red", lty = 1, 
      ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
-plot(specaccum(subset(tree_diversity, Landuse_class == "Com neigh")[,2:143]),col = "red", lty = 2, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "Com neigh")[,2:(number_tree_species+1)]),col = "red", lty = 2, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R low")[,2:143]), col = "blue", lty = 1, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "R low")[,2:(number_tree_species+1)]), col = "blue", lty = 1, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R high")[,2:143]), col = "blue", lty = 2, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "R high")[,2:(number_tree_species+1)]), col = "blue", lty = 2, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R resi")[,2:143]), col = "blue", lty = 3, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "R resi")[,2:(number_tree_species+1)]), col = "blue", lty = 3, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "Ind")[,2:143]), col = "black", lty = 1, 
+plot(specaccum(subset(tree_diversity, Landuse_class == "Ind")[,2:(number_tree_species+1)]), col = "black", lty = 1, 
      ci.lty = 0, add = T)
 # Species accumulation curve for shrubs
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Com")[,2:143]), col = "red", lty = 1, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Com")[,2:(number_shrub_species+1)]), col = "red", lty = 1, 
      ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Com neigh")[,2:143]),col = "red", lty = 2, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Com neigh")[,2:(number_shrub_species+1)]),col = "red", lty = 2, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R low")[,2:143]), col = "blue", lty = 1, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R low")[,2:(number_shrub_species+1)]), col = "blue", lty = 1, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R high")[,2:143]), col = "blue", lty = 2, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R high")[,2:(number_shrub_species+1)]), col = "blue", lty = 2, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R resi")[,2:143]), col = "blue", lty = 3, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "R resi")[,2:(number_shrub_species+1)]), col = "blue", lty = 3, 
      ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Ind")[,2:143]), col = "black", lty = 1, 
+plot(specaccum(subset(shrub_diversity, Landuse_class == "Ind")[,2:(number_shrub_species+1)]), col = "black", lty = 1, 
      ci.lty = 0, add = T)
 par(opar)
 
@@ -326,7 +328,7 @@ tree_rankabun_df <- data.frame(
   Landuse_class = tree_rankabun_list[[5]]
 ) %>% 
   left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN")
-tree_rankabun_df[tree_rankabun_df == 0] <- NA 
+tree_rankabun_df <- tree_rankabun_df[which(tree_rankabun_df$abundance != 0),]
 
 # the rank abundance plot by land use types of shrubs
 shrub_rankabun_list <- vector("list", 5)
@@ -346,7 +348,7 @@ shrub_rankabun_df <- data.frame(
   Landuse_class = shrub_rankabun_list[[5]]
 ) %>% 
   left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN")
-shrub_rankabun_df[shrub_rankabun_df == 0] <- NA
+shrub_rankabun_df <- shrub_rankabun_df[which(shrub_rankabun_df$abundance != 0),]
 
 # rearrange and plot
 tree_rankabun_df <- tree_rankabun_df %>% 
@@ -369,6 +371,7 @@ rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df,
    shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
 
 
+
 ## mds analysis
 set.seed(1234)
 #
@@ -376,17 +379,17 @@ set.seed(1234)
 tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 313, 244, 67))]
 tree_mds_selected <- tree_diversity %>% filter(Plot_ID %in% tree_mds_selected_ID)
 tree_mds_metaMDS <- tree_mds_selected %>% 
-  select(2:143) %>%
+  select(2:(number_tree_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 tree_mds_metaMDS$stress
 stressplot(tree_mds_metaMDS)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
 #
 # nmds calculation for shrub
-shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 244, 164))]
+shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 164, 244, 67))]
 shrub_mds_selected <- shrub_diversity %>% filter(Plot_ID %in% shrub_mds_selected_ID)
 shrub_mds_metaMDS <- shrub_mds_selected %>% 
-  select(2:196) %>%
+  select(2:(number_shrub_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 shrub_mds_metaMDS$stress
 stressplot(shrub_mds_metaMDS)
@@ -394,38 +397,24 @@ shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
 #
 # mds plot for trees and shrubs
 # general Anosim of trees and shrubs
-tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:143], tree_mds_selected$Landuse_class)
-tree_landownership_anosim_result <- anosim(tree_mds_selected[2:143], tree_mds_selected$Land_ownership)
-shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:196], shrub_mds_selected$Landuse_class)
-shrub_landownership_anosim_result <- anosim(shrub_mds_selected[2:196], shrub_mds_selected$Land_ownership)
+tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Landuse_class)
+shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Landuse_class)
 # get statistic results as labels for the mds plots
 tree_landuseclass_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
                                    ", R=", round(tree_landuseclass_anosim_result$statistic, digits = 3), 
                                    ", p=", round(tree_landuseclass_anosim_result$signif, digits = 3), 
                                    sep = "")
-tree_landownership_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
-                                    ", R=", round(tree_landownership_anosim_result$statistic, digits = 3), 
-                                    ", p=", round(tree_landownership_anosim_result$signif, digits = 3), 
-                                    sep = "")
 shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, digits = 3), 
                                     ", R=", round(shrub_landuseclass_anosim_result$statistic, digits = 3), 
                                     ", p=", round(shrub_landuseclass_anosim_result$signif, digits = 3), 
                                     sep = "")
-shrub_landownership_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, digits = 3), 
-                                     ", R=", round(shrub_landownership_anosim_result$statistic, digits = 3), 
-                                     ", p=", round(shrub_landownership_anosim_result$signif, digits = 3), 
-                                     sep = "")
 # mds plots for trees and shrubs by land use types and land ownership 
 Rmisc::multiplot(plotlist = list(
   ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
     labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab), 
-  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_ownership)) + geom_point(alpha = 0.7) + 
-    labs(title = "Tree - Land ownership", subtitle = tree_landownership_mds_lab), 
   ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab), 
-  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_ownership)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub - Land ownership", subtitle = shrub_landownership_mds_lab)
-), layout = matrix(1:4, nrow = 2, byrow = T))
+    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab)
+), layout = matrix(1:2, nrow = 1, byrow = T))
 #
 # pairwise result of ANOSIM of trees by landuse_class
 tree_pair_anosim_list <- vector("list",3)
@@ -436,24 +425,8 @@ for (i in 1:length(tree_pair_anosim_list[[1]])) {
   tree_mds_selected_sub <- subset(tree_mds_selected, Landuse_class == tree_pair_anosim_list[[1]][i] |
                                     Landuse_class == tree_pair_anosim_list[[2]][i])
   tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
-                                  anosim(tree_mds_selected_sub[2:143], 
+                                  anosim(tree_mds_selected_sub[2:(number_tree_species+1)], 
                                          tree_mds_selected_sub$Landuse_class)$signif)
-}
-tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
-                                  comp_2 = tree_pair_anosim_list[[2]], 
-                                  p = tree_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
-
-# pairwise result of ANOSIM of trees by landuse_ownership
-tree_pair_anosim_list <- vector("list",3)
-tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Land_ownership)),2)[1,])
-tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Land_ownership)),2)[2,])
-set.seed(1234)
-for (i in 1:length(tree_pair_anosim_list[[1]])) {
-  tree_mds_selected_sub <- subset(tree_mds_selected, Land_ownership == tree_pair_anosim_list[[1]][i] |
-                                    Land_ownership == tree_pair_anosim_list[[2]][i])
-  tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
-                                  anosim(tree_mds_selected_sub[2:143], 
-                                         tree_mds_selected_sub$Land_ownership)$signif)
 }
 tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
                                   comp_2 = tree_pair_anosim_list[[2]], 
@@ -468,28 +441,13 @@ for (i in 1:length(shrub_pair_anosim_list[[1]])) {
   shrub_mds_selected_sub <- subset(shrub_mds_selected, Landuse_class == shrub_pair_anosim_list[[1]][i] |
                                      Landuse_class == shrub_pair_anosim_list[[2]][i])
   shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
-                                   anosim(shrub_mds_selected_sub[2:196], 
+                                   anosim(shrub_mds_selected_sub[2:(number_shrub_species+1)], 
                                           shrub_mds_selected_sub$Landuse_class)$signif)
 }
 shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
                                    comp_2 = shrub_pair_anosim_list[[2]], 
                                    p = shrub_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
 
-# pairwise result of ANOSIM of shrubs by landuse_ownership
-shrub_pair_anosim_list <- vector("list",3)
-shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Land_ownership)),2)[1,])
-shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Land_ownership)),2)[2,])
-set.seed(1234)
-for (i in 1:length(shrub_pair_anosim_list[[1]])) {
-  shrub_mds_selected_sub <- subset(shrub_mds_selected, Land_ownership == shrub_pair_anosim_list[[1]][i] |
-                                     Land_ownership == shrub_pair_anosim_list[[2]][i])
-  shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
-                                   anosim(shrub_mds_selected_sub[2:196], 
-                                          shrub_mds_selected_sub$Land_ownership)$signif)
-}
-shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
-                                   comp_2 = shrub_pair_anosim_list[[2]], 
-                                   p = shrub_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
 
 
 
@@ -505,31 +463,24 @@ set.seed(1234)
 boxplot_list_index_attr <- vector("list", 2)
 #
 {
-  pvalue_list <- vector("list", 3)
+  pvalue_list <- vector("list", 2)
   for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-    for (j in c("Landuse_class", "Land_ownership")) {
-      pvalue_list[[1]] <- c(pvalue_list[[1]], i)
-      pvalue_list[[2]] <- c(pvalue_list[[2]], j)
-      pvalue_list[[3]] <- c(pvalue_list[[3]], 
-                            round(kruskal.test(tree_diversity[, i] ~ tree_diversity[, j])$p.value,digits = 3))
-    }
+    pvalue_list[[1]] <- c(pvalue_list[[1]], i)
+    pvalue_list[[2]] <- c(pvalue_list[[2]], 
+                          round(kruskal.test(tree_diversity[, i] ~ tree_diversity$Landuse_class)$p.value,digits = 3))
   }
-}
-
-{
   pvalue <- data.frame(index = pvalue_list[[1]],
-                       attr = pvalue_list[[2]],
-                       pvalue = pvalue_list[[3]])
+                       pvalue = pvalue_list[[2]])
   pvalue$label <- NA
-  pvalue$label[pvalue$pvalue >= 0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
+  pvalue$label[pvalue$pvalue >= 0.05] <- 
+    paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
   pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01], "*", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01]), "*", sep = "")
   pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001], "**", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001]), "**", sep = "")
   pvalue$label[pvalue$pvalue < 0.001] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.001], "***", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.001]), "***", sep = "")
 }
-
 boxplot_list_index_attr[[1]] <- tree_diversity_long %>% 
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
@@ -538,30 +489,26 @@ boxplot_list_index_attr[[1]] <- tree_diversity_long %>%
   geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
   theme(axis.text = element_text(angle = 90)) + 
   labs(title = "(a)", x = NULL, y = NULL)
+#
 # for shrub
 {
-  pvalue_list <- vector("list", 3)
+  pvalue_list <- vector("list", 2)
   for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-    for (j in c("Landuse_class", "Land_ownership")) {
-      pvalue_list[[1]] <- c(pvalue_list[[1]], i)
-      pvalue_list[[2]] <- c(pvalue_list[[2]], j)
-      pvalue_list[[3]] <- c(pvalue_list[[3]], round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity[, j])$p.value,digits = 3))
-    }
+    pvalue_list[[1]] <- c(pvalue_list[[1]], i)
+    pvalue_list[[2]] <- c(pvalue_list[[2]], 
+                          round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity$Landuse_class)$p.value,digits = 3))
   }
-  }
-
-{
   pvalue <- data.frame(index = pvalue_list[[1]],
-                       attr = pvalue_list[[2]],
-                       pvalue = pvalue_list[[3]])
+                       pvalue = pvalue_list[[2]])
   pvalue$label <- NA
-  pvalue$label[pvalue$pvalue >= 0.05] <- paste("p=", pvalue$pvalue[pvalue$pvalue>0.05], sep = "")
+  pvalue$label[pvalue$pvalue >= 0.05] <- 
+    paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
   pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01], "*", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01]), "*", sep = "")
   pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001], "**", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001]), "**", sep = "")
   pvalue$label[pvalue$pvalue < 0.001] <- 
-    paste("p=", pvalue$pvalue[pvalue$pvalue < 0.001], "***", sep = "")
+    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.001]), "***", sep = "")
 }
 #
 boxplot_list_index_attr[[2]] <- shrub_diversity_long %>% 
@@ -578,7 +525,7 @@ rm(pvalue, pvalue_list)
 
 
 
-## pairwise dunn test of diversity ~ I(landuse class + ownership)
+## pairwise dunn test of diversity ~ landuse class
 pairwise_list <- vector("list", 5)
 # list of pairwise test of diversity and attrs of tree
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
