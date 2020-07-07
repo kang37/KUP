@@ -292,3 +292,62 @@ Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
 # delete the vars
 rm(pvalue, pvalue_list)
 
+
+
+## pairwise dunn test of diversity ~ landuse class
+pairwise_list <- vector("list", 4)
+# list of pairwise test of diversity of tree_native
+for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+  pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                          rep("tree", 15))
+  pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                          rep(i, 15))
+  pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                          dunn.test(tree_native_diversity[, i], tree_native_diversity$Landuse_class)$comparisons)
+  pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                          dunn.test(tree_native_diversity[, i], tree_native_diversity$Landuse_class)$P.adjusted)
+}
+# list of pairwise test of diversity and attrs of shrub
+for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+  pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                          rep("shrub", 15))
+  pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                          rep(i, 15))
+  pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                          dunn.test(shrub_native_diversity[, i], shrub_native_diversity$Landuse_class)$comparisons)
+  pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                          dunn.test(shrub_native_diversity[, i], shrub_native_diversity$Landuse_class)$P.adjusted)
+}
+# data frame of pairwise test of tree and shrub
+pairwise_df_up <- data.frame(taxa = pairwise_list[[1]], 
+                             index = pairwise_list[[2]], 
+                             comparison = pairwise_list[[3]], 
+                             p = pairwise_list[[4]]) %>% 
+  separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
+pairwise_df_down <- data.frame(
+  taxa = pairwise_df_up$taxa, 
+  index = pairwise_df_up$index, 
+  comparison_1 = pairwise_df_up$comparison_2, 
+  comparison_2 = pairwise_df_up$comparison_1, 
+  p = pairwise_df_up$p)
+pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>% 
+  mutate(index = factor(index, levels = c("Sum_stem", "Sum_area", "Richness", "Shannon", "Evenness")), 
+         comparison_1 = factor(comparison_1, levels = Landuse_class_faclev), 
+         comparison_2 = factor(comparison_2, levels = Landuse_class_faclev))
+# plot the pairwise test results
+ggplot(subset(pairwise_df, taxa == "tree"), 
+       aes(comparison_1, comparison_2, fill = p))+
+  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+  scale_fill_gradient2(high = "blue", low = "red", 
+                       midpoint = 0.05, limits = c(0, 0.05)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+  facet_wrap(~ index, scales = "free")
+ggplot(subset(pairwise_df, taxa == "shrub"), 
+       aes(comparison_1, comparison_2, fill = p))+
+  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+  scale_fill_gradient2(high = "blue", low = "red", 
+                       midpoint = 0.05, limits = c(0, 0.05)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+  facet_wrap(~ index, scales = "free")
