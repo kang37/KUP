@@ -57,13 +57,13 @@ tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem"))
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
 tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Stem, 0)/sum(Stem))) 
 tree_diversity_perc_nonpot <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "N", Stem, 0)/sum(Stem)))
 tree_diversity_perc_private <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Stem, 0)/sum(Stem)))
 tree_diversity_perc_nonstreet <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Street == "N", Stem, 0)/sum(Stem)))
 tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
 tree_diversity <- tree_diversity %>% mutate(
@@ -87,21 +87,18 @@ tree_native_diversity <- subset(tree_native_data, select = c("Plot_ID", "Species
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
 tree_native_diversity_perc_planted <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Stem, 0)/sum(Stem))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Stem, 0)/sum(Stem))) 
 tree_native_diversity_perc_nonpot <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "N", Stem, 0)/sum(Stem)))
 tree_native_diversity_perc_private <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Stem, 0)/sum(Stem)))
 tree_native_diversity_perc_nonstreet <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Stem, 0)/sum(Stem)))
-tree_native_diversity_perc_native <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Street == "N", Stem, 0)/sum(Stem)))
 tree_native_diversity <- tree_native_diversity %>% mutate(
   perc_planted = tree_native_diversity_perc_planted$perc, 
   perc_nonpot = tree_native_diversity_perc_nonpot$perc, 
   perc_private = tree_native_diversity_perc_private$perc, 
-  perc_nonstreet = tree_native_diversity_perc_nonstreet$perc, 
-  perc_native = tree_native_diversity_perc_native$perc
+  perc_nonstreet = tree_native_diversity_perc_nonstreet$perc
 )
 rm(tree_native_diversity_perc_planted, tree_native_diversity_perc_nonpot, tree_native_diversity_perc_private, tree_native_diversity_perc_nonstreet, tree_native_diversity_perc_native)
 
@@ -117,13 +114,13 @@ shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_CN", "Area"
   left_join(all_plot_info,by = "Plot_ID") %>%
   as.data.frame()
 shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Area, 0)/sum(Area))) 
 shrub_diversity_perc_nonpot <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "N", Area, 0)/sum(Area)))
 shrub_diversity_perc_private <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Area, 0)/sum(Area)))
 shrub_diversity_perc_nonstreet <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Street == "N", Area, 0)/sum(Area)))
 shrub_diversity_perc_native <- shrub_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
 shrub_diversity <- shrub_diversity %>% mutate(
@@ -147,21 +144,18 @@ shrub_native_diversity <- subset(shrub_native_data, select = c("Plot_ID", "Speci
   left_join(all_plot_info,by = "Plot_ID") %>% 
   as.data.frame()
 shrub_native_diversity_perc_planted <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "Planted", Area, 0)/sum(Area))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Area, 0)/sum(Area))) 
 shrub_native_diversity_perc_nonpot <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "Non_pot", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "N", Area, 0)/sum(Area)))
 shrub_native_diversity_perc_private <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "Private", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Area, 0)/sum(Area)))
 shrub_native_diversity_perc_nonstreet <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "Non_street", Area, 0)/sum(Area)))
-shrub_native_diversity_perc_native <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Street == "N", Area, 0)/sum(Area)))
 shrub_native_diversity <- shrub_native_diversity %>% mutate(
   perc_planted = shrub_native_diversity_perc_planted$perc, 
   perc_nonpot = shrub_native_diversity_perc_nonpot$perc, 
   perc_private = shrub_native_diversity_perc_private$perc, 
-  perc_nonstreet = shrub_native_diversity_perc_nonstreet$perc, 
-  perc_native = shrub_native_diversity_perc_native$perc
+  perc_nonstreet = shrub_native_diversity_perc_nonstreet$perc
 )
 rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shrub_native_diversity_perc_private, shrub_native_diversity_perc_nonstreet, shrub_native_diversity_perc_native)
 
@@ -526,82 +520,61 @@ rm(pvalue, pvalue_list)
 
 
 ## pairwise dunn test of diversity ~ landuse class
-pairwise_list <- vector("list", 5)
-# list of pairwise test of diversity and attrs of tree
+pairwise_list <- vector("list", 4)
+# list of pairwise test of diversity of tree
 for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
-  for (j in c("Landuse_class", "Land_ownership")) {
-    pairwise_list[[1]] <- c(pairwise_list[[1]], 
-                            rep("tree", 
-                                length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
-    pairwise_list[[2]] <- c(pairwise_list[[2]], 
-                            rep(i, length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
-    pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                            rep(j, length(dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)))
-    pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                            dunn.test(tree_diversity[, i], tree_diversity[, j])$comparisons)
-    pairwise_list[[5]] <- c(pairwise_list[[5]], 
-                            dunn.test(tree_diversity[, i], tree_diversity[, j])$P.adjusted)
-  }
+  pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                          rep("tree", 15))
+  pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                          rep(i, 15))
+  pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                          dunn.test(tree_diversity[, i], tree_diversity$Landuse_class)$comparisons)
+  pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                          dunn.test(tree_diversity[, i], tree_diversity$Landuse_class)$P.adjusted)
 }
 # list of pairwise test of diversity and attrs of shrub
 for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
-  for (j in c("Landuse_class", "Land_ownership")) {
-    pairwise_list[[1]] <- c(pairwise_list[[1]], 
-                            rep("shrub", 
-                                length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
-    pairwise_list[[2]] <- c(pairwise_list[[2]], 
-                            rep(i, length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
-    pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                            rep(j, length(dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)))
-    pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                            dunn.test(shrub_diversity[, i], shrub_diversity[, j])$comparisons)
-    pairwise_list[[5]] <- c(pairwise_list[[5]], 
-                            dunn.test(shrub_diversity[, i], shrub_diversity[, j])$P.adjusted)
-    
-  }
+  pairwise_list[[1]] <- c(pairwise_list[[1]], 
+                          rep("shrub", 15))
+  pairwise_list[[2]] <- c(pairwise_list[[2]], 
+                          rep(i, 15))
+  pairwise_list[[3]] <- c(pairwise_list[[3]], 
+                          dunn.test(shrub_diversity[, i], shrub_diversity$Landuse_class)$comparisons)
+  pairwise_list[[4]] <- c(pairwise_list[[4]], 
+                          dunn.test(shrub_diversity[, i], shrub_diversity$Landuse_class)$P.adjusted)
 }
 # data frame of pairwise test of tree and shrub
 pairwise_df_up <- data.frame(taxa = pairwise_list[[1]], 
                              index = pairwise_list[[2]], 
-                             attr = pairwise_list[[3]], 
-                             comparison = pairwise_list[[4]], 
-                             p = pairwise_list[[5]]) %>% 
+                             comparison = pairwise_list[[3]], 
+                             p = pairwise_list[[4]]) %>% 
   separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
 pairwise_df_down <- data.frame(
   taxa = pairwise_df_up$taxa, 
   index = pairwise_df_up$index, 
-  attr = pairwise_df_up$attr,
   comparison_1 = pairwise_df_up$comparison_2, 
   comparison_2 = pairwise_df_up$comparison_1, 
   p = pairwise_df_up$p)
 pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>% 
   mutate(index = factor(index, levels = c("Sum_stem", "Sum_area", "Richness", "Shannon", "Evenness")), 
-         comparison_1 = factor(comparison_1, levels = c(Landuse_class_faclev, Land_ownership_faclev)), 
-         comparison_2 = factor(comparison_2, levels = c(Landuse_class_faclev, Land_ownership_faclev)))
+         comparison_1 = factor(comparison_1, levels = Landuse_class_faclev), 
+         comparison_2 = factor(comparison_2, levels = Landuse_class_faclev))
 # plot the pairwise test results
-pairwise_plot_list <- list()
-for (i in c("Landuse_class", "Land_ownership")) {
-  pairwise_plot_list <- c(pairwise_plot_list,
-                          list(ggplot(subset(pairwise_df, taxa == "tree" & attr == i), 
-                                      aes(comparison_1, comparison_2, fill = p))+
-                                 geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-                                 scale_fill_gradient2(high = "blue", low = "red", 
-                                                      midpoint = 0.05, limits = c(0, 0.05)) + 
-                                 theme(axis.text.x = element_text(angle = 90)) + 
-                                 xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-                                 facet_grid(index ~ attr, scales = "free", switch = "both")))
-}
-for (i in c("Landuse_class", "Land_ownership")) {
-  pairwise_plot_list <- c(pairwise_plot_list,
-                          list(ggplot(subset(pairwise_df, taxa == "shrub" & attr == i), 
-                                      aes(comparison_1, comparison_2, fill = p))+
-                                 geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-                                 scale_fill_gradient2(high = "blue", low = "red", 
-                                                      midpoint = 0.05, limits = c(0, 0.05)) + 
-                                 theme(axis.text.x = element_text(angle = 90)) + 
-                                 xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-                                 facet_grid(index ~ attr, scales = "free", switch = "both")))
-}
-Rmisc::multiplot(plotlist = pairwise_plot_list, cols = 4)
+ggplot(subset(pairwise_df, taxa == "tree"), 
+       aes(comparison_1, comparison_2, fill = p))+
+  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+  scale_fill_gradient2(high = "blue", low = "red", 
+                       midpoint = 0.05, limits = c(0, 0.05)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+  facet_wrap(~ index, scales = "free")
+ggplot(subset(pairwise_df, taxa == "shrub"), 
+       aes(comparison_1, comparison_2, fill = p))+
+  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+  scale_fill_gradient2(high = "blue", low = "red", 
+                       midpoint = 0.05, limits = c(0, 0.05)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+  facet_wrap(~ index, scales = "free")
 
 
