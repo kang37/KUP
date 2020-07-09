@@ -100,7 +100,7 @@ tree_native_diversity <- tree_native_diversity %>% mutate(
   perc_private = tree_native_diversity_perc_private$perc, 
   perc_nonstreet = tree_native_diversity_perc_nonstreet$perc
 )
-rm(tree_native_diversity_perc_planted, tree_native_diversity_perc_nonpot, tree_native_diversity_perc_private, tree_native_diversity_perc_nonstreet, tree_native_diversity_perc_native)
+rm(tree_native_diversity_perc_planted, tree_native_diversity_perc_nonpot, tree_native_diversity_perc_private, tree_native_diversity_perc_nonstreet)
 
 # data of shrub_diversity
 shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_CN", "Area")) %>%
@@ -157,7 +157,7 @@ shrub_native_diversity <- shrub_native_diversity %>% mutate(
   perc_private = shrub_native_diversity_perc_private$perc, 
   perc_nonstreet = shrub_native_diversity_perc_nonstreet$perc
 )
-rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shrub_native_diversity_perc_private, shrub_native_diversity_perc_nonstreet, shrub_native_diversity_perc_native)
+rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shrub_native_diversity_perc_private, shrub_native_diversity_perc_nonstreet)
 
 # tree diversity longer and shrub diversity longer dataset
 tree_diversity_long <- 
