@@ -148,7 +148,7 @@ rm(tree_native_rankabun_list, tree_native_rankabun_ori, tree_native_rankabun_df,
 ## mds analysis
 set.seed(1234)
 #
-# nmds calculation for tree
+# nmds calculation for tree_native
 tree_native_mds_selected_ID <- tree_native_diversity$Plot_ID[!(tree_native_diversity$Plot_ID %in% c(172))]
 tree_native_mds_selected <- tree_native_diversity %>% filter(Plot_ID %in% tree_native_mds_selected_ID)
 tree_native_mds_metaMDS <- tree_native_mds_selected %>% 
@@ -158,7 +158,7 @@ tree_native_mds_metaMDS$stress
 stressplot(tree_native_mds_metaMDS)
 tree_native_mds_selected <- cbind(tree_native_mds_selected, tree_native_mds_metaMDS$points)
 #
-# nmds calculation for shrub
+# nmds calculation for shrub_native
 shrub_native_mds_selected_ID <- shrub_native_diversity$Plot_ID[!(shrub_native_diversity$Plot_ID %in% c(65, 274, 244, 164, 75, 172))]
 shrub_native_mds_selected <- shrub_native_diversity %>% filter(Plot_ID %in% shrub_native_mds_selected_ID)
 shrub_native_mds_metaMDS <- shrub_native_mds_selected %>% 
@@ -173,20 +173,20 @@ shrub_native_mds_selected <- cbind(shrub_native_mds_selected, shrub_native_mds_m
 tree_landuseclass_anosim_result <- anosim(tree_native_mds_selected[2:(number_tree_native_species+1)], tree_native_mds_selected$Landuse_class)
 shrub_landuseclass_anosim_result <- anosim(shrub_native_mds_selected[2:(number_shrub_native_species+1)], shrub_native_mds_selected$Landuse_class)
 # get statistic results as labels for the mds plots
-tree_landuseclass_mds_lab <- paste("stress=", round(tree_native_mds_metaMDS$stress, digits = 3), 
+tree_native_landuseclass_mds_lab <- paste("stress=", round(tree_native_mds_metaMDS$stress, digits = 3), 
                                    ", R=", round(tree_landuseclass_anosim_result$statistic, digits = 3), 
                                    ", p=", round(tree_landuseclass_anosim_result$signif, digits = 3), 
                                    sep = "")
-shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_native_mds_metaMDS$stress, digits = 3), 
+shrub_native_landuseclass_mds_lab <- paste("stress=", round(shrub_native_mds_metaMDS$stress, digits = 3), 
                                     ", R=", round(shrub_landuseclass_anosim_result$statistic, digits = 3), 
                                     ", p=", round(shrub_landuseclass_anosim_result$signif, digits = 3), 
                                     sep = "")
 # mds plots for trees and shrubs by land use types and land ownership 
 Rmisc::multiplot(plotlist = list(
   ggplot(tree_native_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab), 
+    labs(title = "Tree - Land use type", subtitle = tree_native_landuseclass_mds_lab), 
   ggplot(shrub_native_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab)
+    labs(title = "Shrub - Land use type", subtitle = shrub_native_landuseclass_mds_lab)
 ), layout = matrix(1:2, nrow = 1, byrow = T))
 #
 # pairwise result of ANOSIM of trees by landuse_class
