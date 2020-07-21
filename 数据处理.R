@@ -227,12 +227,12 @@ cat("number of trees:", nrow(tree_data), "\n",
     "area of shrubs:", sum(shrub_data$Area), "\n", 
     "number of shrub-plot:", nrow(shrub_diversity))
 
-# top species of trees by number
+# top species families of trees by number
 tree_data %>% 
   group_by(Family) %>% dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
   arrange(desc(Prop))
 
-# top species of shrubs by area
+# top species families of shrubs by area
 shrub_data %>% 
   group_by(Family) %>% dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
   arrange(desc(Prop))
@@ -370,20 +370,18 @@ rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df,
 set.seed(1234)
 #
 # nmds calculation for tree
-tree_mds_selected_ID <- tree_diversity$Plot_ID[!(tree_diversity$Plot_ID %in% c(214, 261, 313, 244, 67))]
-tree_mds_selected <- tree_diversity %>% filter(Plot_ID %in% tree_mds_selected_ID)
+tree_mds_selected <- tree_diversity %>% filter(Sum_stem > 3)
 tree_mds_metaMDS <- tree_mds_selected %>% 
-  select(2:(number_tree_species+1)) %>%
+  select(2:(grep("Sum_stem", colnames(tree_mds_selected))-1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 tree_mds_metaMDS$stress
 stressplot(tree_mds_metaMDS)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
 #
 # nmds calculation for shrub
-shrub_mds_selected_ID <- shrub_diversity$Plot_ID[!(shrub_diversity$Plot_ID %in% c(269, 214, 75, 164, 244, 67))]
-shrub_mds_selected <- shrub_diversity %>% filter(Plot_ID %in% shrub_mds_selected_ID)
+shrub_mds_selected <- shrub_diversity %>% filter(Sum_area > 5)
 shrub_mds_metaMDS <- shrub_mds_selected %>% 
-  select(2:(number_shrub_species+1)) %>%
+  select(2:(grep("Sum_area", colnames(shrub_mds_selected))-1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 shrub_mds_metaMDS$stress
 stressplot(shrub_mds_metaMDS)
@@ -402,12 +400,19 @@ shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, d
                                     ", R=", round(shrub_landuseclass_anosim_result$statistic, digits = 3), 
                                     ", p=", round(shrub_landuseclass_anosim_result$signif, digits = 3), 
                                     sep = "")
+# get hull for mds plots of trees and shrubs
+tree_find_hull <- function(tree_mds_selected) tree_mds_selected[chull(tree_mds_selected$MDS1, tree_mds_selected$MDS2), ]
+tree_hulls <- ddply(tree_mds_selected, "Landuse_class", tree_find_hull)
+shrub_find_hull <- function(shrub_mds_selected) shrub_mds_selected[chull(shrub_mds_selected$MDS1, shrub_mds_selected$MDS2), ]
+shrub_hulls <- ddply(shrub_mds_selected, "Landuse_class", shrub_find_hull)
 # mds plots for trees and shrubs by land use types and land ownership 
 Rmisc::multiplot(plotlist = list(
-  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab), 
-  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(alpha = 0.7) + 
-    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab)
+  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+    labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab) +
+    geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(), 
+  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab) +
+    geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw()
 ), layout = matrix(1:2, nrow = 1, byrow = T))
 #
 # pairwise result of ANOSIM of trees by landuse_class
