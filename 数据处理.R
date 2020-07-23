@@ -50,7 +50,7 @@ tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem"))
   pivot_wider(names_from = Species_CN, values_from = Stem, 
               values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
   mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
-         Richness = apply(.[2:ncol(.)]>0, 1, sum),
+         Richness = specnumber(.[2:ncol(.)]),
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
@@ -80,7 +80,7 @@ tree_native_diversity <- subset(tree_native_data, select = c("Plot_ID", "Species
   pivot_wider(names_from = Species_CN, values_from = Stem, 
               values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
   mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
-         Richness = apply(.[2:ncol(.)]>0, 1, sum),
+         Richness = specnumber(.[2:ncol(.)]),
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
