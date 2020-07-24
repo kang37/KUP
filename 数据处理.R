@@ -12,10 +12,6 @@ opar <- par(no.readonly = TRUE)
 # define the factor levels
 Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
 Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
-number_tree_species <- length(unique(tree_data$Species_CN))
-number_shrub_species <- length(unique(shrub_data$Species_CN))
-number_tree_native_species <- length(unique(tree_native_data$Species_CN))
-number_shrub_native_species <- length(unique(shrub_native_data$Species_CN))
 
 ## get data
 # data of all_plot_info
@@ -201,6 +197,11 @@ shrub_native_diversity_long <-
          attr = factor(attr, levels = c("Landuse_class")), 
          attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
 
+number_tree_species <- length(unique(tree_data$Species_CN))
+number_shrub_species <- length(unique(shrub_data$Species_CN))
+number_tree_native_species <- length(unique(tree_native_data$Species_CN))
+number_shrub_native_species <- length(unique(shrub_native_data$Species_CN))
+
 
 
 ### analysis begins
@@ -221,13 +222,16 @@ cat("total species:", length(unique(all_plant_data$Species_CN)), "\n",
     "Species solely for shrubs:", length(setdiff(unique(shrub_data$Species_CN), 
                                                  unique(tree_data$Species_CN))))
 
-# the number of trees or area of shrubs
-cat("number of trees:", nrow(tree_data), "\n", 
-    "number of tree-plot:", nrow(tree_diversity), "\n", 
-    "area of shrubs:", sum(shrub_data$Area), "\n", 
-    "number of shrub-plot:", nrow(shrub_diversity))
+# top species families of all plants by species number
+all_plant_info %>% group_by(Family) %>% 
+  dplyr::summarise(number = n(), prop = number/nrow(all_plant_info)) %>% 
+  arrange(desc(prop))
 
-# top species families of trees by number
+# the number of trees or area of shrubs
+cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n", 
+    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(shrub_diversity), "plot")
+
+# top species families of trees by individual
 tree_data %>% 
   group_by(Family) %>% dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
   arrange(desc(Prop))
@@ -264,7 +268,7 @@ for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   j <- j + 1
   barplot(tapply(subset(all_plant_data, Tree_shrub == "shrub")[, "Area"], 
                  subset(all_plant_data, Tree_shrub == "shrub")[, i], 
-                 sum), ylim = c(0, 1400))
+                 sum), ylim = c(0, 1200))
   title(main = paste("(", letters[j], ")"), adj = 0)
 }
 par(opar)
@@ -272,39 +276,39 @@ par(opar)
 
 
 ## Species accumulation curve 
-par(mfrow = c(1,2))
 # Species accumulation curve for trees
-plot(specaccum(subset(tree_diversity, Landuse_class == "Com")[,2:(number_tree_species+1)]), col = "red", lty = 1, 
-     ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
-plot(specaccum(subset(tree_diversity, Landuse_class == "Com neigh")[,2:(number_tree_species+1)]),col = "red", lty = 2, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R low")[,2:(number_tree_species+1)]), col = "blue", lty = 1, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R high")[,2:(number_tree_species+1)]), col = "blue", lty = 2, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "R resi")[,2:(number_tree_species+1)]), col = "blue", lty = 3, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(tree_diversity, Landuse_class == "Ind")[,2:(number_tree_species+1)]), col = "black", lty = 1, 
-     ci.lty = 0, add = T)
+tree_accum_list <- vector("list", 3)
+for (i in Landuse_class_faclev) {
+  tree_accum_list[[1]] <- c(tree_accum_list[[1]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)
+  tree_accum_list[[2]] <- c(tree_accum_list[[2]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$richness)
+  tree_accum_list[[3]] <- c(tree_accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
+}
+tree_accum_df <- data.frame(
+  number_of_plot = tree_accum_list[[1]], 
+  number_of_species = tree_accum_list[[2]], 
+  landuse_class = tree_accum_list[[3]]
+) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev))
+tree_accum_plot <- ggplot(tree_accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + geom_line(size = 1)
 # Species accumulation curve for shrubs
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Com")[,2:(number_shrub_species+1)]), col = "red", lty = 1, 
-     ci.lty = 0, xlim = c(0, 40), ylim = c(0, 110))
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Com neigh")[,2:(number_shrub_species+1)]),col = "red", lty = 2, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R low")[,2:(number_shrub_species+1)]), col = "blue", lty = 1, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R high")[,2:(number_shrub_species+1)]), col = "blue", lty = 2, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "R resi")[,2:(number_shrub_species+1)]), col = "blue", lty = 3, 
-     ci.lty = 0, add = T)
-plot(specaccum(subset(shrub_diversity, Landuse_class == "Ind")[,2:(number_shrub_species+1)]), col = "black", lty = 1, 
-     ci.lty = 0, add = T)
-par(opar)
+shrub_accum_list <- vector("list", 3)
+for (i in Landuse_class_faclev) {
+  shrub_accum_list[[1]] <- c(shrub_accum_list[[1]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)
+  shrub_accum_list[[2]] <- c(shrub_accum_list[[2]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$richness)
+  shrub_accum_list[[3]] <- c(shrub_accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
+}
+shrub_accum_df <- data.frame(
+  number_of_plot = shrub_accum_list[[1]], 
+  number_of_species = shrub_accum_list[[2]], 
+  landuse_class = shrub_accum_list[[3]]
+) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev))
+shrub_accum_plot <- ggplot(shrub_accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + geom_line(size = 1)
+# plots of species accumulation curves for trees and shrubs 
+ggarrange(tree_accum_plot, shrub_accum_plot, common.legend = T, legend = "right")
 
 
 
 ## rank ahundance plot
-# the rank abundance plot by land use types of trees: doesn't omit site 279
+# the rank abundance plot by land use types of trees
 tree_rankabun_list <- vector("list", 5)
 for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
   tree_rankabun_ori <- as.data.frame(rankabundance(subset(tree_diversity, Landuse_class == i)[2:length(unique(tree_data$Species_CN))]))
