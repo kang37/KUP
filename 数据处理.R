@@ -7,6 +7,8 @@ library(digest)
 library(car)
 library(dunn.test)
 library(BiodiversityR)
+library(codyn)
+library(ggpubr)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
@@ -276,95 +278,107 @@ par(opar)
 
 
 ## Species accumulation curve 
-# Species accumulation curve for trees
-tree_accum_list <- vector("list", 3)
+accum_list <- vector("list", 4)
 for (i in Landuse_class_faclev) {
-  tree_accum_list[[1]] <- c(tree_accum_list[[1]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)
-  tree_accum_list[[2]] <- c(tree_accum_list[[2]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$richness)
-  tree_accum_list[[3]] <- c(tree_accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
+  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)
+  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
 }
-tree_accum_df <- data.frame(
-  number_of_plot = tree_accum_list[[1]], 
-  number_of_species = tree_accum_list[[2]], 
-  landuse_class = tree_accum_list[[3]]
-) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev))
-tree_accum_plot <- ggplot(tree_accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + geom_line(size = 1)
-# Species accumulation curve for shrubs
-shrub_accum_list <- vector("list", 3)
 for (i in Landuse_class_faclev) {
-  shrub_accum_list[[1]] <- c(shrub_accum_list[[1]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)
-  shrub_accum_list[[2]] <- c(shrub_accum_list[[2]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$richness)
-  shrub_accum_list[[3]] <- c(shrub_accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
+  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)
+  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
 }
-shrub_accum_df <- data.frame(
-  number_of_plot = shrub_accum_list[[1]], 
-  number_of_species = shrub_accum_list[[2]], 
-  landuse_class = shrub_accum_list[[3]]
-) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev))
-shrub_accum_plot <- ggplot(shrub_accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + geom_line(size = 1)
-# plots of species accumulation curves for trees and shrubs 
-ggarrange(tree_accum_plot, shrub_accum_plot, common.legend = T, legend = "right")
+accum_df <- data.frame(
+  number_of_plot = accum_list[[1]], 
+  number_of_species = accum_list[[2]], 
+  landuse_class = accum_list[[3]], 
+  tree_shrub = accum_list[[4]]
+) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev), 
+             tree_shrub = factor(tree_shrub, levels = c("tree", "shrub")))
+ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + 
+  geom_line(size = 1) + facet_wrap(~tree_shrub)
+
 
 
 
 ## rank ahundance plot
 # the rank abundance plot by land use types of trees
-tree_rankabun_list <- vector("list", 5)
+tree_rankabun_list <- vector("list", 6)
 for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
-  tree_rankabun_ori <- as.data.frame(rankabundance(subset(tree_diversity, Landuse_class == i)[2:length(unique(tree_data$Species_CN))]))
+  tree_diversity_landuse <- subset(tree_diversity, Landuse_class == i)[2:(number_tree_species+1)]
+  tree_diversity_landuse <- subset(tree_diversity_landuse, select = (colSums(tree_diversity_landuse) != 0))
+  tree_rankabun_ori <- as.data.frame(rankabundance(tree_diversity_landuse))
   tree_rankabun_list[[1]] <- c(tree_rankabun_list[[1]], rownames(tree_rankabun_ori))
   tree_rankabun_list[[2]] <- c(tree_rankabun_list[[2]], tree_rankabun_ori$rank)
-  tree_rankabun_list[[3]] <- c(tree_rankabun_list[[3]], tree_rankabun_ori$abundance)
-  tree_rankabun_list[[4]] <- c(tree_rankabun_list[[4]], tree_rankabun_ori$proportion)
-  tree_rankabun_list[[5]] <- c(tree_rankabun_list[[5]], rep(i, nrow(tree_rankabun_ori)))
+  tree_rankabun_list[[3]] <- c(tree_rankabun_list[[3]], tree_rankabun_ori$rankfreq)
+  tree_rankabun_list[[4]] <- c(tree_rankabun_list[[4]], tree_rankabun_ori$abundance)
+  tree_rankabun_list[[5]] <- c(tree_rankabun_list[[5]], tree_rankabun_ori$proportion)
+  tree_rankabun_list[[6]] <- c(tree_rankabun_list[[6]], rep(i, nrow(tree_rankabun_ori)))
 }
 tree_rankabun_df <- data.frame(
   Species_CN = tree_rankabun_list[[1]], 
   rank = tree_rankabun_list[[2]], 
-  abundance = tree_rankabun_list[[3]], 
-  proportion = tree_rankabun_list[[4]], 
-  Landuse_class = tree_rankabun_list[[5]]
+  scaled_rank = tree_rankabun_list[[3]], 
+  abundance = tree_rankabun_list[[4]], 
+  proportion = tree_rankabun_list[[5]], 
+  Landuse_class = tree_rankabun_list[[6]]
 ) %>% 
-  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN")
-tree_rankabun_df <- tree_rankabun_df[which(tree_rankabun_df$abundance != 0),]
-
+  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN") %>% 
+  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+#
 # the rank abundance plot by land use types of shrubs
-shrub_rankabun_list <- vector("list", 5)
+shrub_rankabun_list <- vector("list", 6)
 for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
-  shrub_rankabun_ori <- as.data.frame(rankabundance(subset(shrub_diversity, Landuse_class == i)[2:length(unique(shrub_data$Species_CN))]))
+  shrub_diversity_landuse <- subset(shrub_diversity, Landuse_class == i)[2:(number_shrub_species+1)]
+  shrub_diversity_landuse <- subset(shrub_diversity_landuse, select = (colSums(shrub_diversity_landuse) != 0))
+  shrub_rankabun_ori <- as.data.frame(rankabundance(shrub_diversity_landuse))
   shrub_rankabun_list[[1]] <- c(shrub_rankabun_list[[1]], rownames(shrub_rankabun_ori))
   shrub_rankabun_list[[2]] <- c(shrub_rankabun_list[[2]], shrub_rankabun_ori$rank)
-  shrub_rankabun_list[[3]] <- c(shrub_rankabun_list[[3]], shrub_rankabun_ori$abundance)
-  shrub_rankabun_list[[4]] <- c(shrub_rankabun_list[[4]], shrub_rankabun_ori$proportion)
-  shrub_rankabun_list[[5]] <- c(shrub_rankabun_list[[5]], rep(i, nrow(shrub_rankabun_ori)))
+  shrub_rankabun_list[[3]] <- c(shrub_rankabun_list[[3]], shrub_rankabun_ori$rankfreq)
+  shrub_rankabun_list[[4]] <- c(shrub_rankabun_list[[4]], shrub_rankabun_ori$abundance)
+  shrub_rankabun_list[[5]] <- c(shrub_rankabun_list[[5]], shrub_rankabun_ori$proportion)
+  shrub_rankabun_list[[6]] <- c(shrub_rankabun_list[[6]], rep(i, nrow(shrub_rankabun_ori)))
 }
 shrub_rankabun_df <- data.frame(
   Species_CN = shrub_rankabun_list[[1]], 
   rank = shrub_rankabun_list[[2]], 
-  abundance = shrub_rankabun_list[[3]], 
-  proportion = shrub_rankabun_list[[4]], 
-  Landuse_class = shrub_rankabun_list[[5]]
+  scaled_rank = shrub_rankabun_list[[3]], 
+  abundance = shrub_rankabun_list[[4]], 
+  proportion = shrub_rankabun_list[[5]], 
+  Landuse_class = shrub_rankabun_list[[6]]
 ) %>% 
-  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN")
-shrub_rankabun_df <- shrub_rankabun_df[which(shrub_rankabun_df$abundance != 0),]
-
+  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN") %>% 
+  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+#
 # rearrange and plot
-tree_rankabun_df <- tree_rankabun_df %>% 
-  mutate(Landuse_class = factor(Landuse_class, levels = c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")))
-shrub_rankabun_df <- shrub_rankabun_df %>% 
-  mutate(Landuse_class = factor(Landuse_class, levels = c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")))
-Rmisc::multiplot(plotlist = c(
-  list(ggplot(tree_rankabun_df, aes(rank, proportion, label = Species_CN)) + 
-         geom_line() + 
-         geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-         geom_text(aes(label = ifelse(rank<4, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
-         facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(a)")), 
-  list(ggplot(shrub_rankabun_df, aes(rank, proportion, label = Species_CN)) + 
-         geom_line() + 
-         geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-         geom_text(aes(label = ifelse(rank<4, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
-         facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(b)"))
-))
+ggarrange(ggplot(tree_rankabun_df, aes(scaled_rank, log(abundance), label = Species_CN)) + 
+            geom_line() + 
+            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
+            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
+            facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(a)"),
+          ggplot(shrub_rankabun_df, aes(scaled_rank, log(abundance), label = Species_CN)) + 
+            geom_line() + 
+            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
+            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
+            facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(b)"), 
+          nrow = 2, common.legend = T, legend = "right"
+)
+#
+# the top 3 species regarding abundance
+subset(tree_rankabun_df, rank %in% c(1,2,3))
+subset(shrub_rankabun_df, rank %in% c(1,2,3))
+# calculate the EQ evenness index and plot
+EQ_tree <- community_structure(tree_rankabun_df, time.var = "Landuse_class", 
+                               abundance.var = "abundance", metric = "EQ")
+EQ_shrub <- community_structure(shrub_rankabun_df, time.var = "Landuse_class", 
+                                abundance.var = "abundance", metric = "EQ")
+par(mfrow = c(1,2))
+plot(EQ_tree$Landuse_class, EQ_tree$EQ)
+plot(EQ_shrub$Landuse_class, EQ_shrub$EQ)
+#
 rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df, 
    shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
 
