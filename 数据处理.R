@@ -1,4 +1,4 @@
-setwd("C:/Rdata/KUP")
+setwd("C:/Users/kangj/Documents/R/KUP")
 library(tidyverse)
 library(Rmisc)
 library(vegan)
@@ -12,14 +12,12 @@ library(ggpubr)
 opar <- par(no.readonly = TRUE)
 
 # define the factor levels
-Ward_faclev <- c("Ukyo-ku", "Sakyo-ku", "Kita-ku", "Kamigyo-ku", "Nakagyo-ku", "Shimogyo-ku", "Higashiyama-ku", "Yamashina-ku", "Fushimi-ku", "Minami-ku", "Nishikyo-ku")
-Landuse_class_faclev <- c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")
+Landuse_class_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
 
 ## get data
 # data of all_plot_info
 all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
-  mutate(Ward = factor(Ward, levels = Ward_faclev), 
-         Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
 
 # data of all_plant_info
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
@@ -307,7 +305,7 @@ ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_
 ## rank ahundance plot
 # the rank abundance plot by land use types of trees
 tree_rankabun_list <- vector("list", 6)
-for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
+for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
   tree_diversity_landuse <- subset(tree_diversity, Landuse_class == i)[2:(number_tree_species+1)]
   tree_diversity_landuse <- subset(tree_diversity_landuse, select = (colSums(tree_diversity_landuse) != 0))
   tree_rankabun_ori <- as.data.frame(rankabundance(tree_diversity_landuse))
@@ -331,7 +329,7 @@ tree_rankabun_df <- data.frame(
 #
 # the rank abundance plot by land use types of shrubs
 shrub_rankabun_list <- vector("list", 6)
-for (i in c("Com", "Com neigh", "R low", "R high", "R resi", "Ind")) {
+for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
   shrub_diversity_landuse <- subset(shrub_diversity, Landuse_class == i)[2:(number_shrub_species+1)]
   shrub_diversity_landuse <- subset(shrub_diversity_landuse, select = (colSums(shrub_diversity_landuse) != 0))
   shrub_rankabun_ori <- as.data.frame(rankabundance(shrub_diversity_landuse))
@@ -423,15 +421,15 @@ tree_find_hull <- function(tree_mds_selected) tree_mds_selected[chull(tree_mds_s
 tree_hulls <- ddply(tree_mds_selected, "Landuse_class", tree_find_hull)
 shrub_find_hull <- function(shrub_mds_selected) shrub_mds_selected[chull(shrub_mds_selected$MDS1, shrub_mds_selected$MDS2), ]
 shrub_hulls <- ddply(shrub_mds_selected, "Landuse_class", shrub_find_hull)
-# mds plots for trees and shrubs by land use types and land ownership 
-Rmisc::multiplot(plotlist = list(
-  ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
-    labs(title = "Tree - Land use type", subtitle = tree_landuseclass_mds_lab) +
-    geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(), 
-  ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
-    labs(title = "Shrub - Land use type", subtitle = shrub_landuseclass_mds_lab) +
-    geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw()
-), layout = matrix(1:2, nrow = 1, byrow = T))
+# mds plots for trees and shrubs by land use types
+ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+            labs(title = "Tree", subtitle = tree_landuseclass_mds_lab) +
+            geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(),
+          ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+            labs(title = "Shrub", subtitle = shrub_landuseclass_mds_lab) +
+            geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(),
+          common.legend = T, legend = "right"
+)
 #
 # pairwise result of ANOSIM of trees by landuse_class
 tree_pair_anosim_list <- vector("list",3)
@@ -583,21 +581,26 @@ pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>%
          comparison_1 = factor(comparison_1, levels = Landuse_class_faclev), 
          comparison_2 = factor(comparison_2, levels = Landuse_class_faclev))
 # plot the pairwise test results
-ggplot(subset(pairwise_df, taxa == "tree"), 
-       aes(comparison_1, comparison_2, fill = p))+
-  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-  scale_fill_gradient2(high = "blue", low = "red", 
-                       midpoint = 0.05, limits = c(0, 0.05)) + 
-  theme(axis.text.x = element_text(angle = 90)) + 
-  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-  facet_wrap(~ index, scales = "free")
-ggplot(subset(pairwise_df, taxa == "shrub"), 
-       aes(comparison_1, comparison_2, fill = p))+
-  geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-  scale_fill_gradient2(high = "blue", low = "red", 
-                       midpoint = 0.05, limits = c(0, 0.05)) + 
-  theme(axis.text.x = element_text(angle = 90)) + 
-  xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-  facet_wrap(~ index, scales = "free")
+ggarrange(ggplot(subset(pairwise_df, taxa == "tree"), 
+                 aes(comparison_1, comparison_2, fill = p))+
+            geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+            scale_fill_gradient2(high = "blue", low = "red", 
+                                 midpoint = 0.05, limits = c(0, 0.05)) + 
+            theme(axis.text.x = element_text(angle = 90)) + 
+            xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+            facet_wrap(~ index, scales = "free") +
+            labs(title = "Tree"),
+          ggplot(subset(pairwise_df, taxa == "shrub"), 
+                 aes(comparison_1, comparison_2, fill = p))+
+            geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
+            scale_fill_gradient2(high = "blue", low = "red", 
+                                 midpoint = 0.05, limits = c(0, 0.05)) + 
+            theme(axis.text.x = element_text(angle = 90)) + 
+            xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+            facet_wrap(~ index, scales = "free") + 
+            labs(title = "Shrub")
+)
+
+
 
 
