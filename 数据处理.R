@@ -1,67 +1,53 @@
 setwd("C:/Users/kangj/Documents/R/KUP")
-library(tidyverse)
 library(Rmisc)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 library(vegan)
 library(PerformanceAnalytics)
-library(digest)
-library(car)
 library(dunn.test)
 library(BiodiversityR)
 library(codyn)
 library(ggpubr)
-opar <- par(no.readonly = TRUE)
-
-# define the factor levels
-Landuse_class_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
 
 ## get data
-# data of all_plot_info
+# define default parameters
+opar <- par(no.readonly = TRUE)
+Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
+
+# information of all the plots
 all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
-  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
 
-# data of all_plant_info
+# information of all the plants species: provenance and taxonomy 
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
+
+# data of all the plants: taxonomy, attributes, abundance, etc.
 all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
-  left_join(all_plant_info, by = "Species_CN") %>%
+  left_join(all_plant_info, by = "Species_LT") %>%
   left_join(all_plot_info,by = "Plot_ID")
-all_plant_data$Landuse_subclass <- NULL
-all_plant_data$Landuse_agg <- NULL
 
-# data of trees
-tree_data <- all_plant_data %>% 
-  subset(Tree_shrub == "tree")
-
-# data of shrubs
-shrub_data <- all_plant_data %>% 
-  subset(Tree_shrub == "shrub")
-
-# data of native trees
-tree_native_data <- subset(tree_data, Nt_ex == "nt")
-
-# shrub_native_data
-shrub_native_data <- subset(shrub_data, Nt_ex == "nt")
-
-# data of tree_diversity
-tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_CN", "Stem")) %>%
-  pivot_wider(names_from = Species_CN, values_from = Stem, 
+# data of trees and shrubs and diversity matrix of trees
+tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
+tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_LT", "Stem")) %>%
+  pivot_wider(names_from = Species_LT, values_from = Stem, 
               values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
-  mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
-         Richness = specnumber(.[2:ncol(.)]),
+  mutate(Density = rowSums(.[2:ncol(.)]), 
+         Richness = specnumber(.[2:ncol(.)], MARGIN = 1),
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID") %>% 
-  as.data.frame()
+  left_join(all_plot_info, by = "Plot_ID")
 tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Stem, 0)/sum(Stem))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "planted", Stem, 0)/sum(Stem))) 
 tree_diversity_perc_nonpot <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "N", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "non_pot", Stem, 0)/sum(Stem)))
 tree_diversity_perc_private <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "private", Stem, 0)/sum(Stem)))
 tree_diversity_perc_nonstreet <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "N", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Street == "non_street", Stem, 0)/sum(Stem)))
 tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Stem, 0)/sum(Stem)))
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "native", Stem, 0)/sum(Stem)))
 tree_diversity <- tree_diversity %>% mutate(
   perc_planted = tree_diversity_perc_planted$perc, 
   perc_nonpot = tree_diversity_perc_nonpot$perc, 
@@ -71,54 +57,27 @@ tree_diversity <- tree_diversity %>% mutate(
 )
 rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private, tree_diversity_perc_nonstreet, tree_diversity_perc_native)
 
-# tree_native_diversity
-tree_native_diversity <- subset(tree_native_data, select = c("Plot_ID", "Species_CN", "Stem")) %>%
-  pivot_wider(names_from = Species_CN, values_from = Stem, 
-              values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
-  mutate(Sum_stem = rowSums(.[2:ncol(.)]), 
-         Richness = specnumber(.[2:ncol(.)]),
-         Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
-         Simpson = diversity(.[2:ncol(.)], index = "simpson"),
-         Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID") %>% 
-  as.data.frame()
-tree_native_diversity_perc_planted <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Stem, 0)/sum(Stem))) 
-tree_native_diversity_perc_nonpot <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "N", Stem, 0)/sum(Stem)))
-tree_native_diversity_perc_private <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Stem, 0)/sum(Stem)))
-tree_native_diversity_perc_nonstreet <- tree_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "N", Stem, 0)/sum(Stem)))
-tree_native_diversity <- tree_native_diversity %>% mutate(
-  perc_planted = tree_native_diversity_perc_planted$perc, 
-  perc_nonpot = tree_native_diversity_perc_nonpot$perc, 
-  perc_private = tree_native_diversity_perc_private$perc, 
-  perc_nonstreet = tree_native_diversity_perc_nonstreet$perc
-)
-rm(tree_native_diversity_perc_planted, tree_native_diversity_perc_nonpot, tree_native_diversity_perc_private, tree_native_diversity_perc_nonstreet)
-
-# data of shrub_diversity
-shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_CN", "Area")) %>%
-  pivot_wider(names_from = Species_CN, values_from = Area, 
+# data of shrubs and diversity matrix of shrubs
+shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL)
+shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_LT", "Area")) %>%
+  pivot_wider(names_from = Species_LT, values_from = Area, 
               values_fn = list(Area = sum), values_fill = list(Area = 0)) %>% 
-  mutate(Sum_area = rowSums(.[2:ncol(.)]), 
+  mutate(Density = rowSums(.[2:ncol(.)]), 
          Richness = apply(.[2:ncol(.)]>0, 1, sum),
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
          Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID") %>%
-  as.data.frame()
+  left_join(all_plot_info, by = "Plot_ID") 
 shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Area, 0)/sum(Area))) 
+  dplyr::summarise(perc = sum(ifelse(Pla_spo == "planted", Area, 0)/sum(Area))) 
 shrub_diversity_perc_nonpot <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "N", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pot == "non_pot", Area, 0)/sum(Area)))
 shrub_diversity_perc_private <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Pub_pri == "private", Area, 0)/sum(Area)))
 shrub_diversity_perc_nonstreet <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "N", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Street == "non_street", Area, 0)/sum(Area)))
 shrub_diversity_perc_native <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "nt", Area, 0)/sum(Area)))
+  dplyr::summarise(perc = sum(ifelse(Nt_ex == "native", Area, 0)/sum(Area)))
 shrub_diversity <- shrub_diversity %>% mutate(
   perc_planted = shrub_diversity_perc_planted$perc, 
   perc_nonpot = shrub_diversity_perc_nonpot$perc, 
@@ -128,104 +87,48 @@ shrub_diversity <- shrub_diversity %>% mutate(
 )
 rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
-# shrub_native_diversity
-shrub_native_diversity <- subset(shrub_native_data, select = c("Plot_ID", "Species_CN", "Area")) %>%
-  pivot_wider(names_from = Species_CN, values_from = Area, 
-              values_fn = list(Area = sum), values_fill = list(Area = 0)) %>% 
-  mutate(Sum_area = rowSums(.[2:ncol(.)]), 
-         Richness = apply(.[2:ncol(.)]>0, 1, sum),
-         Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
-         Simpson = diversity(.[2:ncol(.)], index = "simpson"),
-         Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info,by = "Plot_ID") %>% 
-  as.data.frame()
-shrub_native_diversity_perc_planted <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "P", Area, 0)/sum(Area))) 
-shrub_native_diversity_perc_nonpot <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "N", Area, 0)/sum(Area)))
-shrub_native_diversity_perc_private <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "N", Area, 0)/sum(Area)))
-shrub_native_diversity_perc_nonstreet <- shrub_native_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "N", Area, 0)/sum(Area)))
-shrub_native_diversity <- shrub_native_diversity %>% mutate(
-  perc_planted = shrub_native_diversity_perc_planted$perc, 
-  perc_nonpot = shrub_native_diversity_perc_nonpot$perc, 
-  perc_private = shrub_native_diversity_perc_private$perc, 
-  perc_nonstreet = shrub_native_diversity_perc_nonstreet$perc
-)
-rm(shrub_native_diversity_perc_planted, shrub_native_diversity_perc_nonpot, shrub_native_diversity_perc_private, shrub_native_diversity_perc_nonstreet)
-
-# tree diversity longer and shrub diversity longer dataset
+# tree diversity longer and shrub diversity longer data set
 tree_diversity_long <- 
-  subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
-  pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
+  subset(tree_diversity, 
+         select = c("Density", "Richness", "Shannon", "Evenness","Land_use_type")) %>% 
+  pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
+  mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
+         Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)))
 
 shrub_diversity_long <- 
-  subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
-  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
+  subset(shrub_diversity, 
+         select = c("Density", "Richness", "Shannon", "Evenness", "Land_use_type")) %>% 
+  pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
                names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
+  mutate(index = factor(index, levels = c("Density", "Richness", "Shannon","Evenness")), 
+         Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)))
 
-# tree native diversity longer and shrub native diversity longer dataset
-tree_native_diversity_long <- 
-  subset(tree_native_diversity, select = c("Sum_stem", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
-  pivot_longer(cols = c("Sum_stem", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_stem", "Richness", "Shannon", "Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
-
-shrub_native_diversity_long <- 
-  subset(shrub_native_diversity, select = c("Sum_area", "Richness", "Shannon", "Evenness", "Landuse_class")) %>% 
-  pivot_longer(cols = c("Sum_area", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  pivot_longer(cols = c("Landuse_class"), 
-               names_to = "attr", values_to = "attr_value") %>% 
-  mutate(index = factor(index, levels = c("Sum_area", "Richness", "Shannon","Evenness")), 
-         attr = factor(attr, levels = c("Landuse_class")), 
-         attr_value = factor(attr_value, levels = c(Landuse_class_faclev)))
-
-number_tree_species <- length(unique(tree_data$Species_CN))
-number_shrub_species <- length(unique(shrub_data$Species_CN))
-number_tree_native_species <- length(unique(tree_native_data$Species_CN))
-number_shrub_native_species <- length(unique(shrub_native_data$Species_CN))
+# some other variables 
+number_tree_species <- length(unique(tree_data$Species_LT))
+number_shrub_species <- length(unique(shrub_data$Species_LT))
 
 
 
 ### analysis begins
-
-
-
 ## general description
 # the number of species
-cat("total species:", length(unique(all_plant_data$Species_CN)), "\n", 
+cat("total species:", length(unique(all_plant_data$Species_LT)), "\n", 
     "total genera:", length(unique(all_plant_data$Genus)), "\n", 
     "total families:", length(unique(all_plant_data$Family)), "\n", "\n", 
-    "total species of trees:", length(unique(tree_data$Species_CN)), "\n", 
-    "total species of shrubs:", length(unique(shrub_data$Species_CN)), "\n", 
-    "common species of trees and shrubs:", length(intersect(unique(tree_data$Species_CN), 
-                                                            unique(shrub_data$Species_CN))), "\n", 
-    "species solely for trees:", length(setdiff(unique(tree_data$Species_CN), 
-                                               unique(shrub_data$Species_CN))), "\n", 
-    "Species solely for shrubs:", length(setdiff(unique(shrub_data$Species_CN), 
-                                                 unique(tree_data$Species_CN))))
+    "total species of trees:", number_tree_species, "\n", 
+    "total species of shrubs:", number_shrub_species, "\n", 
+    "common species of trees and shrubs:", length(intersect(
+      unique(tree_data$Species_LT), unique(shrub_data$Species_LT))), "\n", 
+    "species solely for trees:", length(setdiff(unique(tree_data$Species_LT), 
+                                               unique(shrub_data$Species_LT))), "\n", 
+    "Species solely for shrubs:", length(setdiff(unique(shrub_data$Species_LT), 
+                                                 unique(tree_data$Species_LT))))
 
 # top species families of all plants by species number
 all_plant_info %>% group_by(Family) %>% 
-  dplyr::summarise(number = n(), prop = number/nrow(all_plant_info)) %>% 
-  arrange(desc(prop))
+  dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
+  arrange(desc(Prop))
 
 # the number of trees or area of shrubs
 cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n", 
@@ -233,80 +136,74 @@ cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n
 
 # top species families of trees by individual
 tree_data %>% 
-  group_by(Family) %>% dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
+  group_by(Family) %>% 
+  dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
   arrange(desc(Prop))
 
 # top species families of shrubs by area
 shrub_data %>% 
-  group_by(Family) %>% dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
+  group_by(Family) %>% 
+  dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
   arrange(desc(Prop))
 
 
 
-## attributes of the tree and shrub
-# the exotic vs. native by species
-all_plant_info %>% group_by(Nt_ex) %>% 
-  dplyr::summarise(n()/nrow(all_plant_info))
+## attributes of trees and shrubs
+# the number of exotic vs. native species
+table(all_plant_info$Nt_ex)/nrow(all_plant_info)
 
-# while regarding the number or area
-tree_data %>% group_by(Nt_ex) %>% 
-  dplyr::summarise(n()/sum(tree_data$Stem))
-shrub_data %>% group_by(Nt_ex) %>% 
-  dplyr::summarise(sum(Area)/sum(shrub_data$Area))
+# the attributes of trees
+for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
+  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 3)
+  cat("\n")
+}
 
-# the graph of attributes of the plants
-par(mfrow= c(2,3), cex.axis = 1.5)
-j <- 0
+# the attributes of shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  j <- j + 1
-  barplot(tapply(subset(all_plant_data, Tree_shrub == "tree")[, "Stem"], 
-                 subset(all_plant_data, Tree_shrub == "tree")[, i], 
-                 sum), ylim = c(0, 1400))
-  title(main = paste("(", letters[j], ")"), adj = 0)
+  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 3)
+  cat("\n")
 }
-for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  j <- j + 1
-  barplot(tapply(subset(all_plant_data, Tree_shrub == "shrub")[, "Area"], 
-                 subset(all_plant_data, Tree_shrub == "shrub")[, i], 
-                 sum), ylim = c(0, 1200))
-  title(main = paste("(", letters[j], ")"), adj = 0)
-}
-par(opar)
 
 
 
 ## Species accumulation curve 
 accum_list <- vector("list", 4)
-for (i in Landuse_class_faclev) {
-  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)
-  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(specaccum(subset(tree_diversity, Landuse_class == i)[,2:(number_tree_species+1)])$sites)))
+for (i in Land_use_type_faclev) {
+  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)
+  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)))
 }
-for (i in Landuse_class_faclev) {
-  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)
-  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(specaccum(subset(shrub_diversity, Landuse_class == i)[,2:(number_shrub_species+1)])$sites)))
+for (i in Land_use_type_faclev) {
+  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)
+  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)))
 }
 accum_df <- data.frame(
   number_of_plot = accum_list[[1]], 
   number_of_species = accum_list[[2]], 
-  landuse_class = accum_list[[3]], 
+  Land_use_type = accum_list[[3]], 
   tree_shrub = accum_list[[4]]
-) %>% mutate(landuse_class = factor(landuse_class, levels = Landuse_class_faclev), 
+) %>% mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
              tree_shrub = factor(tree_shrub, levels = c("tree", "shrub")))
-ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = landuse_class)) + 
-  geom_line(size = 1) + facet_wrap(~tree_shrub)
+ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = Land_use_type)) + 
+  geom_line(size = 1.5) + facet_wrap(~tree_shrub) + 
+  theme(strip.text = element_text(size = 15), 
+        axis.title = element_text(size = 15), 
+        axis.text = element_text(size = 12), 
+        legend.title = element_text(size = 15), 
+        legend.text = element_text(size = 12)) +
+  labs(x = "Number of quadrats", y = "Accumulative number of species") +
+  scale_color_discrete("Land use types")
 
 
 
-
-## rank ahundance plot
+## rank abundance plot
 # the rank abundance plot by land use types of trees
 tree_rankabun_list <- vector("list", 6)
 for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
-  tree_diversity_landuse <- subset(tree_diversity, Landuse_class == i)[2:(number_tree_species+1)]
+  tree_diversity_landuse <- subset(tree_diversity, Land_use_type == i)[2:(number_tree_species+1)]
   tree_diversity_landuse <- subset(tree_diversity_landuse, select = (colSums(tree_diversity_landuse) != 0))
   tree_rankabun_ori <- as.data.frame(rankabundance(tree_diversity_landuse))
   tree_rankabun_list[[1]] <- c(tree_rankabun_list[[1]], rownames(tree_rankabun_ori))
@@ -317,20 +214,20 @@ for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
   tree_rankabun_list[[6]] <- c(tree_rankabun_list[[6]], rep(i, nrow(tree_rankabun_ori)))
 }
 tree_rankabun_df <- data.frame(
-  Species_CN = tree_rankabun_list[[1]], 
+  Species_LT = tree_rankabun_list[[1]], 
   rank = tree_rankabun_list[[2]], 
   scaled_rank = tree_rankabun_list[[3]], 
   abundance = tree_rankabun_list[[4]], 
   proportion = tree_rankabun_list[[5]], 
-  Landuse_class = tree_rankabun_list[[6]]
+  Land_use_type = tree_rankabun_list[[6]]
 ) %>% 
-  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN") %>% 
-  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+  left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
+  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
 #
 # the rank abundance plot by land use types of shrubs
 shrub_rankabun_list <- vector("list", 6)
 for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
-  shrub_diversity_landuse <- subset(shrub_diversity, Landuse_class == i)[2:(number_shrub_species+1)]
+  shrub_diversity_landuse <- subset(shrub_diversity, Land_use_type == i)[2:(number_shrub_species+1)]
   shrub_diversity_landuse <- subset(shrub_diversity_landuse, select = (colSums(shrub_diversity_landuse) != 0))
   shrub_rankabun_ori <- as.data.frame(rankabundance(shrub_diversity_landuse))
   shrub_rankabun_list[[1]] <- c(shrub_rankabun_list[[1]], rownames(shrub_rankabun_ori))
@@ -341,44 +238,61 @@ for (i in c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")) {
   shrub_rankabun_list[[6]] <- c(shrub_rankabun_list[[6]], rep(i, nrow(shrub_rankabun_ori)))
 }
 shrub_rankabun_df <- data.frame(
-  Species_CN = shrub_rankabun_list[[1]], 
+  Species_LT = shrub_rankabun_list[[1]], 
   rank = shrub_rankabun_list[[2]], 
   scaled_rank = shrub_rankabun_list[[3]], 
   abundance = shrub_rankabun_list[[4]], 
   proportion = shrub_rankabun_list[[5]], 
-  Landuse_class = shrub_rankabun_list[[6]]
+  Land_use_type = shrub_rankabun_list[[6]]
 ) %>% 
-  left_join(all_plant_info[, c("Species_CN", "Nt_ex")], by = "Species_CN") %>% 
-  mutate(Landuse_class = factor(Landuse_class, levels = Landuse_class_faclev))
+  left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
+  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
 #
 # rearrange and plot
-ggarrange(ggplot(tree_rankabun_df, aes(scaled_rank, log(abundance), label = Species_CN)) + 
+ggarrange(ggplot(tree_rankabun_df, aes(scaled_rank, log(abundance), label = Species_LT)) + 
             geom_line() + 
             geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
-            facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(a)"),
-          ggplot(shrub_rankabun_df, aes(scaled_rank, log(abundance), label = Species_CN)) + 
+            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_LT), "")), 
+                      hjust = -0.5, vjust = 0) + 
+            facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(a)") + 
+            labs(x = "Scaled rank of species", y = "Log (abundance)") +
+            scale_color_discrete("Provenance") +
+            theme(strip.text = element_text(size = 12),
+                  axis.title = element_text(size = 12),
+                  axis.text = element_text(size = 10),
+                  legend.title = element_text(size = 12),
+                  legend.text = element_text(size = 12)),
+          ggplot(shrub_rankabun_df, aes(scaled_rank, log(abundance), label = Species_LT)) + 
             geom_line() + 
             geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_CN), "")), hjust = -0.5, vjust = 0) + 
-            facet_wrap(~Landuse_class, nrow = 1) + labs(title = "(b)"), 
-          nrow = 2, common.legend = T, legend = "right"
+            geom_text(aes(label = ifelse(rank<0.2, as.character(Species_LT), "")), 
+                      hjust = -0.5, vjust = 0) + 
+            facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(b)") + 
+            labs(x = "Scaled rank of species", y = "Log (abundance)") + 
+            scale_color_discrete("Provenance") +
+            theme(strip.text = element_text(size = 12),
+                  axis.title = element_text(size = 12),
+                  axis.text = element_text(size = 10), 
+                  legend.title = element_text(size = 12),
+                  legend.text = element_text(size = 12)), 
+          nrow = 2, common.legend = T, legend = "bottom"
 )
 #
 # the top 3 species regarding abundance
 subset(tree_rankabun_df, rank %in% c(1,2,3))
 subset(shrub_rankabun_df, rank %in% c(1,2,3))
 # calculate the EQ evenness index and plot
-EQ_tree <- community_structure(tree_rankabun_df, time.var = "Landuse_class", 
+EQ_tree <- community_structure(tree_rankabun_df, time.var = "Land_use_type", 
                                abundance.var = "abundance", metric = "EQ")
-EQ_shrub <- community_structure(shrub_rankabun_df, time.var = "Landuse_class", 
+EQ_shrub <- community_structure(shrub_rankabun_df, time.var = "Land_use_type", 
                                 abundance.var = "abundance", metric = "EQ")
 par(mfrow = c(1,2))
-plot(EQ_tree$Landuse_class, EQ_tree$EQ)
-plot(EQ_shrub$Landuse_class, EQ_shrub$EQ)
+plot(EQ_tree$Land_use_type, EQ_tree$EQ)
+plot(EQ_shrub$Land_use_type, EQ_shrub$EQ)
 #
 rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df, 
    shrub_rankabun_list, shrub_rankabun_ori, shrub_rankabun_df)
+par(opar)
 
 
 
@@ -386,18 +300,18 @@ rm(tree_rankabun_list, tree_rankabun_ori, tree_rankabun_df,
 set.seed(1234)
 #
 # nmds calculation for tree
-tree_mds_selected <- tree_diversity %>% filter(Sum_stem > 3)
+tree_mds_selected <- tree_diversity %>% filter(Density > 3)
 tree_mds_metaMDS <- tree_mds_selected %>% 
-  select(2:(grep("Sum_stem", colnames(tree_mds_selected))-1)) %>%
+  select(2:(grep("Density", colnames(tree_mds_selected))-1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 tree_mds_metaMDS$stress
 stressplot(tree_mds_metaMDS)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
 #
 # nmds calculation for shrub
-shrub_mds_selected <- shrub_diversity %>% filter(Sum_area > 5)
+shrub_mds_selected <- shrub_diversity %>% filter(Density > 5)
 shrub_mds_metaMDS <- shrub_mds_selected %>% 
-  select(2:(grep("Sum_area", colnames(shrub_mds_selected))-1)) %>%
+  select(2:(grep("Density", colnames(shrub_mds_selected))-1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
 shrub_mds_metaMDS$stress
 stressplot(shrub_mds_metaMDS)
@@ -405,8 +319,8 @@ shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
 #
 # mds plot for trees and shrubs
 # general Anosim of trees and shrubs
-tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Landuse_class)
-shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Landuse_class)
+tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Land_use_type)
+shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Land_use_type)
 # get statistic results as labels for the mds plots
 tree_landuseclass_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
                                    ", R=", round(tree_landuseclass_anosim_result$statistic, digits = 3), 
@@ -418,74 +332,86 @@ shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, d
                                     sep = "")
 # get hull for mds plots of trees and shrubs
 tree_find_hull <- function(tree_mds_selected) tree_mds_selected[chull(tree_mds_selected$MDS1, tree_mds_selected$MDS2), ]
-tree_hulls <- ddply(tree_mds_selected, "Landuse_class", tree_find_hull)
+tree_hulls <- ddply(tree_mds_selected, "Land_use_type", tree_find_hull)
 shrub_find_hull <- function(shrub_mds_selected) shrub_mds_selected[chull(shrub_mds_selected$MDS1, shrub_mds_selected$MDS2), ]
-shrub_hulls <- ddply(shrub_mds_selected, "Landuse_class", shrub_find_hull)
+shrub_hulls <- ddply(shrub_mds_selected, "Land_use_type", shrub_find_hull)
 # mds plots for trees and shrubs by land use types
-ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
+            geom_point(size=3) +
             labs(title = "Tree", subtitle = tree_landuseclass_mds_lab) +
-            geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(),
-          ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Landuse_class)) + geom_point(size=3) +
+            geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
+            theme(axis.text = element_text(size = 12), 
+                  legend.title = element_text(size = 15), 
+                  legend.text = element_text(size = 12)) +
+            theme_bw(),
+          ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
+            geom_point(size=3) +
             labs(title = "Shrub", subtitle = shrub_landuseclass_mds_lab) +
-            geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Landuse_class), size=1) +theme_bw(),
+            geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
+            theme(axis.text = element_text(size = 12), 
+                  legend.title = element_text(size = 15), 
+                  legend.text = element_text(size = 12)) +
+            theme_bw(),
           common.legend = T, legend = "right"
 )
 #
-# pairwise result of ANOSIM of trees by landuse_class
+# pairwise result of ANOSIM of trees by Land_use_type
 tree_pair_anosim_list <- vector("list",3)
-tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Landuse_class)),2)[1,])
-tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Landuse_class)),2)[2,])
+tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Land_use_type)),2)[1,])
+tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Land_use_type)),2)[2,])
 set.seed(1234)
 for (i in 1:length(tree_pair_anosim_list[[1]])) {
-  tree_mds_selected_sub <- subset(tree_mds_selected, Landuse_class == tree_pair_anosim_list[[1]][i] |
-                                    Landuse_class == tree_pair_anosim_list[[2]][i])
+  tree_mds_selected_sub <- subset(tree_mds_selected, Land_use_type == tree_pair_anosim_list[[1]][i] |
+                                    Land_use_type == tree_pair_anosim_list[[2]][i])
   tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
                                   anosim(tree_mds_selected_sub[2:(number_tree_species+1)], 
-                                         tree_mds_selected_sub$Landuse_class)$signif)
+                                         tree_mds_selected_sub$Land_use_type)$signif)
 }
 tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
                                   comp_2 = tree_pair_anosim_list[[2]], 
                                   p = tree_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
 
-# pairwise result of ANOSIM of shrubs by landuse_class
+# pairwise result of ANOSIM of shrubs by Land_use_type
 shrub_pair_anosim_list <- vector("list",3)
-shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Landuse_class)),2)[1,])
-shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Landuse_class)),2)[2,])
+shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Land_use_type)),2)[1,])
+shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Land_use_type)),2)[2,])
 set.seed(1234)
 for (i in 1:length(shrub_pair_anosim_list[[1]])) {
-  shrub_mds_selected_sub <- subset(shrub_mds_selected, Landuse_class == shrub_pair_anosim_list[[1]][i] |
-                                     Landuse_class == shrub_pair_anosim_list[[2]][i])
+  shrub_mds_selected_sub <- subset(shrub_mds_selected, Land_use_type == shrub_pair_anosim_list[[1]][i] |
+                                     Land_use_type == shrub_pair_anosim_list[[2]][i])
   shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
                                    anosim(shrub_mds_selected_sub[2:(number_shrub_species+1)], 
-                                          shrub_mds_selected_sub$Landuse_class)$signif)
+                                          shrub_mds_selected_sub$Land_use_type)$signif)
 }
 shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
                                    comp_2 = shrub_pair_anosim_list[[2]], 
-                                   p = shrub_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
+                                   p = shrub_pair_anosim_list[[3]]) %>% 
+  subset(p < 0.05) %>% print()
 
 
 
 
 ## cor among the indexes
-chart.Correlation(subset(tree_diversity, select = c("Sum_stem", "Richness", "Shannon", "Simpson", "Evenness")))
-chart.Correlation(subset(shrub_diversity, select = c("Sum_area", "Richness", "Shannon", "Simpson", "Evenness")))
+chart.Correlation(subset(tree_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
+chart.Correlation(subset(shrub_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
 
 
 
-## kruskal test & boxplot for trees 
+## Kruskal-Wallis test & boxplot for trees 
 # p-value matrix for tree 
 set.seed(1234)
 boxplot_list_index_attr <- vector("list", 2)
 #
 {
   pvalue_list <- vector("list", 2)
-  for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
     pvalue_list[[1]] <- c(pvalue_list[[1]], i)
     pvalue_list[[2]] <- c(pvalue_list[[2]], 
-                          round(kruskal.test(tree_diversity[, i] ~ tree_diversity$Landuse_class)$p.value,digits = 3))
+                          round(kruskal.test(tree_diversity[, i] ~ tree_diversity$Land_use_type)$p.value,digits = 3))
   }
   pvalue <- data.frame(index = pvalue_list[[1]],
-                       pvalue = pvalue_list[[2]])
+                       pvalue = pvalue_list[[2]]) %>% 
+    mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")))
   pvalue$label <- NA
   pvalue$label[pvalue$pvalue >= 0.05] <- 
     paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
@@ -500,21 +426,23 @@ boxplot_list_index_attr[[1]] <- tree_diversity_long %>%
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
-  scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
-  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text = element_text(angle = 90)) + 
+  scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
+  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), 
+            size=3.5, hjust = 1.05, vjust = 1.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 12)) + 
   labs(title = "(a)", x = NULL, y = NULL)
 #
 # for shrub
 {
   pvalue_list <- vector("list", 2)
-  for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
     pvalue_list[[1]] <- c(pvalue_list[[1]], i)
     pvalue_list[[2]] <- c(pvalue_list[[2]], 
-                          round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity$Landuse_class)$p.value,digits = 3))
+                          round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity$Land_use_type)$p.value,digits = 3))
   }
   pvalue <- data.frame(index = pvalue_list[[1]],
-                       pvalue = pvalue_list[[2]])
+                       pvalue = pvalue_list[[2]]) %>% 
+    mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")))
   pvalue$label <- NA
   pvalue$label[pvalue$pvalue >= 0.05] <- 
     paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
@@ -530,9 +458,10 @@ boxplot_list_index_attr[[2]] <- shrub_diversity_long %>%
   na.omit() %>%
   ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
   facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
-  scale_y_continuous(expand = expand_scale(mult = c(0.05,0.3))) +
-  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text = element_text(angle = 90)) + 
+  scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
+  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), 
+            size=3.5, hjust = 1.05, vjust = 1.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 12)) + 
   labs(title = "(b)", x = NULL, y = NULL)
 Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
 # delete the vars
@@ -543,26 +472,26 @@ rm(pvalue, pvalue_list)
 ## pairwise dunn test of diversity ~ landuse class
 pairwise_list <- vector("list", 4)
 # list of pairwise test of diversity of tree
-for (i in c("Sum_stem", "Richness", "Shannon", "Evenness")) {
+for (i in c("Density", "Richness", "Shannon", "Evenness")) {
   pairwise_list[[1]] <- c(pairwise_list[[1]], 
                           rep("tree", 15))
   pairwise_list[[2]] <- c(pairwise_list[[2]], 
                           rep(i, 15))
   pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                          dunn.test(tree_diversity[, i], tree_diversity$Landuse_class)$comparisons)
+                          dunn.test(tree_diversity[, i], tree_diversity$Land_use_type)$comparisons)
   pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                          dunn.test(tree_diversity[, i], tree_diversity$Landuse_class)$P.adjusted)
+                          dunn.test(tree_diversity[, i], tree_diversity$Land_use_type)$P.adjusted)
 }
 # list of pairwise test of diversity and attrs of shrub
-for (i in c("Sum_area", "Richness", "Shannon", "Evenness")) {
+for (i in c("Density", "Richness", "Shannon", "Evenness")) {
   pairwise_list[[1]] <- c(pairwise_list[[1]], 
                           rep("shrub", 15))
   pairwise_list[[2]] <- c(pairwise_list[[2]], 
                           rep(i, 15))
   pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                          dunn.test(shrub_diversity[, i], shrub_diversity$Landuse_class)$comparisons)
+                          dunn.test(shrub_diversity[, i], shrub_diversity$Land_use_type)$comparisons)
   pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                          dunn.test(shrub_diversity[, i], shrub_diversity$Landuse_class)$P.adjusted)
+                          dunn.test(shrub_diversity[, i], shrub_diversity$Land_use_type)$P.adjusted)
 }
 # data frame of pairwise test of tree and shrub
 pairwise_df_up <- data.frame(taxa = pairwise_list[[1]], 
@@ -577,9 +506,9 @@ pairwise_df_down <- data.frame(
   comparison_2 = pairwise_df_up$comparison_1, 
   p = pairwise_df_up$p)
 pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>% 
-  mutate(index = factor(index, levels = c("Sum_stem", "Sum_area", "Richness", "Shannon", "Evenness")), 
-         comparison_1 = factor(comparison_1, levels = Landuse_class_faclev), 
-         comparison_2 = factor(comparison_2, levels = Landuse_class_faclev))
+  mutate(index = factor(index, levels = c("Density", "Density", "Richness", "Shannon", "Evenness")), 
+         comparison_1 = factor(comparison_1, levels = Land_use_type_faclev), 
+         comparison_2 = factor(comparison_2, levels = Land_use_type_faclev))
 # plot the pairwise test results
 ggarrange(ggplot(subset(pairwise_df, taxa == "tree"), 
                  aes(comparison_1, comparison_2, fill = p))+
