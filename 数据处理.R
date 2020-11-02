@@ -169,16 +169,20 @@ for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
 ## Species accumulation curve 
 accum_list <- vector("list", 4)
 for (i in Land_use_type_faclev) {
-  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)
-  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(specaccum(subset(tree_diversity, Land_use_type == i)[,2:(number_tree_species+1)])$sites)))
+  accum_data <- specaccum(subset(tree_diversity, 
+                                 Land_use_type == i)[,2:(number_tree_species+1)])
+  accum_list[[1]] <- c(accum_list[[1]], accum_data$sites)
+  accum_list[[2]] <- c(accum_list[[2]], accum_data$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(accum_data$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(accum_data$sites)))
 }
 for (i in Land_use_type_faclev) {
-  accum_list[[1]] <- c(accum_list[[1]], specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)
-  accum_list[[2]] <- c(accum_list[[2]], specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(specaccum(subset(shrub_diversity, Land_use_type == i)[,2:(number_shrub_species+1)])$sites)))
+  accum_data <- specaccum(subset(shrub_diversity, 
+                                 Land_use_type == i)[,2:(number_shrub_species+1)])
+  accum_list[[1]] <- c(accum_list[[1]], accum_data$sites)
+  accum_list[[2]] <- c(accum_list[[2]], accum_data$richness)
+  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(accum_data$sites)))
+  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(accum_data$sites)))
 }
 accum_df <- data.frame(
   number_of_plot = accum_list[[1]], 
