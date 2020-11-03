@@ -205,62 +205,20 @@ rm(accum_ori, accum_list, accum_df)
 
 
 ## rank abundance plot
-# the rank abundance plot by land use types of trees
-tree_rank_list <- vector("list", 6)
-for (i in Land_use_type_faclev) {
-  tree_rank_ori <- 
-    subset(tree_diversity, Land_use_type == i)[2:(number_tree_species+1)] %>% 
-    subset(select = colSums(.) != 0) %>% 
+fun_rank <- function(x, y) {
+  as.data.frame(x[2:(y+1)]) %>%
+    subset(select = colSums(.) != 0) %>%
+    rankabundance() %>% 
     as.data.frame() %>%
-    rankabundance() %>%
-    as.data.frame()
-  tree_rank_list[[1]] <- c(tree_rank_list[[1]], rownames(tree_rank_ori))
-  tree_rank_list[[2]] <- c(tree_rank_list[[2]], tree_rank_ori$rank)
-  tree_rank_list[[3]] <- c(tree_rank_list[[3]], tree_rank_ori$rankfreq)
-  tree_rank_list[[4]] <- c(tree_rank_list[[4]], tree_rank_ori$abundance)
-  tree_rank_list[[5]] <- c(tree_rank_list[[5]], tree_rank_ori$proportion)
-  tree_rank_list[[6]] <- c(tree_rank_list[[6]], rep(i, nrow(tree_rank_ori)))
+    mutate(Species_LT = rownames(.))
 }
-tree_rank_df <- data.frame(
-  Species_LT = tree_rank_list[[1]], 
-  Rank = tree_rank_list[[2]], 
-  Scaled_rank = tree_rank_list[[3]], 
-  Abundance = tree_rank_list[[4]], 
-  Proportion = tree_rank_list[[5]], 
-  Land_use_type = tree_rank_list[[6]]
-) %>% 
-  left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
-  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
-
-# the rank abundance plot by land use types of shrubs
-shrub_rank_list <- vector("list", 6)
-for (i in Land_use_type_faclev) {
-  shrub_rank_ori <- 
-    subset(shrub_diversity, Land_use_type == i)[2:(number_shrub_species+1)] %>% 
-    subset(select = colSums(.) != 0) %>% 
-    as.data.frame() %>%
-    rankabundance() %>%
-    as.data.frame()
-  shrub_rank_list[[1]] <- c(shrub_rank_list[[1]], rownames(shrub_rank_ori))
-  shrub_rank_list[[2]] <- c(shrub_rank_list[[2]], shrub_rank_ori$rank)
-  shrub_rank_list[[3]] <- c(shrub_rank_list[[3]], shrub_rank_ori$rankfreq)
-  shrub_rank_list[[4]] <- c(shrub_rank_list[[4]], shrub_rank_ori$abundance)
-  shrub_rank_list[[5]] <- c(shrub_rank_list[[5]], shrub_rank_ori$proportion)
-  shrub_rank_list[[6]] <- c(shrub_rank_list[[6]], rep(i, nrow(shrub_rank_ori)))
-}
-shrub_rank_df <- data.frame(
-  Species_LT = shrub_rank_list[[1]], 
-  Rank = shrub_rank_list[[2]], 
-  Scaled_rank = shrub_rank_list[[3]], 
-  Abundance = shrub_rank_list[[4]], 
-  Proportion = shrub_rank_list[[5]], 
-  Land_use_type = shrub_rank_list[[6]]
-) %>% 
-  left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
-  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
-
-# rearrange and plot
-ggarrange(ggplot(tree_rank_df, aes(Scaled_rank, log(Abundance), label = Species_LT)) + 
+tree_rank_df <- 
+  ddply(tree_diversity, "Land_use_type", y = number_tree_species, fun_rank) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
+shrub_rank_df <- 
+  ddply(shrub_diversity, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
+ggarrange(ggplot(tree_rank_df, aes(rankfreq, log(abundance))) + 
             geom_line() + 
             geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
             facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(a)") + 
@@ -271,9 +229,9 @@ ggarrange(ggplot(tree_rank_df, aes(Scaled_rank, log(Abundance), label = Species_
                   axis.text = element_text(size = 10),
                   legend.title = element_text(size = 12),
                   legend.text = element_text(size = 12)),
-          ggplot(shrub_rank_df, aes(Scaled_rank, log(Abundance), label = Species_LT)) + 
+          ggplot(shrub_rank_df, aes(rankfreq, log(abundance))) + 
             geom_line() + 
-            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) +
+            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
             facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(b)") + 
             labs(x = "Scaled rank of species", y = "Log (abundance)") + 
             scale_color_discrete("Provenance") +
@@ -284,19 +242,17 @@ ggarrange(ggplot(tree_rank_df, aes(Scaled_rank, log(Abundance), label = Species_
                   legend.text = element_text(size = 12)), 
           nrow = 2, common.legend = T, legend = "bottom"
 )
-
 # the top 3 species regarding abundance
-subset(tree_rank_df, Rank <= 3)
-subset(shrub_rank_df, Rank <= 3)
+subset(tree_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
+subset(shrub_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
 # calculate the EQ evenness index and plot
-community_structure(tree_rank_df, time.var = "Land_use_type", 
-                               abundance.var = "Abundance", metric = "EQ") %>% 
+community_structure(
+  tree_rank_df, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>% 
   arrange(EQ)
-community_structure(shrub_rank_df, time.var = "Land_use_type", 
-                                abundance.var = "Abundance", metric = "EQ") %>%
+community_structure(
+  shrub_rank_df, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
   arrange(EQ)
-rm(tree_rank_ori, tree_rank_list, tree_rank_df, 
-   shrub_rank_ori, shrub_rank_list, shrub_rank_df)
+rm(tree_rank_df, shrub_rank_df, fun_rank)
 
 
 
