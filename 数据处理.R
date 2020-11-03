@@ -87,23 +87,6 @@ shrub_diversity <- shrub_diversity %>% mutate(
 )
 rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
-# tree diversity longer and shrub diversity longer data set
-tree_diversity_long <- 
-  subset(tree_diversity, 
-         select = c("Density", "Richness", "Shannon", "Evenness","Land_use_type")) %>% 
-  pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
-         Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)))
-
-shrub_diversity_long <- 
-  subset(shrub_diversity, 
-         select = c("Density", "Richness", "Shannon", "Evenness", "Land_use_type")) %>% 
-  pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
-               names_to = "index", values_to = "index_value") %>% 
-  mutate(index = factor(index, levels = c("Density", "Richness", "Shannon","Evenness")), 
-         Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)))
-
 # some other variables 
 number_tree_species <- length(unique(tree_data$Species_LT))
 number_shrub_species <- length(unique(shrub_data$Species_LT))
@@ -347,81 +330,71 @@ rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected, tree_mds_selected_
    anosim_pairs, pair_anosim_list, fun_find_hull)
 
 
+
 ## cor among the indexes
-chart.Correlation(subset(tree_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
-chart.Correlation(subset(shrub_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
+chart.Correlation(subset(tree_diversity, 
+                         select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
+chart.Correlation(subset(shrub_diversity, 
+                         select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
 
 
 
-## Kruskal-Wallis test & boxplot for trees 
-# p-value matrix for tree 
-set.seed(1234)
-boxplot_list_index_attr <- vector("list", 2)
-#
-{
-  pvalue_list <- vector("list", 2)
-  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
-    pvalue_list[[1]] <- c(pvalue_list[[1]], i)
-    pvalue_list[[2]] <- c(pvalue_list[[2]], 
-                          round(kruskal.test(tree_diversity[, i] ~ tree_diversity$Land_use_type)$p.value,digits = 3))
-  }
-  pvalue <- data.frame(index = pvalue_list[[1]],
-                       pvalue = pvalue_list[[2]]) %>% 
-    mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")))
-  pvalue$label <- NA
-  pvalue$label[pvalue$pvalue >= 0.05] <- 
-    paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
-  pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01]), "*", sep = "")
-  pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001]), "**", sep = "")
-  pvalue$label[pvalue$pvalue < 0.001] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.001]), "***", sep = "")
+## Kruskal-Wallis test & box plot for trees 
+# tree diversity longer and shrub diversity longer data set
+fun_cons_long <- function(x) {
+  subset(x, select = c("Density", "Richness", "Shannon", "Evenness","Land_use_type")) %>% 
+    pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
+                 names_to = "Index", values_to = "Index_value") %>% 
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
+           Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)), 
+           Attr = c("Land use type")) %>% 
+    na.omit()
 }
-boxplot_list_index_attr[[1]] <- tree_diversity_long %>% 
-  na.omit() %>%
-  ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
-  facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
-  scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
-  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), 
-            size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text.x = element_text(angle = 90, size = 12)) + 
-  labs(title = "(a)", x = NULL, y = NULL)
-#
-# for shrub
-{
-  pvalue_list <- vector("list", 2)
+tree_diversity_long <- fun_cons_long(tree_diversity)
+shrub_diversity_long <- fun_cons_long(shrub_diversity)
+
+# get p-values for box plots
+fun_get_pvalue <- function(x) {
+  y <- data.frame(Index = c("Density", "Richness", "Shannon", "Evenness"), 
+             Pvalue = NA, Label = NA) %>% 
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")))
+  j <- 0
   for (i in c("Density", "Richness", "Shannon", "Evenness")) {
-    pvalue_list[[1]] <- c(pvalue_list[[1]], i)
-    pvalue_list[[2]] <- c(pvalue_list[[2]], 
-                          round(kruskal.test(shrub_diversity[, i] ~ shrub_diversity$Land_use_type)$p.value,digits = 3))
+    j <- j+1
+    y$Pvalue[j] <- round(kruskal.test(
+      as.data.frame(x)[, i] ~ x$Land_use_type)$p.value,digits = 3)
   }
-  pvalue <- data.frame(index = pvalue_list[[1]],
-                       pvalue = pvalue_list[[2]]) %>% 
-    mutate(index = factor(index, levels = c("Density", "Richness", "Shannon", "Evenness")))
-  pvalue$label <- NA
-  pvalue$label[pvalue$pvalue >= 0.05] <- 
-    paste("p=", sprintf("%.3f",pvalue$pvalue[pvalue$pvalue>0.05]), sep = "")
-  pvalue$label[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.05 & pvalue$pvalue >= 0.01]), "*", sep = "")
-  pvalue$label[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.01 & pvalue$pvalue >= 0.001]), "**", sep = "")
-  pvalue$label[pvalue$pvalue < 0.001] <- 
-    paste("p=", sprintf("%.3f", pvalue$pvalue[pvalue$pvalue < 0.001]), "***", sep = "")
+  y$Label <- case_when(
+    y$Pvalue >= 0.05 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), sep = ""), 
+    y$Pvalue < 0.05 & y$Pvalue >= 0.01 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "*", sep = ""), 
+    y$Pvalue < 0.01 & y$Pvalue >= 0.001 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "**", sep = ""),
+    y$Pvalue < 0.001 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "***", sep = "")
+  )
+  data.frame(y)
 }
-#
-boxplot_list_index_attr[[2]] <- shrub_diversity_long %>% 
-  na.omit() %>%
-  ggplot(aes(attr_value, index_value)) + geom_boxplot() + 
-  facet_grid(index ~ attr, scales = "free", space = "free_x", switch = "both") + 
-  scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
-  geom_text(data = pvalue, aes(x =Inf, y = Inf, label = label), 
-            size=3.5, hjust = 1.05, vjust = 1.5) +
-  theme(axis.text.x = element_text(angle = 90, size = 12)) + 
-  labs(title = "(b)", x = NULL, y = NULL)
-Rmisc::multiplot(plotlist = boxplot_list_index_attr, cols = 2)
-# delete the vars
-rm(pvalue, pvalue_list)
+tree_box_pvalue <- fun_get_pvalue(tree_diversity)
+shrub_box_pvalue <- fun_get_pvalue(shrub_diversity)
+
+# get box plots
+fun_box_plot <- function(x, y, z) {
+  ggplot(x, aes(Land_use_type, Index_value)) + 
+    geom_boxplot() + 
+    facet_grid(Index ~ Attr, scales = "free", space = "free_x", switch = "both") + 
+    scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
+    geom_text(data = y, aes(x =Inf, y = Inf, label = Label), 
+              size=3.5, hjust = 1.05, vjust = 1.5) +
+    theme(axis.text.x = element_text(angle = 90, size = 12)) + 
+    labs(title = z, x = NULL, y = NULL)
+}
+ggarrange(fun_box_plot(tree_diversity_long, tree_box_pvalue, "(a)"), 
+          fun_box_plot(shrub_diversity_long, shrub_box_pvalue, "(b)"))
+rm(tree_box_pvalue, tree_diversity_long, 
+   shrub_box_pvalue, shrub_diversity_long, 
+   fun_box_plot, fun_cons_long, fun_get_pvalue)
 
 
 
