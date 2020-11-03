@@ -231,7 +231,7 @@ tree_rank_df <- data.frame(
 ) %>% 
   left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
   mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
-#
+
 # the rank abundance plot by land use types of shrubs
 shrub_rank_list <- vector("list", 6)
 for (i in Land_use_type_faclev) {
@@ -258,7 +258,7 @@ shrub_rank_df <- data.frame(
 ) %>% 
   left_join(all_plant_info[, c("Species_LT", "Nt_ex")], by = "Species_LT") %>% 
   mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
-#
+
 # rearrange and plot
 ggarrange(ggplot(tree_rank_df, aes(Scaled_rank, log(Abundance), label = Species_LT)) + 
             geom_line() + 
@@ -284,7 +284,7 @@ ggarrange(ggplot(tree_rank_df, aes(Scaled_rank, log(Abundance), label = Species_
                   legend.text = element_text(size = 12)), 
           nrow = 2, common.legend = T, legend = "bottom"
 )
-#
+
 # the top 3 species regarding abundance
 subset(tree_rank_df, Rank <= 3)
 subset(shrub_rank_df, Rank <= 3)
@@ -300,49 +300,45 @@ rm(tree_rank_ori, tree_rank_list, tree_rank_df,
 
 
 
-## mds analysis
+## Non-metric multidimensional scaling analysis
 set.seed(1234)
-#
-# nmds calculation for tree
-tree_mds_selected <- tree_diversity %>% filter(Density > 3)
-tree_mds_metaMDS <- tree_mds_selected %>% 
-  select(2:(grep("Density", colnames(tree_mds_selected))-1)) %>%
+
+# nMDS calculation for tree
+tree_mds_selected <- subset(tree_diversity, Density > 3)
+tree_mds_meta <- tree_mds_selected %>% 
+  select(2:(number_tree_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
-tree_mds_metaMDS$stress
-stressplot(tree_mds_metaMDS)
-tree_mds_selected <- cbind(tree_mds_selected, tree_mds_metaMDS$points)
-#
-# nmds calculation for shrub
+tree_mds_meta$stress
+stressplot(tree_mds_meta)
+tree_mds_selected <- cbind(tree_mds_selected, tree_mds_meta$points)
+
+# nMDS calculation for shrub
 shrub_mds_selected <- shrub_diversity %>% filter(Density > 5)
-shrub_mds_metaMDS <- shrub_mds_selected %>% 
-  select(2:(grep("Density", colnames(shrub_mds_selected))-1)) %>%
+shrub_mds_meta <- shrub_mds_selected %>% 
+  select(2:(number_shrub_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
-shrub_mds_metaMDS$stress
-stressplot(shrub_mds_metaMDS)
-shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_metaMDS$points)
-#
-# mds plot for trees and shrubs
-# general Anosim of trees and shrubs
-tree_landuseclass_anosim_result <- anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Land_use_type)
-shrub_landuseclass_anosim_result <- anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Land_use_type)
-# get statistic results as labels for the mds plots
-tree_landuseclass_mds_lab <- paste("stress=", round(tree_mds_metaMDS$stress, digits = 3), 
-                                   ", R=", round(tree_landuseclass_anosim_result$statistic, digits = 3), 
-                                   ", p=", round(tree_landuseclass_anosim_result$signif, digits = 3), 
-                                   sep = "")
-shrub_landuseclass_mds_lab <- paste("stress=", round(shrub_mds_metaMDS$stress, digits = 3), 
-                                    ", R=", round(shrub_landuseclass_anosim_result$statistic, digits = 3), 
-                                    ", p=", round(shrub_landuseclass_anosim_result$signif, digits = 3), 
-                                    sep = "")
-# get hull for mds plots of trees and shrubs
-tree_find_hull <- function(tree_mds_selected) tree_mds_selected[chull(tree_mds_selected$MDS1, tree_mds_selected$MDS2), ]
-tree_hulls <- ddply(tree_mds_selected, "Land_use_type", tree_find_hull)
-shrub_find_hull <- function(shrub_mds_selected) shrub_mds_selected[chull(shrub_mds_selected$MDS1, shrub_mds_selected$MDS2), ]
-shrub_hulls <- ddply(shrub_mds_selected, "Land_use_type", shrub_find_hull)
-# mds plots for trees and shrubs by land use types
+shrub_mds_meta$stress
+stressplot(shrub_mds_meta)
+shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_meta$points)
+
+# ANOSIM of trees and shrubs as labels for the nMDS plots
+tree_anosim <- 
+  anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Land_use_type)
+shrub_anosim <- 
+  anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Land_use_type)
+
+# get hull for nMDS plots of trees and shrubs
+fun_find_hull <- function(x) {x[chull(x$MDS1, x$MDS2), ]}
+tree_hulls <- ddply(tree_mds_selected, "Land_use_type", fun_find_hull)
+shrub_hulls <- ddply(shrub_mds_selected, "Land_use_type", fun_find_hull)
+
+# nMDS plots for trees and shrubs by land use types
 ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
             geom_point(size=3) +
-            labs(title = "Tree", subtitle = tree_landuseclass_mds_lab) +
+            labs(title = "Tree", 
+                 subtitle = paste("stress=", round(tree_mds_meta$stress, digits = 3),
+                                  ", R=", round(tree_anosim$statistic, digits = 3),
+                                  ", p=", round(tree_anosim$signif, digits = 3),sep = "")) +
             geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
             theme(axis.text = element_text(size = 12), 
                   legend.title = element_text(size = 15), 
@@ -350,7 +346,10 @@ ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) +
             theme_bw(),
           ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
             geom_point(size=3) +
-            labs(title = "Shrub", subtitle = shrub_landuseclass_mds_lab) +
+            labs(title = "Shrub", 
+                 subtitle = paste("stress=", round(shrub_mds_meta$stress, digits = 3),
+                                  ", R=", round(shrub_anosim$statistic, digits = 3),
+                                  ", p=", round(shrub_anosim$signif, digits = 3), sep = "")) +
             geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
             theme(axis.text = element_text(size = 12), 
                   legend.title = element_text(size = 15), 
@@ -358,7 +357,7 @@ ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) +
             theme_bw(),
           common.legend = T, legend = "right"
 )
-#
+
 # pairwise result of ANOSIM of trees by Land_use_type
 tree_pair_anosim_list <- vector("list",3)
 tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Land_use_type)),2)[1,])
