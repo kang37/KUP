@@ -258,7 +258,6 @@ rm(tree_rank_df, shrub_rank_df, fun_rank)
 
 ## Non-metric multidimensional scaling analysis
 set.seed(1234)
-
 # nMDS calculation for tree
 tree_mds_selected <- subset(tree_diversity, Density > 3)
 tree_mds_meta <- tree_mds_selected %>% 
@@ -315,39 +314,37 @@ ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) +
 )
 
 # pairwise result of ANOSIM of trees by Land_use_type
-tree_pair_anosim_list <- vector("list",3)
-tree_pair_anosim_list[[1]] <- c(combn(levels(factor(tree_mds_selected$Land_use_type)),2)[1,])
-tree_pair_anosim_list[[2]] <- c(combn(levels(factor(tree_mds_selected$Land_use_type)),2)[2,])
-set.seed(1234)
-for (i in 1:length(tree_pair_anosim_list[[1]])) {
-  tree_mds_selected_sub <- subset(tree_mds_selected, Land_use_type == tree_pair_anosim_list[[1]][i] |
-                                    Land_use_type == tree_pair_anosim_list[[2]][i])
-  tree_pair_anosim_list[[3]] <- c(tree_pair_anosim_list[[3]], 
-                                  anosim(tree_mds_selected_sub[2:(number_tree_species+1)], 
-                                         tree_mds_selected_sub$Land_use_type)$signif)
+anosim_pairs <- combn(levels(factor(tree_mds_selected$Land_use_type)),2)
+pair_anosim_list <- vector("list",4)
+pair_anosim_list[[1]] <- rep(c("tree", "shrub"), each = ncol(anosim_pairs))
+pair_anosim_list[[2]] <- rep(anosim_pairs[1,], 2)
+pair_anosim_list[[3]] <- rep(anosim_pairs[2,], 2)
+for (i in 1:ncol(anosim_pairs)) {
+  set.seed(1234)
+  tree_mds_selected_sub <- subset(
+    tree_mds_selected, Land_use_type == pair_anosim_list[[2]][i] | 
+      Land_use_type == pair_anosim_list[[3]][i])
+  pair_anosim_list[[4]] <- c(pair_anosim_list[[4]], 
+                             anosim(tree_mds_selected_sub[2:(number_tree_species+1)], 
+                                    tree_mds_selected_sub$Land_use_type)$signif)
 }
-tree_pair_anosim_df <- data.frame(comp_1 = tree_pair_anosim_list[[1]], 
-                                  comp_2 = tree_pair_anosim_list[[2]], 
-                                  p = tree_pair_anosim_list[[3]]) %>% subset(p < 0.05) %>% print()
-
-# pairwise result of ANOSIM of shrubs by Land_use_type
-shrub_pair_anosim_list <- vector("list",3)
-shrub_pair_anosim_list[[1]] <- c(combn(levels(factor(shrub_mds_selected$Land_use_type)),2)[1,])
-shrub_pair_anosim_list[[2]] <- c(combn(levels(factor(shrub_mds_selected$Land_use_type)),2)[2,])
-set.seed(1234)
-for (i in 1:length(shrub_pair_anosim_list[[1]])) {
-  shrub_mds_selected_sub <- subset(shrub_mds_selected, Land_use_type == shrub_pair_anosim_list[[1]][i] |
-                                     Land_use_type == shrub_pair_anosim_list[[2]][i])
-  shrub_pair_anosim_list[[3]] <- c(shrub_pair_anosim_list[[3]], 
-                                   anosim(shrub_mds_selected_sub[2:(number_shrub_species+1)], 
-                                          shrub_mds_selected_sub$Land_use_type)$signif)
+for (i in 1:ncol(anosim_pairs)) {
+  set.seed(1234)
+  shrub_mds_selected_sub <- subset(
+    shrub_mds_selected, Land_use_type == pair_anosim_list[[2]][i] | 
+      Land_use_type == pair_anosim_list[[3]][i])
+  pair_anosim_list[[4]] <- c(pair_anosim_list[[4]], 
+                             anosim(shrub_mds_selected_sub[2:(number_shrub_species+1)], 
+                                    shrub_mds_selected_sub$Land_use_type)$signif)
 }
-shrub_pair_anosim_df <- data.frame(comp_1 = shrub_pair_anosim_list[[1]], 
-                                   comp_2 = shrub_pair_anosim_list[[2]], 
-                                   p = shrub_pair_anosim_list[[3]]) %>% 
-  subset(p < 0.05) %>% print()
-
-
+data.frame(Tree_shrub = pair_anosim_list[[1]],
+           Comp_1 = pair_anosim_list[[2]], 
+           Comp_2 = pair_anosim_list[[3]], 
+           p = pair_anosim_list[[4]]) %>% 
+  subset(p < 0.05)
+rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected, tree_mds_selected_sub,
+   shrub_anosim, shrub_hulls, shrub_mds_meta, shrub_mds_selected, shrub_mds_selected_sub, 
+   anosim_pairs, pair_anosim_list, fun_find_hull)
 
 
 ## cor among the indexes
