@@ -11,7 +11,7 @@ library(codyn)
 library(ggpubr)
 
 ## get data
-# define default parameters
+#some default parameters
 opar <- par(no.readonly = TRUE)
 Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
 
@@ -55,7 +55,8 @@ tree_diversity <- tree_diversity %>% mutate(
   perc_nonstreet = tree_diversity_perc_nonstreet$perc, 
   perc_native = tree_diversity_perc_native$perc
 )
-rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private, tree_diversity_perc_nonstreet, tree_diversity_perc_native)
+rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private,
+   tree_diversity_perc_nonstreet, tree_diversity_perc_native)
 
 # data of shrubs and diversity matrix of shrubs
 shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL)
@@ -66,7 +67,7 @@ shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_LT", "Area"
          Richness = apply(.[2:ncol(.)]>0, 1, sum),
          Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
          Simpson = diversity(.[2:ncol(.)], index = "simpson"),
-         Evenness = Shannon / log(Richness)) %>%
+         Evenness = Shannon / log(Richness)) %>% 
   left_join(all_plot_info, by = "Plot_ID") 
 shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
   dplyr::summarise(perc = sum(ifelse(Pla_spo == "planted", Area, 0)/sum(Area))) 
@@ -85,12 +86,12 @@ shrub_diversity <- shrub_diversity %>% mutate(
   perc_nonstreet = shrub_diversity_perc_nonstreet$perc, 
   perc_native = shrub_diversity_perc_native$perc
 )
-rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private, shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
+rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private,
+   shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
 
 # some other variables 
 number_tree_species <- length(unique(tree_data$Species_LT))
 number_shrub_species <- length(unique(shrub_data$Species_LT))
-
 
 
 ### analysis begins
@@ -117,63 +118,46 @@ all_plant_info %>% group_by(Family) %>%
 cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n", 
     "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(shrub_diversity), "plot")
 
-# top species families of trees by individual
+# top species families of trees and shrubs by abundance
 tree_data %>% 
   group_by(Family) %>% 
   dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
   arrange(desc(Prop))
-
-# top species families of shrubs by area
 shrub_data %>% 
   group_by(Family) %>% 
   dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
   arrange(desc(Prop))
 
 
-
 ## attributes of trees and shrubs
 # the number of exotic vs. native species
 table(all_plant_info$Nt_ex)/nrow(all_plant_info)
 
-# the attributes of trees
+# the attributes of trees and shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 3)
   cat("\n")
 }
-
-# the attributes of shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 3)
   cat("\n")
 }
 
 
-
 ## Species accumulation curve 
-accum_list <- vector("list", 4)
-for (i in Land_use_type_faclev) {
-  accum_ori <- specaccum(subset(tree_diversity, 
-                                Land_use_type == i)[,2:(number_tree_species+1)])
-  accum_list[[1]] <- c(accum_list[[1]], accum_ori$sites)
-  accum_list[[2]] <- c(accum_list[[2]], accum_ori$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(accum_ori$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("tree", length(accum_ori$sites)))
+fun_accum <- function(x, y, z) {
+  ori <- specaccum(x[, 2:(y+1)])
+  data.frame("number_of_plot" = ori$sites,
+             "number_of_species" = ori$richness, 
+             "tree_shrub" = z)
 }
-for (i in Land_use_type_faclev) {
-  accum_ori <- specaccum(subset(shrub_diversity, 
-                                Land_use_type == i)[,2:(number_shrub_species+1)])
-  accum_list[[1]] <- c(accum_list[[1]], accum_ori$sites)
-  accum_list[[2]] <- c(accum_list[[2]], accum_ori$richness)
-  accum_list[[3]] <- c(accum_list[[3]], rep(i, length(accum_ori$sites)))
-  accum_list[[4]] <- c(accum_list[[4]], rep("shrub", length(accum_ori$sites)))
-}
-accum_df <- data.frame(
-  number_of_plot = accum_list[[1]], 
-  number_of_species = accum_list[[2]], 
-  Land_use_type = accum_list[[3]], 
-  tree_shrub = accum_list[[4]]
-) %>% mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
-             tree_shrub = factor(tree_shrub, levels = c("tree", "shrub")))
+tree_accum <- ddply(tree_diversity, .(Land_use_type), 
+                    y = number_tree_species, z = "tree", fun_accum)
+shrub_accum <- ddply(shrub_diversity, .(Land_use_type), 
+                     y = number_shrub_species, z = "shrub", fun_accum)
+accum_df <- rbind(tree_accum, shrub_accum) %>% 
+  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
+         tree_shrub = factor(tree_shrub, levels = c("tree", "shrub")))
 ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = Land_use_type)) + 
   geom_line(size = 1.5) + facet_wrap(~tree_shrub) + 
   theme(strip.text = element_text(size = 15), 
@@ -183,8 +167,7 @@ ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = Land_use
         legend.text = element_text(size = 12)) +
   labs(x = "Number of quadrats", y = "Accumulative number of species") +
   scale_color_discrete("Land use types")
-rm(accum_ori, accum_list, accum_df)
-
+rm(tree_accum, shrub_accum, fun_accum)
 
 
 ## rank abundance plot
