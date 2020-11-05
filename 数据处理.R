@@ -221,7 +221,6 @@ community_structure(
 rm(tree_rank_df, shrub_rank_df, fun_rank)
 
 
-
 ## Non-metric multidimensional scaling analysis
 set.seed(1234)
 # nMDS calculation for tree
@@ -254,29 +253,23 @@ tree_hulls <- ddply(tree_mds_selected, "Land_use_type", fun_find_hull)
 shrub_hulls <- ddply(shrub_mds_selected, "Land_use_type", fun_find_hull)
 
 # nMDS plots for trees and shrubs by land use types
-ggarrange(ggplot(tree_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
-            geom_point(size=3) +
-            labs(title = "Tree", 
-                 subtitle = paste("stress=", round(tree_mds_meta$stress, digits = 3),
-                                  ", R=", round(tree_anosim$statistic, digits = 3),
-                                  ", p=", round(tree_anosim$signif, digits = 3),sep = "")) +
-            geom_polygon(data=tree_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
-            theme(axis.text = element_text(size = 12), 
-                  legend.title = element_text(size = 15), 
-                  legend.text = element_text(size = 12)) +
-            theme_bw(),
-          ggplot(shrub_mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
-            geom_point(size=3) +
-            labs(title = "Shrub", 
-                 subtitle = paste("stress=", round(shrub_mds_meta$stress, digits = 3),
-                                  ", R=", round(shrub_anosim$statistic, digits = 3),
-                                  ", p=", round(shrub_anosim$signif, digits = 3), sep = "")) +
-            geom_polygon(data=shrub_hulls, alpha = 0, aes(fill=Land_use_type), size=1) +
-            theme(axis.text = element_text(size = 12), 
-                  legend.title = element_text(size = 15), 
-                  legend.text = element_text(size = 12)) +
-            theme_bw(),
-          common.legend = T, legend = "right"
+fun_nmds_plot <- function(mds_selected, hull, plot_title, mds_meta, anosim) {
+  ggplot(mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
+    geom_point(size=3) +
+    geom_polygon(data = hull, alpha = 0, aes(fill=Land_use_type), size=1) +
+    labs(title = plot_title, 
+         subtitle = paste("stress=", round(mds_meta$stress, digits = 3),
+                          ", R=", round(anosim$statistic, digits = 3),
+                          ", p=", round(anosim$signif, digits = 3),sep = "")) +
+    theme(axis.text = element_text(size = 12), 
+        legend.title = element_text(size = 15), 
+        legend.text = element_text(size = 12)) +
+    theme_bw()
+}
+ggarrange(
+  fun_nmds_plot(tree_mds_selected, tree_hulls, "tree", tree_mds_meta, tree_anosim), 
+  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "shrub", shrub_mds_meta, shrub_anosim),
+  common.legend = T, legend = "right"
 )
 
 # pairwise result of ANOSIM of trees by Land_use_type
