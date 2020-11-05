@@ -27,67 +27,38 @@ all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
   left_join(all_plant_info, by = "Species_LT") %>%
   left_join(all_plot_info,by = "Plot_ID")
 
-# data of trees and shrubs and diversity matrix of trees
+# data of trees and shrubs and diversity table of trees and shrubs 
 tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
-tree_diversity <- subset(tree_data, select = c("Plot_ID", "Species_LT", "Stem")) %>%
-  pivot_wider(names_from = Species_LT, values_from = Stem, 
-              values_fn = list(Stem = sum), values_fill = list(Stem = 0)) %>% 
-  mutate(Density = rowSums(.[2:ncol(.)]), 
-         Richness = specnumber(.[2:ncol(.)], MARGIN = 1),
-         Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
-         Simpson = diversity(.[2:ncol(.)], index = "simpson"),
-         Evenness = Shannon / log(Richness)) %>%
-  left_join(all_plot_info, by = "Plot_ID")
-tree_diversity_perc_planted <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "planted", Stem, 0)/sum(Stem))) 
-tree_diversity_perc_nonpot <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "non_pot", Stem, 0)/sum(Stem)))
-tree_diversity_perc_private <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "private", Stem, 0)/sum(Stem)))
-tree_diversity_perc_nonstreet <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "non_street", Stem, 0)/sum(Stem)))
-tree_diversity_perc_native <- tree_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "native", Stem, 0)/sum(Stem)))
-tree_diversity <- tree_diversity %>% mutate(
-  perc_planted = tree_diversity_perc_planted$perc, 
-  perc_nonpot = tree_diversity_perc_nonpot$perc, 
-  perc_private = tree_diversity_perc_private$perc, 
-  perc_nonstreet = tree_diversity_perc_nonstreet$perc, 
-  perc_native = tree_diversity_perc_native$perc
-)
-rm(tree_diversity_perc_planted, tree_diversity_perc_nonpot, tree_diversity_perc_private,
-   tree_diversity_perc_nonstreet, tree_diversity_perc_native)
-
-# data of shrubs and diversity matrix of shrubs
 shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL)
-shrub_diversity <- subset(shrub_data, select = c("Plot_ID", "Species_LT", "Area")) %>%
-  pivot_wider(names_from = Species_LT, values_from = Area, 
-              values_fn = list(Area = sum), values_fill = list(Area = 0)) %>% 
-  mutate(Density = rowSums(.[2:ncol(.)]), 
-         Richness = apply(.[2:ncol(.)]>0, 1, sum),
-         Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
-         Simpson = diversity(.[2:ncol(.)], index = "simpson"),
-         Evenness = Shannon / log(Richness)) %>% 
-  left_join(all_plot_info, by = "Plot_ID") 
-shrub_diversity_perc_planted <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pla_spo == "planted", Area, 0)/sum(Area))) 
-shrub_diversity_perc_nonpot <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pot == "non_pot", Area, 0)/sum(Area)))
-shrub_diversity_perc_private <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Pub_pri == "private", Area, 0)/sum(Area)))
-shrub_diversity_perc_nonstreet <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Street == "non_street", Area, 0)/sum(Area)))
-shrub_diversity_perc_native <- shrub_data %>% group_by(Plot_ID) %>% 
-  dplyr::summarise(perc = sum(ifelse(Nt_ex == "native", Area, 0)/sum(Area)))
-shrub_diversity <- shrub_diversity %>% mutate(
-  perc_planted = shrub_diversity_perc_planted$perc, 
-  perc_nonpot = shrub_diversity_perc_nonpot$perc, 
-  perc_private = shrub_diversity_perc_private$perc, 
-  perc_nonstreet = shrub_diversity_perc_nonstreet$perc, 
-  perc_native = shrub_diversity_perc_native$perc
-)
-rm(shrub_diversity_perc_planted, shrub_diversity_perc_nonpot, shrub_diversity_perc_private,
-   shrub_diversity_perc_nonstreet, shrub_diversity_perc_native)
+fun_div <- function(x, y, z) {
+  perc_planted <- x %>% group_by(Plot_ID) %>% 
+    summarise(perc = sum(ifelse(Pla_spo == "planted", {{y}}, 0)/sum({{y}})))
+  perc_nonpot <- x %>% group_by(Plot_ID) %>% 
+    summarise(perc = sum(ifelse(Pot == "non_pot", {{y}}, 0)/sum({{y}})))
+  perc_private <- x %>% group_by(Plot_ID) %>% 
+    summarise(perc = sum(ifelse(Pub_pri == "private", {{y}}, 0)/sum({{y}})))
+  perc_nonstreet <- x %>% group_by(Plot_ID) %>% 
+    summarise(perc = sum(ifelse(Street == "non_street", {{y}}, 0)/sum({{y}})))
+  perc_native <- x %>% group_by(Plot_ID) %>% 
+    summarise(perc = sum(ifelse(Nt_ex == "native", {{y}}, 0)/sum({{y}})))
+  subset(x, select = c("Plot_ID", "Species_LT", z)) %>%
+    pivot_wider(names_from = Species_LT, values_from = {{y}}, 
+                values_fn = sum, values_fill = 0) %>% 
+    mutate(Density = rowSums(.[2:ncol(.)]), 
+           Richness = apply(.[2:ncol(.)]>0, 1, sum),
+           Shannon = diversity(.[2:ncol(.)], index = "shannon"), 
+           Simpson = diversity(.[2:ncol(.)], index = "simpson"),
+           Evenness = Shannon / log(Richness), 
+           perc_planted = perc_planted$perc, 
+           perc_nonpot = perc_nonpot$perc, 
+           perc_private = perc_private$perc, 
+           perc_nonstreet = perc_nonstreet$perc, 
+           perc_native = perc_native$perc) %>% 
+    left_join(all_plot_info, by = "Plot_ID")
+}
+tree_diversity <- fun_div(tree_data, Stem, "Stem")
+shrub_diversity <- fun_div(shrub_data, Area, "Area")
+rm(fun_div)
 
 # some other variables 
 number_tree_species <- length(unique(tree_data$Species_LT))
