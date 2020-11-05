@@ -14,6 +14,7 @@ library(ggpubr)
 #some default parameters
 opar <- par(no.readonly = TRUE)
 Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
+index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
 
 # information of all the plots
 all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
@@ -54,7 +55,8 @@ fun_div <- function(x, y, z) {
            perc_private = perc_private$perc, 
            perc_nonstreet = perc_nonstreet$perc, 
            perc_native = perc_native$perc) %>% 
-    left_join(all_plot_info, by = "Plot_ID")
+    left_join(all_plot_info, by = "Plot_ID") %>% 
+    as.data.frame()
 }
 tree_diversity <- fun_div(tree_data, Stem, "Stem")
 shrub_diversity <- fun_div(shrub_data, Area, "Area")
@@ -143,7 +145,7 @@ rm(tree_accum, shrub_accum, fun_accum)
 
 ## rank abundance plot
 fun_rank <- function(x, y) {
-  as.data.frame(x[2:(y+1)]) %>%
+  x[2:(y+1)] %>%
     subset(select = colSums(.) != 0) %>%
     rankabundance() %>% 
     as.data.frame() %>%
@@ -277,13 +279,11 @@ rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected, tree_mds_selected_
    anosim_pairs, pair_anosim_list, fun_find_hull)
 
 
-
 ## cor among the indexes
-chart.Correlation(subset(tree_diversity, 
-                         select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
-chart.Correlation(subset(shrub_diversity, 
-                         select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
-
+chart.Correlation(subset(
+  tree_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
+chart.Correlation(subset(
+  shrub_diversity, select = c("Density", "Richness", "Shannon", "Simpson", "Evenness")))
 
 
 ## Kruskal-Wallis test & box plot for trees 
@@ -309,7 +309,7 @@ fun_get_pvalue <- function(x) {
   for (i in c("Density", "Richness", "Shannon", "Evenness")) {
     j <- j+1
     y$Pvalue[j] <- round(kruskal.test(
-      as.data.frame(x)[, i] ~ x$Land_use_type)$p.value,digits = 3)
+      x[, i] ~ x$Land_use_type)$p.value,digits = 3)
   }
   y$Label <- case_when(
     y$Pvalue >= 0.05 ~ 
@@ -344,68 +344,47 @@ rm(tree_box_pvalue, tree_diversity_long,
    fun_box_plot, fun_cons_long, fun_get_pvalue)
 
 
-
-## pairwise dunn test of diversity ~ landuse class
-pairwise_list <- vector("list", 4)
-# list of pairwise test of diversity of tree
-for (i in c("Density", "Richness", "Shannon", "Evenness")) {
-  pairwise_list[[1]] <- c(pairwise_list[[1]], 
-                          rep("tree", 15))
-  pairwise_list[[2]] <- c(pairwise_list[[2]], 
-                          rep(i, 15))
-  pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                          dunn.test(tree_diversity[, i], tree_diversity$Land_use_type)$comparisons)
-  pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                          dunn.test(tree_diversity[, i], tree_diversity$Land_use_type)$P.adjusted)
+## pairwise dunn test of diversity ~ land use type
+fun_dunn <- function(x, taxa, index) {
+  dunn_result <- dunn.test(x[ , index], x$Land_use_type, table = FALSE, kw = FALSE)
+  x <- data.frame(
+    "taxa" = taxa, 
+    "index" = index, 
+    "comparison" = dunn_result$comparisons, 
+    "p" = dunn_result$P.adjusted
+  ) %>% 
+    separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
 }
-# list of pairwise test of diversity and attrs of shrub
-for (i in c("Density", "Richness", "Shannon", "Evenness")) {
-  pairwise_list[[1]] <- c(pairwise_list[[1]], 
-                          rep("shrub", 15))
-  pairwise_list[[2]] <- c(pairwise_list[[2]], 
-                          rep(i, 15))
-  pairwise_list[[3]] <- c(pairwise_list[[3]], 
-                          dunn.test(shrub_diversity[, i], shrub_diversity$Land_use_type)$comparisons)
-  pairwise_list[[4]] <- c(pairwise_list[[4]], 
-                          dunn.test(shrub_diversity[, i], shrub_diversity$Land_use_type)$P.adjusted)
-}
-# data frame of pairwise test of tree and shrub
-pairwise_df_up <- data.frame(taxa = pairwise_list[[1]], 
-                             index = pairwise_list[[2]], 
-                             comparison = pairwise_list[[3]], 
-                             p = pairwise_list[[4]]) %>% 
-  separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-pairwise_df_down <- data.frame(
-  taxa = pairwise_df_up$taxa, 
-  index = pairwise_df_up$index, 
-  comparison_1 = pairwise_df_up$comparison_2, 
-  comparison_2 = pairwise_df_up$comparison_1, 
-  p = pairwise_df_up$p)
-pairwise_df <- rbind(pairwise_df_up, pairwise_df_down) %>% 
-  mutate(index = factor(index, levels = c("Density", "Density", "Richness", "Shannon", "Evenness")), 
-         comparison_1 = factor(comparison_1, levels = Land_use_type_faclev), 
-         comparison_2 = factor(comparison_2, levels = Land_use_type_faclev))
+dunn_df_1 <- rbind(fun_dunn(tree_diversity, "tree", "Density"), 
+                   fun_dunn(tree_diversity, "tree", "Richness"),
+                   fun_dunn(tree_diversity, "tree", "Shannon"),
+                   fun_dunn(tree_diversity, "tree", "Evenness"),
+                   fun_dunn(shrub_diversity, "shrub", "Density"), 
+                   fun_dunn(shrub_diversity, "shrub", "Richness"),
+                   fun_dunn(shrub_diversity, "shrub", "Shannon"),
+                   fun_dunn(shrub_diversity, "shrub", "Evenness")
+) 
+dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
+names(dunn_df_2) <- c("taxa", "index", "comparison_1", "comparison_2", "p")
+dunn_df <- rbind(dunn_df_1, dunn_df_2)%>% 
+  mutate(index = factor(index, levels = index_faclev), 
+         comparison_1 = factor(comparison_1, Land_use_type_faclev), 
+         comparison_2 = factor(comparison_2, Land_use_type_faclev))
 # plot the pairwise test results
-ggarrange(ggplot(subset(pairwise_df, taxa == "tree"), 
-                 aes(comparison_1, comparison_2, fill = p))+
-            geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-            scale_fill_gradient2(high = "blue", low = "red", 
-                                 midpoint = 0.05, limits = c(0, 0.05)) + 
-            theme(axis.text.x = element_text(angle = 90)) + 
-            xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-            facet_wrap(~ index, scales = "free") +
-            labs(title = "Tree"),
-          ggplot(subset(pairwise_df, taxa == "shrub"), 
-                 aes(comparison_1, comparison_2, fill = p))+
-            geom_tile() + geom_text(aes(label = round(p*100)), size = 2.5) +
-            scale_fill_gradient2(high = "blue", low = "red", 
-                                 midpoint = 0.05, limits = c(0, 0.05)) + 
-            theme(axis.text.x = element_text(angle = 90)) + 
-            xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-            facet_wrap(~ index, scales = "free") + 
-            labs(title = "Shrub")
-)
-
-
-
+fun_dunn_plot <- function(x, title) {
+  ggplot(x, aes(comparison_1, comparison_2, fill = p)) +
+    geom_tile() + 
+    geom_text(aes(label = round(p*100)), size = 2.5) +
+    scale_fill_gradient2(high = "blue", low = "red", 
+                         midpoint = 0.05, limits = c(0, 0.05)) + 
+    theme(axis.text.x = element_text(angle = 90)) + 
+    xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+    facet_wrap(~ index, scales = "free", nrow = 1) +
+    labs(title = title)
+}
+ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"), 
+          fun_dunn_plot(subset(dunn_df, taxa == "shrub"), "Shrub"), 
+          nrow = 2)
+rm(dunn_df_1, dunn_df_2, dunn_df, 
+   fun_dunn, fun_dunn_plot)
 
