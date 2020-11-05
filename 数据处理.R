@@ -289,10 +289,10 @@ chart.Correlation(subset(
 ## Kruskal-Wallis test & box plot for trees 
 # tree diversity longer and shrub diversity longer data set
 fun_cons_long <- function(x) {
-  subset(x, select = c("Density", "Richness", "Shannon", "Evenness","Land_use_type")) %>% 
-    pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
+  subset(x, select = index_faclev) %>% 
+    pivot_longer(cols = index_faclev, 
                  names_to = "Index", values_to = "Index_value") %>% 
-    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
+    mutate(Index = factor(Index, levels = index_faclev), 
            Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)), 
            Attr = c("Land use type")) %>% 
     na.omit()
@@ -302,11 +302,11 @@ shrub_diversity_long <- fun_cons_long(shrub_diversity)
 
 # get p-values for box plots
 fun_get_pvalue <- function(x) {
-  y <- data.frame(Index = c("Density", "Richness", "Shannon", "Evenness"), 
+  y <- data.frame(Index = index_faclev, 
              Pvalue = NA, Label = NA) %>% 
-    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")))
+    mutate(Index = factor(Index, levels = index_faclev))
   j <- 0
-  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
+  for (i in index_faclev) {
     j <- j+1
     y$Pvalue[j] <- round(kruskal.test(
       x[, i] ~ x$Land_use_type)$p.value,digits = 3)
