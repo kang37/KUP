@@ -177,30 +177,22 @@ tree_rank_df <-
 shrub_rank_df <- 
   ddply(shrub_diversity, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
-ggarrange(ggplot(tree_rank_df, aes(rankfreq, log(abundance))) + 
-            geom_line() + 
-            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-            facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(a)") + 
-            labs(x = "Scaled rank of species", y = "Log (abundance)") +
-            scale_color_discrete("Provenance") +
-            theme(strip.text = element_text(size = 12),
-                  axis.title = element_text(size = 12),
-                  axis.text = element_text(size = 10),
-                  legend.title = element_text(size = 12),
-                  legend.text = element_text(size = 12)),
-          ggplot(shrub_rank_df, aes(rankfreq, log(abundance))) + 
-            geom_line() + 
-            geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-            facet_wrap(~Land_use_type, nrow = 1) + labs(title = "(b)") + 
-            labs(x = "Scaled rank of species", y = "Log (abundance)") + 
-            scale_color_discrete("Provenance") +
-            theme(strip.text = element_text(size = 12),
-                  axis.title = element_text(size = 12),
-                  axis.text = element_text(size = 10), 
-                  legend.title = element_text(size = 12),
-                  legend.text = element_text(size = 12)), 
-          nrow = 2, common.legend = T, legend = "bottom"
-)
+fun_rank_plot <- function(x, title) {
+  ggplot(x, aes(rankfreq, log(abundance))) + 
+    geom_line() + 
+    geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
+    facet_wrap(~Land_use_type, nrow = 1) + labs(title = title) + 
+    labs(x = "Scaled rank of species", y = "Log (abundance)") +
+    scale_color_discrete("Provenance") +
+    theme(strip.text = element_text(size = 12),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 12))
+}
+ggarrange(fun_rank_plot(tree_rank_df, "(a)"),
+          fun_rank_plot(shrub_rank_df, "(b)"), 
+          nrow = 2, common.legend = TRUE, legend = "bottom")
 # the top 3 species regarding abundance
 subset(tree_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
 subset(shrub_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
