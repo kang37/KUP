@@ -292,8 +292,8 @@ fun_cons_long <- function(x) {
                        "Land_use_type")) %>% 
     pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
                  names_to = "Index", values_to = "Index_value") %>% 
-    mutate(Index = factor(Index, levels = index_faclev), 
-           Land_use_type = factor(Land_use_type, levels = c(Land_use_type_faclev)), 
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
+           Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
            Attr = c("Land use type")) %>% 
     na.omit()
 }
@@ -302,11 +302,11 @@ shrub_diversity_long <- fun_cons_long(shrub_diversity)
 
 # get p-values for box plots
 fun_get_pvalue <- function(x) {
-  y <- data.frame(Index = index_faclev, 
+  y <- data.frame(Index = c("Density", "Richness", "Shannon", "Evenness"), 
              Pvalue = NA, Label = NA) %>% 
-    mutate(Index = factor(Index, levels = index_faclev))
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")))
   j <- 0
-  for (i in index_faclev) {
+  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
     j <- j+1
     y$Pvalue[j] <- round(kruskal.test(
       x[, i] ~ x$Land_use_type)$p.value,digits = 3)
