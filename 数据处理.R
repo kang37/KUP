@@ -258,37 +258,26 @@ ggarrange(
 )
 
 # pairwise result of ANOSIM of trees by Land_use_type
-anosim_pairs <- combn(levels(factor(tree_mds_selected$Land_use_type)),2)
-pair_anosim_list <- vector("list",4)
-pair_anosim_list[[1]] <- rep(c("tree", "shrub"), each = ncol(anosim_pairs))
-pair_anosim_list[[2]] <- rep(anosim_pairs[1,], 2)
-pair_anosim_list[[3]] <- rep(anosim_pairs[2,], 2)
-for (i in 1:ncol(anosim_pairs)) {
-  set.seed(1234)
-  tree_mds_selected_sub <- subset(
-    tree_mds_selected, Land_use_type == pair_anosim_list[[2]][i] | 
-      Land_use_type == pair_anosim_list[[3]][i])
-  pair_anosim_list[[4]] <- c(pair_anosim_list[[4]], 
-                             anosim(tree_mds_selected_sub[2:(number_tree_species+1)], 
-                                    tree_mds_selected_sub$Land_use_type)$signif)
+anosim_pairs <- combn(Land_use_type_faclev, 2)
+fun_anosim_pairs <- function(x, y) {
+  result <- NULL
+  for (i in 1:ncol(anosim_pairs)) {
+    set.seed(1234)
+    mds_selected_sub <- subset(x, Land_use_type %in% c(anosim_pairs[1,i], anosim_pairs[2,i]))
+    result <- c(result, anosim(mds_selected_sub[2:(y+1)], 
+                               mds_selected_sub$Land_use_type)$signif)
+  }
+  result
 }
-for (i in 1:ncol(anosim_pairs)) {
-  set.seed(1234)
-  shrub_mds_selected_sub <- subset(
-    shrub_mds_selected, Land_use_type == pair_anosim_list[[2]][i] | 
-      Land_use_type == pair_anosim_list[[3]][i])
-  pair_anosim_list[[4]] <- c(pair_anosim_list[[4]], 
-                             anosim(shrub_mds_selected_sub[2:(number_shrub_species+1)], 
-                                    shrub_mds_selected_sub$Land_use_type)$signif)
-}
-data.frame(Tree_shrub = pair_anosim_list[[1]],
-           Comp_1 = pair_anosim_list[[2]], 
-           Comp_2 = pair_anosim_list[[3]], 
-           p = pair_anosim_list[[4]]) %>% 
-  subset(p < 0.05)
-rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected, tree_mds_selected_sub,
-   shrub_anosim, shrub_hulls, shrub_mds_meta, shrub_mds_selected, shrub_mds_selected_sub, 
-   anosim_pairs, pair_anosim_list, fun_find_hull)
+data.frame("Comp_1" = anosim_pairs[1,], "Comp_2" = anosim_pairs[2,], 
+  "p" = fun_anosim_pairs(tree_mds_selected, number_tree_species)
+) %>% subset(p < 0.05)
+data.frame("Comp_1" = anosim_pairs[1,], "Comp_2" = anosim_pairs[2,], 
+  "p" = fun_anosim_pairs(shrub_mds_selected, number_shrub_species)
+) %>% subset(p < 0.05)
+rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected, 
+   shrub_anosim, shrub_hulls, shrub_mds_meta, shrub_mds_selected, 
+   anosim_pairs, fun_nmds_plot, fun_find_hull, fun_anosim_pairs)
 
 
 ## cor among the indexes
