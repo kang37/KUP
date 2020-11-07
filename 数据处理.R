@@ -159,6 +159,7 @@ ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = Land_use
         legend.text = element_text(size = 12)) +
   labs(x = "Number of quadrats", y = "Accumulative number of species") +
   scale_color_discrete("Land use types")
+tapply(accum_df$number_of_species, accum_df[, c("Land_use_type", "tree_shrub")], max)
 rm(tree_accum, shrub_accum, fun_accum)
 
 
