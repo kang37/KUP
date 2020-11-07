@@ -94,14 +94,31 @@ cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n
     "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(shrub_diversity), "plot")
 
 # top species families of trees and shrubs by abundance
-tree_data %>% 
-  group_by(Family) %>% 
-  dplyr::summarise(Number = sum(Stem), Prop = Number/sum(tree_data$Stem)) %>% 
-  arrange(desc(Prop))
-shrub_data %>% 
-  group_by(Family) %>% 
-  dplyr::summarise(SArea = sum(Area), Prop = SArea/sum(shrub_data$Area)) %>% 
-  arrange(desc(Prop))
+fun_top <- function(x, y, z, k, n) {
+  top_plant <- x %>%¡¡group_by(get(y)) %>% 
+    dplyr::summarise(Number = sum(get(z)), Prop = Number/k) %>% 
+    arrange(desc(Number)) %>% 
+    head(n)
+  names(top_plant)[1] = c(y)
+  print(top_plant)
+}
+tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 5)
+tree_top_family <- fun_top(tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
+shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 5)
+shrub_top_family <- fun_top(shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
+
+fun_contain <- function(x, y) {
+  merge_data <- merge(x, all_plant_info, by = "Species_LT")
+  data.frame("Family" = merge_data$Family, 
+             "Speices_LT" = merge_data$Species_LT, 
+             "Contain" = merge_data$Family %in% y$Family
+  )
+}
+fun_contain(tree_top_species, tree_top_family)
+fun_contain(shrub_top_species, shrub_top_family)
+rm(tree_top_species, tree_top_family, 
+   shrub_top_species, shrub_top_family, 
+   fun_top, fun_contain)
 
 
 ## attributes of trees and shrubs
