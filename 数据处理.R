@@ -280,6 +280,34 @@ rm(tree_anosim, tree_hulls, tree_mds_meta, tree_mds_selected,
    anosim_pairs, fun_nmds_plot, fun_find_hull, fun_anosim_pairs)
 
 
+## plant occupancy of species for different land use types
+fun_occup_rate <- function(x,y) {
+  apply(x[,2:(y+1)], 2, function(k)sum(ifelse(k>0,1,0))/length(k))
+}
+fun_occup_df <- function(x){
+  data.frame("Com" = names(head(sort(x[,"Com"],decreasing = TRUE),10)), 
+             "Com-neigh" = names(head(sort(x[,"Com-neigh"],decreasing = TRUE),10)),
+             "R-low" = names(head(sort(x[,"R-low"],decreasing = TRUE),10)),
+             "R-high" = names(head(sort(x[,"R-high"],decreasing = TRUE),10)), 
+             "R-other" = names(head(sort(x[,"R-other"],decreasing = TRUE),10)), 
+             "Ind" = names(head(sort(x[,"Ind"],decreasing = TRUE),10)))
+}
+
+tree_occup <- ddply(
+  tree_diversity, .(Land_use_type), y = number_tree_species, fun_occup_rate) %>% 
+  .[,-1] %>% t() 
+colnames(tree_occup) = Land_use_type_faclev
+fun_occup_df(tree_occup)
+
+shrub_occup <- ddply(
+  shrub_diversity, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
+  .[,-1] %>% t() 
+colnames(shrub_occup) = Land_use_type_faclev
+fun_occup_df(shrub_occup)
+
+rm(tree_occup, shrub_occup,fun_occup_rate,fun_occup_df)
+
+
 ## cor among the indexes
 chart.Correlation(subset(tree_diversity, select = index_faclev))
 chart.Correlation(subset(shrub_diversity, select = index_faclev))
