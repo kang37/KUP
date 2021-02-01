@@ -30,7 +30,8 @@ all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
 
 # data of trees and shrubs and diversity table of trees and shrubs 
 tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
-shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL)
+shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL) %>% 
+  mutate(Area = Area/10000)
 fun_div <- function(x, y, z) {
   perc_planted <- x %>% group_by(Plot_ID) %>% 
     summarise(perc = sum(ifelse(Pla_spo == "planted", {{y}}, 0)/sum({{y}})))
@@ -160,7 +161,7 @@ ggplot(accum_df, aes(x = number_of_plot, y = number_of_species, color = Land_use
   labs(x = "Number of quadrats", y = "Accumulative number of species") +
   scale_color_discrete("Land use types")
 tapply(accum_df$number_of_species, accum_df[, c("Land_use_type", "tree_shrub")], max)
-rm(tree_accum, shrub_accum, fun_accum)
+rm(tree_accum, shrub_accum, accum_df,fun_accum)
 
 
 ## rank abundance plot
@@ -203,13 +204,13 @@ community_structure(
 community_structure(
   shrub_rank_df, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
   arrange(EQ)
-rm(tree_rank_df, shrub_rank_df, fun_rank)
+rm(tree_rank_df, shrub_rank_df, fun_rank, fun_rank_plot)
 
 
 ## Non-metric multidimensional scaling analysis
 set.seed(1234)
 # nMDS calculation for tree
-tree_mds_selected <- subset(tree_diversity, Density > 3)
+tree_mds_selected <- subset(tree_diversity, Density > 1)
 tree_mds_meta <- tree_mds_selected %>% 
   select(2:(number_tree_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
@@ -243,12 +244,12 @@ fun_nmds_plot <- function(mds_selected, hull, plot_title, mds_meta, anosim) {
     geom_point(size=3) +
     geom_polygon(data = hull, alpha = 0, aes(fill=Land_use_type), size=1) +
     labs(title = plot_title, 
-         subtitle = paste("stress=", round(mds_meta$stress, digits = 3),
-                          ", R=", round(anosim$statistic, digits = 3),
-                          ", p=", round(anosim$signif, digits = 3),sep = "")) +
+         subtitle = paste("stress=", sprintf("%.3f",mds_meta$stress),
+                          ", R=", sprintf("%.3f",anosim$statistic),
+                          ", p=", sprintf("%.3f",anosim$signif),sep = "")) +
     theme(axis.text = element_text(size = 12), 
-        legend.title = element_text(size = 15), 
-        legend.text = element_text(size = 12)) +
+          legend.title = element_text(size = 15), 
+          legend.text = element_text(size = 12)) +
     theme_bw()
 }
 ggarrange(
@@ -297,15 +298,68 @@ tree_occup <- ddply(
   tree_diversity, .(Land_use_type), y = number_tree_species, fun_occup_rate) %>% 
   .[,-1] %>% t() 
 colnames(tree_occup) = Land_use_type_faclev
-fun_occup_df(tree_occup)
+tree_occup_top <- fun_occup_df(tree_occup)
+write.csv(tree_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", row.names = FALSE)
 
 shrub_occup <- ddply(
   shrub_diversity, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
   .[,-1] %>% t() 
 colnames(shrub_occup) = Land_use_type_faclev
-fun_occup_df(shrub_occup)
+shrub_occup_top <- fun_occup_df(shrub_occup)
+write.table(shrub_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", 
+              row.names = FALSE, append = TRUE, sep = ",")
 
-rm(tree_occup, shrub_occup,fun_occup_rate,fun_occup_df)
+occup_top <- rbind(tree_occup_top, shrub_occup_top)
+
+# shared species over land use types
+# shared species for both trees and shrubs over land use types
+Reduce(intersect, list(tree_occup_top[,1], tree_occup_top[,2], tree_occup_top[,3], 
+                       tree_occup_top[,4], tree_occup_top[,5], tree_occup_top[,6], 
+                       shrub_occup_top[,1], shrub_occup_top[,2], shrub_occup_top[,3], 
+                       shrub_occup_top[,4], shrub_occup_top[,5], shrub_occup_top[,6]))
+
+# shared species for trees over land use types
+Reduce(intersect, list(tree_occup_top[,1], tree_occup_top[,2], tree_occup_top[,3], 
+                       tree_occup_top[,4], tree_occup_top[,5], tree_occup_top[,6]))
+# shared species for shrubs over land use types
+Reduce(intersect, list(shrub_occup_top[,1], shrub_occup_top[,2], shrub_occup_top[,3], 
+                       shrub_occup_top[,4], shrub_occup_top[,5], shrub_occup_top[,6]))
+
+# shared species for trees between land use types
+fun_share_prop <- function(occup_top_data, plot_title) {
+  share_prop <- as.data.frame(matrix(numeric(0),ncol=3, nrow = 36))
+  colnames(share_prop) <- c("land_use_1", "land_use_2", "prop")
+  k <- 0
+  for (i in c(1:6)) {
+    for (j in c(1:6)) {
+      k <- k+1
+      share_prop$land_use_1[k] <- Land_use_type_faclev[i]
+      share_prop$land_use_2[k] <- Land_use_type_faclev[j]
+      share_prop$prop[k] <- (length(intersect(occup_top_data[,i],occup_top_data[,j])))/
+        (length(union(occup_top_data[,i],occup_top_data[,j])))
+    }
+  }
+  ggplot(share_prop, aes(land_use_1, land_use_2, fill = prop)) + 
+    geom_tile() + geom_text(aes(label = round(prop*100))) +
+    scale_fill_gradient2(high = "red", low = "blue", midpoint = 0.4, limits = c(0,0.8)) +
+    labs(title = plot_title) + theme(axis.text.x = element_text(angle = 90))
+}
+ggarrange(fun_share_prop(tree_occup_top, "tree"), 
+          fun_share_prop(shrub_occup_top, "shrub"), 
+          fun_share_prop(occup_top, "common"), 
+          nrow = 1, common.legend = TRUE, legend = "right")
+
+# unique ubiquitous species in certain land use types
+occup_top_long <- occup_top %>% pivot_longer(
+  cols = c("Com", "Com.neigh", "R.low", "R.high", "R.other",  "Ind"),  
+  names_to = "Land_use_type", values_to = "Species") %>% unique()
+Species_unique <- occup_top_long %>% group_by(Species) %>% 
+  dplyr::summarise(Number = n()) %>% arrange(Number) %>% 
+  subset(Number == 1) %>% .$Species 
+occup_top_long[which(occup_top_long$Species %in% Species_unique),] %>% arrange(Land_use_type)
+
+rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, occup_top, occup_top_long, 
+  Species_unique, fun_occup_rate,fun_occup_df, fun_share_prop)
 
 
 ## cor among the indexes
@@ -316,8 +370,7 @@ chart.Correlation(subset(shrub_diversity, select = index_faclev))
 ## Kruskal-Wallis test & box plot for trees 
 # tree diversity longer and shrub diversity longer data set
 fun_cons_long <- function(x) {
-  subset(x, select = c("Density", "Richness", "Shannon", "Evenness", 
-                       "Land_use_type")) %>% 
+  subset(x, select = c("Density", "Richness", "Shannon", "Evenness", "Land_use_type")) %>% 
     pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
                  names_to = "Index", values_to = "Index_value") %>% 
     mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
