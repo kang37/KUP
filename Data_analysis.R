@@ -34,15 +34,15 @@ shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NU
   mutate(Area = Area/10000)
 fun_div <- function(x, y, z) {
   perc_planted <- x %>% group_by(Plot_ID) %>% 
-    summarise(perc = sum(ifelse(Pla_spo == "planted", {{y}}, 0)/sum({{y}})))
+    summarise(perc = sum(ifelse(Pla_spo == "planted", x[, z], 0)/sum(x[, z])))
   perc_nonpot <- x %>% group_by(Plot_ID) %>% 
-    summarise(perc = sum(ifelse(Pot == "non_pot", {{y}}, 0)/sum({{y}})))
+    summarise(perc = sum(ifelse(Pot == "non_pot", x[, z], 0)/sum(x[, z])))
   perc_private <- x %>% group_by(Plot_ID) %>% 
-    summarise(perc = sum(ifelse(Pub_pri == "private", {{y}}, 0)/sum({{y}})))
+    summarise(perc = sum(ifelse(Pub_pri == "private", x[, z], 0)/sum(x[, z])))
   perc_nonstreet <- x %>% group_by(Plot_ID) %>% 
-    summarise(perc = sum(ifelse(Street == "non_street", {{y}}, 0)/sum({{y}})))
+    summarise(perc = sum(ifelse(Street == "non_street", x[, z], 0)/sum(x[, z])))
   perc_native <- x %>% group_by(Plot_ID) %>% 
-    summarise(perc = sum(ifelse(Nt_ex == "native", {{y}}, 0)/sum({{y}})))
+    summarise(perc = sum(ifelse(Nt_ex == "native", x[, z], 0)/sum(x[, z])))
   subset(x, select = c("Plot_ID", "Species_LT", z)) %>%
     pivot_wider(names_from = Species_LT, values_from = {{y}}, 
                 values_fn = sum, values_fill = 0) %>% 
