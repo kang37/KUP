@@ -11,7 +11,7 @@ library(codyn)
 library(ggpubr)
 
 ## get data
-#some default parameters
+# some default factors
 opar <- par(no.readonly = TRUE)
 Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
 index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
