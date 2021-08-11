@@ -12,7 +12,7 @@ library(iNEXT)
 
 # Get data ----
 # some default factors
-Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
+Land_use_type_faclev <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
 index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
 
 # information of all the plots
@@ -104,13 +104,13 @@ fun_accum <- function(x, y, z, method) {
   } else {
     incidence <- list(
       fun_temp(x, "Com"), 
-      fun_temp(x, "Com-neigh"),
+      fun_temp(x, "ComNbr"),
       fun_temp(x, "Ind"), 
-      fun_temp(x, "R-other"), 
-      fun_temp(x, "R-high"), 
-      fun_temp(x, "R-low")
+      fun_temp(x, "ResOther"), 
+      fun_temp(x, "ResHigh"), 
+      fun_temp(x, "ResLow")
     )
-    names(incidence) <- c("Com", "Com-neigh", "Ind", "R-other", "R-high", "R-low")
+    names(incidence) <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
   }
   
   accum <- iNEXT(incidence, q = 0, datatype = "incidence_freq", 
@@ -120,15 +120,15 @@ fun_accum <- function(x, y, z, method) {
     accum <- accum$iNextEst$city
   } else {
     accum$iNextEst$Com$land_use <- "Com"
-    accum$iNextEst$"Com-neigh"$land_use <- "Com-neigh"
+    accum$iNextEst$"ComNbr"$land_use <- "ComNbr"
     accum$iNextEst$Ind$land_use <- "Ind"
-    accum$iNextEst$"R-other"$land_use <- "R-other"
-    accum$iNextEst$"R-high"$land_use <- "R-high"
-    accum$iNextEst$"R-low"$land_use <- "R-low"
+    accum$iNextEst$"ResOther"$land_use <- "ResOther"
+    accum$iNextEst$"ResHigh"$land_use <- "ResHigh"
+    accum$iNextEst$"ResLow"$land_use <- "ResLow"
     accum <- Reduce(rbind, accum$iNextEst)
     accum$land_use <- factor(
       accum$land_use, 
-      levels = c("Com", "Com-neigh", "Ind", "R-other", "R-high", "R-low"))
+      levels = c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow"))
   }
   accum$method[accum$method == "interpolated"] <- "observed"
   
@@ -372,10 +372,10 @@ fun_occup_rate <- function(x,y) {
 }
 fun_occup_df <- function(x){
   data.frame("Com" = names(head(sort(x[,"Com"],decreasing = TRUE),10)), 
-             "Com-neigh" = names(head(sort(x[,"Com-neigh"],decreasing = TRUE),10)),
-             "R-low" = names(head(sort(x[,"R-low"],decreasing = TRUE),10)),
-             "R-high" = names(head(sort(x[,"R-high"],decreasing = TRUE),10)), 
-             "R-other" = names(head(sort(x[,"R-other"],decreasing = TRUE),10)), 
+             "ComNbr" = names(head(sort(x[,"ComNbr"],decreasing = TRUE),10)),
+             "ResLow" = names(head(sort(x[,"ResLow"],decreasing = TRUE),10)),
+             "ResHigh" = names(head(sort(x[,"ResHigh"],decreasing = TRUE),10)), 
+             "ResOther" = names(head(sort(x[,"ResOther"],decreasing = TRUE),10)), 
              "Ind" = names(head(sort(x[,"Ind"],decreasing = TRUE),10)))
 }
 
