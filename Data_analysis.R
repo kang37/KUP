@@ -260,40 +260,26 @@ fun_accum(all_plant_data, 600, 50, method = "land_use") +
   scale_color_manual(values = c("#FF0000", "#FF7800", "#DF73FF", 
                                 "#BFBF30", "#6BE400", "#00733E"))
 
-## rank abundance plot
-tree_rank_df <- 
+# Distribution of species abundance ----
+lu_tree_rank <- 
   ddply(tree_diversity, "Land_use_type", y = number_tree_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
-shrub_rank_df <- 
+lu_shrub_rank <- 
   ddply(shrub_diversity, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
-fun_rank_plot <- function(x, title) {
-  ggplot(x, aes(rankfreq, log(abundance))) + 
-    geom_line() + 
-    geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-    facet_wrap(~Land_use_type, nrow = 1) + labs(title = title) + 
-    labs(x = "Scaled rank of species", y = "Log (abundance)") +
-    scale_color_discrete("Provenance") +
-    theme(strip.text = element_text(size = 12),
-          axis.title = element_text(size = 12),
-          axis.text = element_text(size = 10),
-          legend.title = element_text(size = 12),
-          legend.text = element_text(size = 12))
-}
-ggarrange(fun_rank_plot(tree_rank_df, "(a)"),
-          fun_rank_plot(shrub_rank_df, "(b)"), 
+ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use"),
+          fun_rank_plot(lu_shrub_rank, "(b)", method = "land_use"), 
           nrow = 2, common.legend = TRUE, legend = "bottom")
 # the top 3 species regarding abundance
-subset(tree_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
-subset(shrub_rank_df[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
+subset(lu_tree_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
+subset(lu_shrub_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
 # calculate the EQ evenness index and plot
 community_structure(
-  tree_rank_df, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>% 
-  arrange(EQ)
+  lu_tree_rank, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>% 
+  arrange(desc(EQ))
 community_structure(
-  shrub_rank_df, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
-  arrange(EQ)
-rm(tree_rank_df, shrub_rank_df, fun_rank, fun_rank_plot)
+  lu_shrub_rank, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
+  arrange(desc(EQ))
 
 
 ## Non-metric multidimensional scaling analysis
