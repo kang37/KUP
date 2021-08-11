@@ -32,18 +32,19 @@ all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
 tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
 shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL) %>% 
   mutate(Area = Area/10000)
-fun_div <- function(x, y, z) {
-  perc_planted <- x %>% group_by(Plot_ID) %>% 
+fun_div <- function(x, y, z, k, m, method) {
+  perc_planted <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Pla_spo == "planted", x[, z], 0)/sum(x[, z])))
-  perc_nonpot <- x %>% group_by(Plot_ID) %>% 
+  perc_nonpot <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Pot == "non_pot", x[, z], 0)/sum(x[, z])))
-  perc_private <- x %>% group_by(Plot_ID) %>% 
+  perc_private <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Pub_pri == "private", x[, z], 0)/sum(x[, z])))
-  perc_nonstreet <- x %>% group_by(Plot_ID) %>% 
+  perc_nonstreet <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Street == "non_street", x[, z], 0)/sum(x[, z])))
-  perc_native <- x %>% group_by(Plot_ID) %>% 
+  perc_native <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Nt_ex == "native", x[, z], 0)/sum(x[, z])))
-  subset(x, select = c("Plot_ID", "Species_LT", z)) %>%
+  
+  newdf <- subset(x, select = c(m, "Species_LT", z)) %>% 
     pivot_wider(names_from = Species_LT, values_from = {{y}}, 
                 values_fn = sum, values_fill = 0) %>% 
     mutate(Density = rowSums(.[2:ncol(.)]), 
@@ -55,13 +56,23 @@ fun_div <- function(x, y, z) {
            perc_nonpot = perc_nonpot$perc, 
            perc_private = perc_private$perc, 
            perc_nonstreet = perc_nonstreet$perc, 
-           perc_native = perc_native$perc) %>% 
-    left_join(all_plot_info, by = "Plot_ID") %>% 
-    as.data.frame()
+           perc_native = perc_native$perc)
+  if (method == "land_use") {
+    as.data.frame(newdf)
+  } else {
+    newdf %>% left_join(all_plot_info, by = m) %>% 
+      as.data.frame()
+  }
 }
-tree_diversity <- fun_div(tree_data, Stem, "Stem")
-shrub_diversity <- fun_div(shrub_data, Area, "Area")
-rm(fun_div)
+lu_tree_div <- fun_div(tree_data, Stem, "Stem", 
+                       Land_use_type, "Land_use_type", method = "land_use")
+lu_shrub_div <- fun_div(shrub_data, Area, "Area", 
+                        Land_use_type, "Land_use_type", method = "land_use")
+qua_tree_div <- fun_div(tree_data, Stem, "Stem", 
+                        Plot_ID, "Plot_ID", method = "quadrat")
+qua_shrub_div <- fun_div(shrub_data, Area, "Area", 
+                         Plot_ID, "Plot_ID", method = "quadrat")
+
 
 # some other variables 
 number_tree_species <- length(unique(tree_data$Species_LT))
@@ -153,8 +164,8 @@ all_plant_info %>% group_by(Family) %>%
   arrange(desc(Prop))
 
 # abundance of trees and shrubs
-cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n", 
-    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(shrub_diversity), "plot")
+cat("number of trees:", nrow(tree_data), "in", nrow(qua_tree_div), "plot", "\n", 
+    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(qua_shrub_div), "plot")
 
 # top species families of trees and shrubs by abundance
 # func to generate top species with abundance data
@@ -211,9 +222,9 @@ fun_rank_data <- function(x, y) {
     as.data.frame() %>%
     mutate(Species_LT = rownames(.))
 }
-city_tree_rank <- fun_rank_data(tree_diversity, number_tree_species) %>% 
+city_tree_rank <- fun_rank_data(qua_tree_div, number_tree_species) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
-city_shrub_rank <- fun_rank_data(shrub_diversity, number_tree_species) %>% 
+city_shrub_rank <- fun_rank_data(qua_shrub_div, number_tree_species) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 
 # func to plot rank-abundance curve
@@ -262,10 +273,10 @@ fun_accum(all_plant_data, 600, 50, method = "land_use") +
 
 # Distribution of species abundance ----
 lu_tree_rank <- 
-  ddply(tree_diversity, "Land_use_type", y = number_tree_species, fun_rank) %>% 
+  ddply(qua_tree_div, "Land_use_type", y = number_tree_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 lu_shrub_rank <- 
-  ddply(shrub_diversity, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
+  ddply(qua_shrub_div, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use"),
           fun_rank_plot(lu_shrub_rank, "(b)", method = "land_use"), 
@@ -282,10 +293,10 @@ community_structure(
   arrange(desc(EQ))
 
 
-## Non-metric multidimensional scaling analysis
+## Non-metric multidimensional scaling
 set.seed(1234)
 # nMDS calculation for tree
-tree_mds_selected <- subset(tree_diversity, Density > 1)
+tree_mds_selected <- subset(qua_tree_div, Density > 1)
 tree_mds_meta <- tree_mds_selected %>% 
   select(2:(number_tree_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
@@ -294,7 +305,7 @@ stressplot(tree_mds_meta)
 tree_mds_selected <- cbind(tree_mds_selected, tree_mds_meta$points)
 
 # nMDS calculation for shrub
-shrub_mds_selected <- shrub_diversity %>% filter(Density > 5)
+shrub_mds_selected <- qua_shrub_div %>% filter(Density > 5)
 shrub_mds_meta <- shrub_mds_selected %>% 
   select(2:(number_shrub_species+1)) %>%
   metaMDS(distance = "bray", trace = FALSE, autotransform = FALSE) 
@@ -370,14 +381,14 @@ fun_occup_df <- function(x){
 }
 
 tree_occup <- ddply(
-  tree_diversity, .(Land_use_type), y = number_tree_species, fun_occup_rate) %>% 
+  qua_tree_div, .(Land_use_type), y = number_tree_species, fun_occup_rate) %>% 
   .[,-1] %>% t() 
 colnames(tree_occup) = Land_use_type_faclev
 tree_occup_top <- fun_occup_df(tree_occup)
 write.csv(tree_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", row.names = FALSE)
 
 shrub_occup <- ddply(
-  shrub_diversity, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
+  qua_shrub_div, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
   .[,-1] %>% t() 
 colnames(shrub_occup) = Land_use_type_faclev
 shrub_occup_top <- fun_occup_df(shrub_occup)
@@ -438,8 +449,8 @@ rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, occup_top, occup_to
 
 
 ## cor among the indexes
-chart.Correlation(subset(tree_diversity, select = index_faclev))
-chart.Correlation(subset(shrub_diversity, select = index_faclev))
+chart.Correlation(subset(qua_tree_div, select = index_faclev))
+chart.Correlation(subset(qua_shrub_div, select = index_faclev))
 
 
 ## Kruskal-Wallis test & box plot for trees 
@@ -453,8 +464,8 @@ fun_cons_long <- function(x) {
            Attr = c("Land use type")) %>% 
     na.omit()
 }
-tree_diversity_long <- fun_cons_long(tree_diversity)
-shrub_diversity_long <- fun_cons_long(shrub_diversity)
+qua_tree_div_long <- fun_cons_long(qua_tree_div)
+qua_shrub_div_long <- fun_cons_long(qua_shrub_div)
 
 # get p-values for box plots
 fun_get_pvalue <- function(x) {
@@ -479,8 +490,8 @@ fun_get_pvalue <- function(x) {
   )
   data.frame(y)
 }
-tree_box_pvalue <- fun_get_pvalue(tree_diversity)
-shrub_box_pvalue <- fun_get_pvalue(shrub_diversity)
+tree_box_pvalue <- fun_get_pvalue(qua_tree_div)
+shrub_box_pvalue <- fun_get_pvalue(qua_shrub_div)
 
 # get box plots
 fun_box_plot <- function(x, y, z) {
@@ -493,10 +504,10 @@ fun_box_plot <- function(x, y, z) {
     theme(axis.text.x = element_text(angle = 90, size = 12)) + 
     labs(title = z, x = NULL, y = NULL)
 }
-ggarrange(fun_box_plot(tree_diversity_long, tree_box_pvalue, "(a)"), 
-          fun_box_plot(shrub_diversity_long, shrub_box_pvalue, "(b)"))
-rm(tree_box_pvalue, tree_diversity_long, 
-   shrub_box_pvalue, shrub_diversity_long, 
+ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
+          fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
+rm(tree_box_pvalue, qua_tree_div_long, 
+   shrub_box_pvalue, qua_shrub_div_long, 
    fun_box_plot, fun_cons_long, fun_get_pvalue)
 
 
@@ -511,14 +522,14 @@ fun_dunn <- function(x, taxa, index) {
   ) %>% 
     separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
 }
-dunn_df_1 <- rbind(fun_dunn(tree_diversity, "tree", "Density"), 
-                   fun_dunn(tree_diversity, "tree", "Richness"),
-                   fun_dunn(tree_diversity, "tree", "Shannon"),
-                   fun_dunn(tree_diversity, "tree", "Evenness"),
-                   fun_dunn(shrub_diversity, "shrub", "Density"), 
-                   fun_dunn(shrub_diversity, "shrub", "Richness"),
-                   fun_dunn(shrub_diversity, "shrub", "Shannon"),
-                   fun_dunn(shrub_diversity, "shrub", "Evenness")
+dunn_df_1 <- rbind(fun_dunn(qua_tree_div, "tree", "Density"), 
+                   fun_dunn(qua_tree_div, "tree", "Richness"),
+                   fun_dunn(qua_tree_div, "tree", "Shannon"),
+                   fun_dunn(qua_tree_div, "tree", "Evenness"),
+                   fun_dunn(qua_shrub_div, "shrub", "Density"), 
+                   fun_dunn(qua_shrub_div, "shrub", "Richness"),
+                   fun_dunn(qua_shrub_div, "shrub", "Shannon"),
+                   fun_dunn(qua_shrub_div, "shrub", "Evenness")
 ) 
 dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
 names(dunn_df_2) <- c("taxa", "index", "comparison_1", "comparison_2", "p")
@@ -546,6 +557,6 @@ rm(dunn_df_1, dunn_df_2, dunn_df,
 
 ## data for discussion
 # means of quadrat density and richness for trees
-tree_diversity %>% group_by(Land_use_type) %>% 
+qua_tree_div %>% group_by(Land_use_type) %>% 
   dplyr::summarise(Density = mean(Density), Richness = mean(Richness))
 
