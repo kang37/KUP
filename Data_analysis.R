@@ -114,18 +114,17 @@ rm(tree_top_species, tree_top_family,
    shrub_top_species, shrub_top_family, 
    fun_top, fun_contain)
 
-
-## attributes of trees and shrubs
-# the number of exotic vs. native species
+# attributes of trees and shrubs
+# the number of exotic vs. native by number of species
 table(all_plant_info$Nt_ex)/nrow(all_plant_info)
 
 # the attributes of trees and shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 3)
+  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 2)
   cat("\n")
 }
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 3)
+  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 2)
   cat("\n")
 }
 
