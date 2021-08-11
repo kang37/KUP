@@ -8,6 +8,7 @@ library(dunn.test)
 library(BiodiversityR)
 library(codyn)
 library(ggpubr)
+library(iNEXT)
 
 # Get data ----
 # some default factors
@@ -197,8 +198,60 @@ for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   cat("\n")
 }
 
+## Distribution of species abundance ----
+# rank abundance curves for trees and shrubs
+fun_rank_data <- function(x, y) {
+  x[2:(y+1)] %>%
+    subset(select = colSums(.) != 0) %>%
+    rankabundance() %>% 
+    as.data.frame() %>%
+    mutate(Species_LT = rownames(.))
+}
+city_tree_rank <- fun_rank_data(tree_diversity, number_tree_species) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
+city_shrub_rank <- fun_rank_data(shrub_diversity, number_tree_species) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 
-## species accumulation curve
+# func to plot rank-abundance curve
+# func para: x, raw data; title, plot title; method, plot at city level (method = "city") or at land use level (method = "land_use)
+fun_rank_plot <- function(x, title, method) {
+  if (method == "city") {
+    plotdata <- ggplot(x, aes(rankfreq, proportion)) + 
+      geom_line()
+  } else {
+    plotdata <- ggplot(x, aes(rankfreq, proportion)) + 
+      geom_line() + 
+      facet_wrap(~Land_use_type, nrow = 1) + labs(title = title)
+  }
+  plotdata + 
+    geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
+    labs(x = "Scaled rank of species", y = "Relative abundance") +
+    scale_color_discrete("Provenance") +
+    theme(strip.text = element_text(size = 12),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 12))
+}
+ggarrange(plotlist = list(
+  fun_rank_plot(city_tree_rank, title = "(a)", method = "city"), 
+  fun_rank_plot(city_shrub_rank, title = "(b)", method = "city")
+), nrow = 1, common.legend = TRUE)
+
+# the top 3 species regarding abundance
+subset(city_tree_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
+subset(city_shrub_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
+
+# EQ evenness index and plot
+city_tree_rank %>% 
+  community_structure(abundance.var = "abundance", metric = "EQ") %>% 
+  arrange(EQ)
+city_shrub_rank %>% 
+  community_structure(abundance.var = "abundance", metric = "EQ") %>%
+  arrange(EQ)
+
+# Land use ----
+# Species accumulation curve
 fun_accum <- function(x, y, z) {
   ori <- specaccum(x[, 2:(y+1)])
   data.frame("number_of_plot" = ori$sites,
@@ -226,13 +279,6 @@ rm(tree_accum, shrub_accum, accum_df,fun_accum)
 
 
 ## rank abundance plot
-fun_rank <- function(x, y) {
-  x[2:(y+1)] %>%
-    subset(select = colSums(.) != 0) %>%
-    rankabundance() %>% 
-    as.data.frame() %>%
-    mutate(Species_LT = rownames(.))
-}
 tree_rank_df <- 
   ddply(tree_diversity, "Land_use_type", y = number_tree_species, fun_rank) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
