@@ -78,11 +78,13 @@ all_plant_info %>% group_by(Family) %>%
   dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
   arrange(desc(Prop))
 
-# the number of trees or area of shrubs
+# abundance of trees and shrubs
 cat("number of trees:", nrow(tree_data), "in", nrow(tree_diversity), "plot", "\n", 
     "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(shrub_diversity), "plot")
 
 # top species families of trees and shrubs by abundance
+# func to generate top species with abundance data
+# func para: x, row data; y, level of classification; z, column of abundance data; k, calculation of total abundance; n, number of top "n"
 fun_top <- function(x, y, z, k, n) {
   top_plant <- x %>%¡¡group_by(get(y)) %>% 
     dplyr::summarise(Number = sum(get(z)), Prop = Number/k) %>% 
@@ -91,11 +93,14 @@ fun_top <- function(x, y, z, k, n) {
   names(top_plant)[1] = c(y)
   print(top_plant)
 }
-tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 5)
+tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 10)
 tree_top_family <- fun_top(tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
-shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 5)
+shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 10)
 shrub_top_family <- fun_top(shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
+intersect(tree_top_family$Family, shrub_top_family$Family)
 
+# func to test if top species are contained in top families
+# func para: x, raw data of species; y, raw data of families 
 fun_contain <- function(x, y) {
   merge_data <- merge(x, all_plant_info, by = "Species_LT")
   data.frame("Family" = merge_data$Family, 
