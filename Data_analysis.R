@@ -68,11 +68,80 @@ number_shrub_species <- length(unique(shrub_data$Species_LT))
 
 
 # City level ----
-# the number of species
+## Number of species ----
 cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n", 
     "total genera:", length(unique(all_plant_data$Genus)), "\n", 
     "total families:", length(unique(all_plant_data$Family)), "\n", "\n")
 
+# species accumulation curve 
+# func to plot species accumulation curve and extrapolation 
+# func parameters: x, raw data; y, size of extrapolation; z, extent of x axis; method, plot the curve separately by land use (method = "landuse") or not (method = "all")
+fun_accum <- function(x, y, z, method) {
+  # func to derive list of incidence data of certain land use
+  # func para: xtemp, raw data; ytemp, name of land use
+  fun_temp <- function(xtemp, ytemp) {
+    xtemp %>% filter(Land_use_type %in% ytemp) %>% 
+      group_by(Species_LT) %>% 
+      summarise(n = length(unique(Plot_ID))) %>% 
+      arrange(desc(n)) %>% 
+      .$n %>% 
+      c(length(unique(xtemp[which(xtemp[, "Land_use_type"] %in% ytemp), "Plot_ID"])), .)
+  }
+  if (method == "landuse") {
+    incidence <- list(
+      fun_temp(x, "Com"), 
+      fun_temp(x, "Com-neigh"),
+      fun_temp(x, "Ind"), 
+      fun_temp(x, "R-other"), 
+      fun_temp(x, "R-high"), 
+      fun_temp(x, "R-low")
+    )
+    names(incidence) <- c("Com", "Com-neigh", "Ind", "R-other", "R-high", "R-low")
+  } else {
+    incidence <- list(fun_temp(x, Land_use_type_faclev))
+    names(incidence) <- "all"
+  }
+  
+  accum <- iNEXT(incidence, q = 0, datatype = "incidence_freq", 
+                 size = seq(1:y), se = FALSE)
+  if (method == "landuse") {
+    accum$iNextEst$Com$land_use <- "Com"
+    accum$iNextEst$"Com-neigh"$land_use <- "Com-neigh"
+    accum$iNextEst$Ind$land_use <- "Ind"
+    accum$iNextEst$"R-other"$land_use <- "R-other"
+    accum$iNextEst$"R-high"$land_use <- "R-high"
+    accum$iNextEst$"R-low"$land_use <- "R-low"
+    accum <- Reduce(rbind, accum$iNextEst)
+  } else {
+    accum$iNextEst$all$land_use <- "all"
+    accum <- accum$iNextEst$all
+  }
+  accum$method[accum$method == "interpolated"] <- "observed"
+  
+  hline <- accum %>% group_by(land_use) %>% 
+    summarise(asymtote = max(qD))
+  
+  if (method == "all") {
+    plotdata <- ggplot(accum) + 
+      geom_line(aes(t, qD, linetype = method), size = 1) +
+      geom_hline(data = hline, aes(yintercept = asymtote), 
+                 linetype = 2, size = 1) + 
+      scale_linetype_discrete(limits = c("observed", "extrapolated"))
+  } else {
+    ggplot(accum[which(accum$method == "observed"), ]) + 
+      geom_line(aes(t, qD, color = land_use, linetype = method), size = 1)+
+      geom_hline(data = hline, aes(yintercept = asymtote, color = land_use), 
+                 linetype = 2, size = 1)
+  }
+  plotdata + 
+    labs(x = "Number of quadrats", y = "Nuber of species") + 
+    scale_x_continuous(limits = c(0, z)) + 
+    theme_bw()
+}
+fun_accum(all_plant_data, 600, 600, method = "all") + 
+  theme(legend.position = "none")
+
+## Top taxa ----
 # top species families of all plants by species number
 all_plant_info %>% group_by(Family) %>% 
   dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
@@ -129,7 +198,7 @@ for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
 }
 
 
-## Species accumulation curve 
+## species accumulation curve
 fun_accum <- function(x, y, z) {
   ori <- specaccum(x[, 2:(y+1)])
   data.frame("number_of_plot" = ori$sites,
