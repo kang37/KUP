@@ -69,19 +69,9 @@ number_shrub_species <- length(unique(shrub_data$Species_LT))
 
 # City level ----
 # the number of species
-cat("total species:", length(unique(all_plant_data$Species_LT)), "\n", 
+cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n", 
     "total genera:", length(unique(all_plant_data$Genus)), "\n", 
-    "total families:", length(unique(all_plant_data$Family)), "\n", 
-    "total species of trees:", number_tree_species, 
-    "of", length(unique(tree_data$Family)), "families", "\n", 
-    "total species of shrubs:", number_shrub_species, 
-    "of", length(unique(shrub_data$Family)), "families", "\n", 
-    "common species of trees and shrubs:", length(intersect(
-      unique(tree_data$Species_LT), unique(shrub_data$Species_LT))), "\n", 
-    "species solely for trees:", length(setdiff(unique(tree_data$Species_LT), 
-                                               unique(shrub_data$Species_LT))), "\n", 
-    "Species solely for shrubs:", length(setdiff(unique(shrub_data$Species_LT), 
-                                                 unique(tree_data$Species_LT))))
+    "total families:", length(unique(all_plant_data$Family)), "\n", "\n")
 
 # top species families of all plants by species number
 all_plant_info %>% group_by(Family) %>% 
