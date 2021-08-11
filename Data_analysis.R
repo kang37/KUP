@@ -121,6 +121,7 @@ fun_accum <- function(x, y, z, method) {
   
   hline <- accum %>% group_by(land_use) %>% 
     summarise(asymtote = max(qD))
+  print(hline)
   
   if (method == "all") {
     plotdata <- ggplot(accum) + 
