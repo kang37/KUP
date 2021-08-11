@@ -10,27 +10,7 @@ library(codyn)
 library(ggpubr)
 library(iNEXT)
 
-# Get data ----
-# some default factors
-Land_use_type_faclev <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
-index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
-
-# information of all the plots
-all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
-  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
-
-# information of all the plants species: provenance and taxonomy 
-all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
-
-# data of all the plants: taxonomy, attributes, abundance, etc.
-all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
-  left_join(all_plant_info, by = "Species_LT") %>%
-  left_join(all_plot_info,by = "Plot_ID")
-
-# data of trees and shrubs and diversity table of trees and shrubs 
-tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
-shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL) %>% 
-  mutate(Area = Area/10000)
+# Functions ----
 fun_div <- function(x, y, z, k, m, method) {
   perc_planted <- x %>% group_by({{k}}) %>% 
     summarise(perc = sum(ifelse(Pla_spo == "planted", x[, z], 0)/sum(x[, z])))
@@ -63,28 +43,7 @@ fun_div <- function(x, y, z, k, m, method) {
       as.data.frame()
   }
 }
-lu_tree_div <- fun_div(tree_data, Stem, "Stem", 
-                       Land_use_type, "Land_use_type", method = "land_use")
-lu_shrub_div <- fun_div(shrub_data, Area, "Area", 
-                        Land_use_type, "Land_use_type", method = "land_use")
-qua_tree_div <- fun_div(tree_data, Stem, "Stem", 
-                        Plot_ID, "Plot_ID", method = "quadrat")
-qua_shrub_div <- fun_div(shrub_data, Area, "Area", 
-                         Plot_ID, "Plot_ID", method = "quadrat")
 
-
-# some other variables 
-number_tree_species <- length(unique(tree_data$Species_LT))
-number_shrub_species <- length(unique(shrub_data$Species_LT))
-
-
-# City level ----
-## Number of species ----
-cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n", 
-    "total genera:", length(unique(all_plant_data$Genus)), "\n", 
-    "total families:", length(unique(all_plant_data$Family)), "\n", "\n")
-
-# species accumulation curve 
 # func to plot species accumulation curve and extrapolation 
 # func parameters: x, raw data; y, size of extrapolation; z, extent of x axis; method, plot the curve separately by land use (method = "land_use") or not (method = "city")
 fun_accum <- function(x, y, z, method) {
@@ -153,20 +112,7 @@ fun_accum <- function(x, y, z, method) {
     scale_x_continuous(limits = c(0, z)) + 
     theme_bw()
 }
-fun_accum(all_plant_data, 600, 600, method = "city") + 
-  theme(legend.position = "none")
 
-## Top taxa ----
-# top species families of all plants by species number
-all_plant_info %>% group_by(Family) %>% 
-  dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
-  arrange(desc(Prop))
-
-# abundance of trees and shrubs
-cat("number of trees:", nrow(tree_data), "in", nrow(qua_tree_div), "plot", "\n", 
-    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(qua_shrub_div), "plot")
-
-# top species families of trees and shrubs by abundance
 # func to generate top species with abundance data
 # func para: x, row data; y, level of classification; z, column of abundance data; k, calculation of total abundance; n, number of top "n"
 fun_top <- function(x, y, z, k, n) {
@@ -177,11 +123,6 @@ fun_top <- function(x, y, z, k, n) {
   names(top_plant)[1] = c(y)
   print(top_plant)
 }
-tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 10)
-tree_top_family <- fun_top(tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
-shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 10)
-shrub_top_family <- fun_top(shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
-intersect(tree_top_family$Family, shrub_top_family$Family)
 
 # func to test if top species are contained in top families
 # func para: x, raw data of species; y, raw data of families 
@@ -192,28 +133,7 @@ fun_contain <- function(x, y) {
              "Contain" = merge_data$Family %in% y$Family
   )
 }
-fun_contain(tree_top_species, tree_top_family)
-fun_contain(shrub_top_species, shrub_top_family)
-rm(tree_top_species, tree_top_family, 
-   shrub_top_species, shrub_top_family, 
-   fun_top, fun_contain)
 
-# attributes of trees and shrubs
-# the number of exotic vs. native by number of species
-table(all_plant_info$Nt_ex)/nrow(all_plant_info)
-
-# the attributes of trees and shrubs
-for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 2)
-  cat("\n")
-}
-for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 2)
-  cat("\n")
-}
-
-## Distribution of species abundance ----
-# rank abundance curves for trees and shrubs
 fun_rank_data <- function(x, y) {
   x[2:(y+1)] %>%
     subset(select = colSums(.) != 0) %>%
@@ -221,10 +141,6 @@ fun_rank_data <- function(x, y) {
     as.data.frame() %>%
     mutate(Species_LT = rownames(.))
 }
-city_tree_rank <- fun_rank_data(qua_tree_div, number_tree_species) %>% 
-  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
-city_shrub_rank <- fun_rank_data(qua_shrub_div, number_tree_species) %>% 
-  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 
 # func to plot rank-abundance curve
 # func para: x, raw data; title, plot title; method, plot at city level (method = "city") or at land use level (method = "land_use)
@@ -247,6 +163,98 @@ fun_rank_plot <- function(x, title, method) {
           legend.title = element_text(size = 12),
           legend.text = element_text(size = 12))
 }
+
+# Get data ----
+# some default factors
+Land_use_type_faclev <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
+index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
+
+# information of all the plots
+all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
+  mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
+
+# information of all the plants species: provenance and taxonomy 
+all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
+
+# data of all the plants: taxonomy, attributes, abundance, etc.
+all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
+  left_join(all_plant_info, by = "Species_LT") %>%
+  left_join(all_plot_info,by = "Plot_ID")
+
+# data of trees and shrubs and diversity table of trees and shrubs 
+tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
+shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL) %>% 
+  mutate(Area = Area/10000)
+
+lu_tree_div <- fun_div(tree_data, Stem, "Stem", 
+                       Land_use_type, "Land_use_type", method = "land_use")
+lu_shrub_div <- fun_div(shrub_data, Area, "Area", 
+                        Land_use_type, "Land_use_type", method = "land_use")
+qua_tree_div <- fun_div(tree_data, Stem, "Stem", 
+                        Plot_ID, "Plot_ID", method = "quadrat")
+qua_shrub_div <- fun_div(shrub_data, Area, "Area", 
+                         Plot_ID, "Plot_ID", method = "quadrat")
+
+
+# some other variables 
+number_tree_species <- length(unique(tree_data$Species_LT))
+number_shrub_species <- length(unique(shrub_data$Species_LT))
+
+
+# City level ----
+## Number of species ----
+cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n", 
+    "total genera:", length(unique(all_plant_data$Genus)), "\n", 
+    "total families:", length(unique(all_plant_data$Family)), "\n", "\n")
+
+# species accumulation curve 
+fun_accum(all_plant_data, 600, 600, method = "city") + 
+  theme(legend.position = "none")
+
+## Top taxa ----
+# top species families of all plants by species number
+all_plant_info %>% group_by(Family) %>% 
+  dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
+  arrange(desc(Prop))
+
+# abundance of trees and shrubs
+cat("number of trees:", nrow(tree_data), "in", nrow(qua_tree_div), "plot", "\n", 
+    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(qua_shrub_div), "plot")
+
+# top species families of trees and shrubs by abundance
+tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 10)
+tree_top_family <- fun_top(tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
+shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 10)
+shrub_top_family <- fun_top(shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
+intersect(tree_top_family$Family, shrub_top_family$Family)
+
+fun_contain(tree_top_species, tree_top_family)
+fun_contain(shrub_top_species, shrub_top_family)
+rm(tree_top_species, tree_top_family, 
+   shrub_top_species, shrub_top_family, 
+   fun_top, fun_contain)
+
+# attributes of trees and shrubs
+# the number of exotic vs. native by number of species
+table(all_plant_info$Nt_ex)/nrow(all_plant_info)
+
+# the attributes of trees and shrubs
+for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
+  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 2)
+  cat("\n")
+}
+for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
+  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 2)
+  cat("\n")
+}
+
+## Distribution of species abundance ----
+# rank abundance curves for trees and shrubs
+city_tree_rank <- fun_rank_data(qua_tree_div, number_tree_species) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
+city_shrub_rank <- fun_rank_data(qua_shrub_div, number_tree_species) %>% 
+  left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
+
 ggarrange(plotlist = list(
   fun_rank_plot(city_tree_rank, title = "(a)", method = "city"), 
   fun_rank_plot(city_shrub_rank, title = "(b)", method = "city")
