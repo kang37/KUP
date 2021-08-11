@@ -306,6 +306,109 @@ rownames(lu_dissim) <- Land_use_type_faclev
 colnames(lu_dissim) <- Land_use_type_faclev
 lu_dissim
 
+# Quadrat level ----
+## Kruskal-Wallis test & box plot for trees 
+# tree diversity longer and shrub diversity longer data set
+fun_cons_long <- function(x) {
+  subset(x, select = c("Density", "Richness", "Shannon", "Evenness", "Land_use_type")) %>% 
+    pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
+                 names_to = "Index", values_to = "Index_value") %>% 
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
+           Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
+           Attr = c("Land use type")) %>% 
+    na.omit()
+}
+qua_tree_div_long <- fun_cons_long(qua_tree_div)
+qua_shrub_div_long <- fun_cons_long(qua_shrub_div)
+
+# get p-values for box plots
+fun_get_pvalue <- function(x) {
+  y <- data.frame(Index = c("Density", "Richness", "Shannon", "Evenness"), 
+                  Pvalue = NA, Label = NA) %>% 
+    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")))
+  j <- 0
+  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
+    j <- j+1
+    y$Pvalue[j] <- round(kruskal.test(
+      x[, i] ~ x$Land_use_type)$p.value,digits = 3)
+  }
+  y$Label <- case_when(
+    y$Pvalue >= 0.05 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), sep = ""), 
+    y$Pvalue < 0.05 & y$Pvalue >= 0.01 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "*", sep = ""), 
+    y$Pvalue < 0.01 & y$Pvalue >= 0.001 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "**", sep = ""),
+    y$Pvalue < 0.001 ~ 
+      paste("p=", sprintf("%.3f",y$Pvalue), "***", sep = "")
+  )
+  data.frame(y)
+}
+tree_box_pvalue <- fun_get_pvalue(qua_tree_div)
+shrub_box_pvalue <- fun_get_pvalue(qua_shrub_div)
+
+# get box plots
+fun_box_plot <- function(x, y, z) {
+  ggplot(x, aes(Land_use_type, Index_value)) + 
+    geom_boxplot() + 
+    facet_grid(Index ~ Attr, scales = "free", space = "free_x", switch = "both") + 
+    scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
+    geom_text(data = y, aes(x =Inf, y = Inf, label = Label), 
+              size=3.5, hjust = 1.05, vjust = 1.5) +
+    theme(axis.text.x = element_text(angle = 90, size = 12)) + 
+    labs(title = z, x = NULL, y = NULL)
+}
+ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
+          fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
+rm(tree_box_pvalue, qua_tree_div_long, 
+   shrub_box_pvalue, qua_shrub_div_long, 
+   fun_box_plot, fun_cons_long, fun_get_pvalue)
+
+
+## pairwise dunn test of diversity ~ land use type
+fun_dunn <- function(x, taxa, index) {
+  dunn_result <- dunn.test(x[ , index], x$Land_use_type, table = FALSE, kw = FALSE)
+  x <- data.frame(
+    "taxa" = taxa, 
+    "index" = index, 
+    "comparison" = dunn_result$comparisons, 
+    "p" = dunn_result$P.adjusted
+  ) %>% 
+    separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
+}
+dunn_df_1 <- rbind(fun_dunn(qua_tree_div, "tree", "Density"), 
+                   fun_dunn(qua_tree_div, "tree", "Richness"),
+                   fun_dunn(qua_tree_div, "tree", "Shannon"),
+                   fun_dunn(qua_tree_div, "tree", "Evenness"),
+                   fun_dunn(qua_shrub_div, "shrub", "Density"), 
+                   fun_dunn(qua_shrub_div, "shrub", "Richness"),
+                   fun_dunn(qua_shrub_div, "shrub", "Shannon"),
+                   fun_dunn(qua_shrub_div, "shrub", "Evenness")
+) 
+dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
+names(dunn_df_2) <- c("taxa", "index", "comparison_1", "comparison_2", "p")
+dunn_df <- rbind(dunn_df_1, dunn_df_2)%>% 
+  mutate(index = factor(index, levels = index_faclev), 
+         comparison_1 = factor(comparison_1, Land_use_type_faclev), 
+         comparison_2 = factor(comparison_2, Land_use_type_faclev))
+# plot the pairwise test results
+fun_dunn_plot <- function(x, title) {
+  ggplot(x, aes(comparison_1, comparison_2, fill = p)) +
+    geom_tile() + 
+    geom_text(aes(label = round(p*100)), size = 2.5) +
+    scale_fill_gradient2(high = "blue", low = "red", 
+                         midpoint = 0.05, limits = c(0, 0.05)) + 
+    theme(axis.text.x = element_text(angle = 90)) + 
+    xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+    facet_wrap(~ index, scales = "free", nrow = 1) +
+    labs(title = title)
+}
+ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"), 
+          fun_dunn_plot(subset(dunn_df, taxa == "shrub"), "Shrub"), 
+          nrow = 2)
+rm(dunn_df_1, dunn_df_2, dunn_df, 
+   fun_dunn, fun_dunn_plot)
+
 
 ## Non-metric multidimensional scaling
 set.seed(1234)
@@ -466,108 +569,6 @@ rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, occup_top, occup_to
 chart.Correlation(subset(qua_tree_div, select = index_faclev))
 chart.Correlation(subset(qua_shrub_div, select = index_faclev))
 
-
-## Kruskal-Wallis test & box plot for trees 
-# tree diversity longer and shrub diversity longer data set
-fun_cons_long <- function(x) {
-  subset(x, select = c("Density", "Richness", "Shannon", "Evenness", "Land_use_type")) %>% 
-    pivot_longer(cols = c("Density", "Richness", "Shannon", "Evenness"), 
-                 names_to = "Index", values_to = "Index_value") %>% 
-    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")), 
-           Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
-           Attr = c("Land use type")) %>% 
-    na.omit()
-}
-qua_tree_div_long <- fun_cons_long(qua_tree_div)
-qua_shrub_div_long <- fun_cons_long(qua_shrub_div)
-
-# get p-values for box plots
-fun_get_pvalue <- function(x) {
-  y <- data.frame(Index = c("Density", "Richness", "Shannon", "Evenness"), 
-             Pvalue = NA, Label = NA) %>% 
-    mutate(Index = factor(Index, levels = c("Density", "Richness", "Shannon", "Evenness")))
-  j <- 0
-  for (i in c("Density", "Richness", "Shannon", "Evenness")) {
-    j <- j+1
-    y$Pvalue[j] <- round(kruskal.test(
-      x[, i] ~ x$Land_use_type)$p.value,digits = 3)
-  }
-  y$Label <- case_when(
-    y$Pvalue >= 0.05 ~ 
-      paste("p=", sprintf("%.3f",y$Pvalue), sep = ""), 
-    y$Pvalue < 0.05 & y$Pvalue >= 0.01 ~ 
-      paste("p=", sprintf("%.3f",y$Pvalue), "*", sep = ""), 
-    y$Pvalue < 0.01 & y$Pvalue >= 0.001 ~ 
-      paste("p=", sprintf("%.3f",y$Pvalue), "**", sep = ""),
-    y$Pvalue < 0.001 ~ 
-      paste("p=", sprintf("%.3f",y$Pvalue), "***", sep = "")
-  )
-  data.frame(y)
-}
-tree_box_pvalue <- fun_get_pvalue(qua_tree_div)
-shrub_box_pvalue <- fun_get_pvalue(qua_shrub_div)
-
-# get box plots
-fun_box_plot <- function(x, y, z) {
-  ggplot(x, aes(Land_use_type, Index_value)) + 
-    geom_boxplot() + 
-    facet_grid(Index ~ Attr, scales = "free", space = "free_x", switch = "both") + 
-    scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
-    geom_text(data = y, aes(x =Inf, y = Inf, label = Label), 
-              size=3.5, hjust = 1.05, vjust = 1.5) +
-    theme(axis.text.x = element_text(angle = 90, size = 12)) + 
-    labs(title = z, x = NULL, y = NULL)
-}
-ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
-          fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
-rm(tree_box_pvalue, qua_tree_div_long, 
-   shrub_box_pvalue, qua_shrub_div_long, 
-   fun_box_plot, fun_cons_long, fun_get_pvalue)
-
-
-## pairwise dunn test of diversity ~ land use type
-fun_dunn <- function(x, taxa, index) {
-  dunn_result <- dunn.test(x[ , index], x$Land_use_type, table = FALSE, kw = FALSE)
-  x <- data.frame(
-    "taxa" = taxa, 
-    "index" = index, 
-    "comparison" = dunn_result$comparisons, 
-    "p" = dunn_result$P.adjusted
-  ) %>% 
-    separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
-}
-dunn_df_1 <- rbind(fun_dunn(qua_tree_div, "tree", "Density"), 
-                   fun_dunn(qua_tree_div, "tree", "Richness"),
-                   fun_dunn(qua_tree_div, "tree", "Shannon"),
-                   fun_dunn(qua_tree_div, "tree", "Evenness"),
-                   fun_dunn(qua_shrub_div, "shrub", "Density"), 
-                   fun_dunn(qua_shrub_div, "shrub", "Richness"),
-                   fun_dunn(qua_shrub_div, "shrub", "Shannon"),
-                   fun_dunn(qua_shrub_div, "shrub", "Evenness")
-) 
-dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
-names(dunn_df_2) <- c("taxa", "index", "comparison_1", "comparison_2", "p")
-dunn_df <- rbind(dunn_df_1, dunn_df_2)%>% 
-  mutate(index = factor(index, levels = index_faclev), 
-         comparison_1 = factor(comparison_1, Land_use_type_faclev), 
-         comparison_2 = factor(comparison_2, Land_use_type_faclev))
-# plot the pairwise test results
-fun_dunn_plot <- function(x, title) {
-  ggplot(x, aes(comparison_1, comparison_2, fill = p)) +
-    geom_tile() + 
-    geom_text(aes(label = round(p*100)), size = 2.5) +
-    scale_fill_gradient2(high = "blue", low = "red", 
-                         midpoint = 0.05, limits = c(0, 0.05)) + 
-    theme(axis.text.x = element_text(angle = 90)) + 
-    xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
-    facet_wrap(~ index, scales = "free", nrow = 1) +
-    labs(title = title)
-}
-ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"), 
-          fun_dunn_plot(subset(dunn_df, taxa == "shrub"), "Shrub"), 
-          nrow = 2)
-rm(dunn_df_1, dunn_df_2, dunn_df, 
-   fun_dunn, fun_dunn_plot)
 
 ## data for discussion
 # means of quadrat density and richness for trees
