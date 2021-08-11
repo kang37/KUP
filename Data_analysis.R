@@ -1,4 +1,3 @@
-setwd("C:/Users/kangj/Documents/R/KUP")
 library(Rmisc)
 library(ggplot2)
 library(dplyr)
@@ -473,3 +472,4 @@ rm(dunn_df_1, dunn_df_2, dunn_df,
 # means of quadrat density and richness for trees
 tree_diversity %>% group_by(Land_use_type) %>% 
   dplyr::summarise(Density = mean(Density), Richness = mean(Richness))
+
