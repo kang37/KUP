@@ -291,6 +291,13 @@ community_structure(
   lu_shrub_rank, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
   arrange(desc(EQ))
 
+## Species composition ----
+# Bray Curtis dissimilarity of pairs of land use
+lu_dissim <- vegdist(lu_tree_div[2: 133]) %>% as.matrix() %>% round(digits = 2)
+rownames(lu_dissim) <- Land_use_type_faclev
+colnames(lu_dissim) <- Land_use_type_faclev
+lu_dissim
+
 
 ## Non-metric multidimensional scaling
 set.seed(1234)
