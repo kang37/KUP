@@ -270,7 +270,7 @@ fun_accum(all_plant_data, 600, 50, method = "land_use") +
   scale_color_manual(values = c("#FF0000", "#FF7800", "#DF73FF", 
                                 "#BFBF30", "#6BE400", "#00733E"))
 
-# Distribution of species abundance ----
+## Distribution of species abundance ----
 lu_tree_rank <- 
   ddply(qua_tree_div, "Land_use_type", y = number_tree_species, fun_rank_data) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
