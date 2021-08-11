@@ -9,7 +9,7 @@ library(BiodiversityR)
 library(codyn)
 library(ggpubr)
 
-## get data
+# Get data ----
 # some default factors
 opar <- par(no.readonly = TRUE)
 Land_use_type_faclev <- c("Com", "Com-neigh", "R-low", "R-high", "R-other", "Ind")
@@ -67,8 +67,7 @@ number_tree_species <- length(unique(tree_data$Species_LT))
 number_shrub_species <- length(unique(shrub_data$Species_LT))
 
 
-### analysis begins
-## general description
+# City level ----
 # the number of species
 cat("total species:", length(unique(all_plant_data$Species_LT)), "\n", 
     "total genera:", length(unique(all_plant_data$Genus)), "\n", 
