@@ -272,7 +272,7 @@ city_shrub_rank %>%
   community_structure(abundance.var = "abundance", metric = "EQ") %>%
   arrange(EQ)
 
-# Land use ----
+# Land use level ----
 ## Species accumulation curve ----
 fun_accum(all_plant_data, 600, 50, method = "land_use") + 
   scale_color_manual(values = c("#FF0000", "#FF7800", "#DF73FF", 
