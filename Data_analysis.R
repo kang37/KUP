@@ -272,10 +272,10 @@ fun_accum(all_plant_data, 600, 50, method = "land_use") +
 
 # Distribution of species abundance ----
 lu_tree_rank <- 
-  ddply(qua_tree_div, "Land_use_type", y = number_tree_species, fun_rank) %>% 
+  ddply(qua_tree_div, "Land_use_type", y = number_tree_species, fun_rank_data) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 lu_shrub_rank <- 
-  ddply(qua_shrub_div, "Land_use_type", y = number_shrub_species, fun_rank) %>% 
+  ddply(qua_shrub_div, "Land_use_type", y = number_shrub_species, fun_rank_data) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use"),
           fun_rank_plot(lu_shrub_rank, "(b)", method = "land_use"), 
