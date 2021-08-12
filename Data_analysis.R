@@ -317,6 +317,19 @@ colnames(lu_dissim) <- Land_use_type_faclev
 lu_dissim
 
 # Quadrat level ----
+## Richness ~ land use for all plants ----
+ggplot(qua_plant_div) + 
+  geom_boxplot(aes(Land_use_type, Richness)) + 
+  labs(x = "Land use zone", y = "Quadrat richness") + 
+  geom_text(data = data.frame(
+    Land_use_type = Land_use_type_faclev, 
+    Label = c(rep("a", 4), "ab", "b")
+  ), aes(x = Land_use_type, y = Inf, label = Label), vjust = 2) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) + 
+  theme_bw()
+kruskal.test(qua_plant_div$Richness ~ qua_plant_div$Land_use_type)
+dunn.test(x = qua_plant_div$Richness, g = qua_plant_div$Land_use_type)
+
 ## Kruskal-Wallis test & box plot for trees 
 # tree diversity longer and shrub diversity longer data set
 fun_cons_long <- function(x) {
