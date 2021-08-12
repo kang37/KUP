@@ -206,6 +206,7 @@ qua_shrub_div <- fun_div(shrub_data, Area, "Area",
 
 
 # some other variables 
+number_plant_species <- length(unique(all_plant_data$Species_LT))
 number_tree_species <- length(unique(tree_data$Species_LT))
 number_shrub_species <- length(unique(shrub_data$Species_LT))
 
