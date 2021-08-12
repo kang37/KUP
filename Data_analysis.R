@@ -172,6 +172,15 @@ index_faclev <- c("Density", "Richness", "Shannon", "Simpson", "Evenness")
 # information of all the plots
 all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
   mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
+qua_plant_div <- all_plant_data %>% 
+  mutate(presence = 1) %>% 
+  subset(select = c("Plot_ID", "Species_LT", "presence")) %>% 
+  unique() %>% 
+  pivot_wider(names_from = Species_LT, values_from = presence, 
+              values_fn = sum, values_fill = 0) %>% 
+  mutate(Richness = apply(.[2:ncol(.)]>0, 1, sum)) %>% 
+  left_join(all_plot_info, by = "Plot_ID") %>% 
+  as.data.frame()
 
 # information of all the plants species: provenance and taxonomy 
 all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
