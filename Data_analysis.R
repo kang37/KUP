@@ -388,8 +388,7 @@ rm(tree_box_pvalue, qua_tree_div_long,
    shrub_box_pvalue, qua_shrub_div_long, 
    fun_box_plot, fun_cons_long, fun_get_pvalue)
 
-
-## pairwise dunn test of diversity ~ land use type
+# pairwise dunn test of indexes ~ land use type
 fun_dunn <- function(x, taxa, index) {
   dunn_result <- dunn.test(x[ , index], x$Land_use_type, table = FALSE, kw = FALSE)
   x <- data.frame(
@@ -402,11 +401,9 @@ fun_dunn <- function(x, taxa, index) {
 }
 dunn_df_1 <- rbind(fun_dunn(qua_tree_div, "tree", "Abundance"), 
                    fun_dunn(qua_tree_div, "tree", "Richness"),
-                   fun_dunn(qua_tree_div, "tree", "Shannon"),
                    fun_dunn(qua_tree_div, "tree", "Evenness"),
                    fun_dunn(qua_shrub_div, "shrub", "Abundance"), 
                    fun_dunn(qua_shrub_div, "shrub", "Richness"),
-                   fun_dunn(qua_shrub_div, "shrub", "Shannon"),
                    fun_dunn(qua_shrub_div, "shrub", "Evenness")
 ) 
 dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
@@ -423,7 +420,7 @@ fun_dunn_plot <- function(x, title) {
     scale_fill_gradient2(high = "blue", low = "red", 
                          midpoint = 0.05, limits = c(0, 0.05)) + 
     theme(axis.text.x = element_text(angle = 90)) + 
-    xlab(NULL) + ylab(NULL) + guides(fill = FALSE) + 
+    xlab(NULL) + ylab(NULL) + guides(fill = "none") + 
     facet_wrap(~ index, scales = "free", nrow = 1) +
     labs(title = title)
 }
@@ -433,8 +430,8 @@ ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"),
 rm(dunn_df_1, dunn_df_2, dunn_df, 
    fun_dunn, fun_dunn_plot)
 
-
-## Non-metric multidimensional scaling
+## Species composition ----
+# use non-metric multidimensional scaling
 set.seed(1234)
 # nMDS calculation for tree
 tree_mds_selected <- subset(qua_tree_div, Abundance > 1)
@@ -589,12 +586,12 @@ rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, occup_top, occup_to
   Species_unique, fun_occup_rate,fun_occup_df, fun_share_prop)
 
 
-## cor among the indexes
+# Cor among the indexes ----
 chart.Correlation(subset(qua_tree_div, select = index_faclev))
 chart.Correlation(subset(qua_shrub_div, select = index_faclev))
 
 
-## data for discussion
+# Data for discussion ----
 # means of quadrat Abundance and richness for trees
 qua_tree_div %>% group_by(Land_use_type) %>% 
   dplyr::summarise(Abundance = mean(Abundance), Richness = mean(Richness))
