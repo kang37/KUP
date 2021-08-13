@@ -224,22 +224,29 @@ fun_accum(all_plant_data, 600, 600, method = "city") +
 ## Top taxa ----
 # top species families of all plants by species number
 all_plant_info %>% group_by(Family) %>% 
-  dplyr::summarise(Number = n(), Prop = n()/nrow(all_plant_info)) %>% 
+  dplyr::summarise(Num_spe = n(), Prop = n()/nrow(all_plant_info)) %>% 
   arrange(desc(Prop))
 
 # abundance of trees and shrubs
-cat("number of trees:", nrow(tree_data), "in", nrow(qua_tree_div), "plot", "\n", 
-    "area of shrubs:", sum(shrub_data$Area), "m2 in", nrow(qua_shrub_div), "plot")
+cat("number of trees:", nrow(tree_data), "in", 
+    nrow(qua_tree_div), "plot", "\n", 
+    "area of shrubs:", sum(shrub_data$Area), "m2 in", 
+    nrow(qua_shrub_div), "plot")
 
 # top species families of trees and shrubs by abundance
-tree_top_species <- fun_top(tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 10)
-tree_top_family <- fun_top(tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
-shrub_top_species <- fun_top(shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 10)
-shrub_top_family <- fun_top(shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
-intersect(tree_top_family$Family, shrub_top_family$Family)
-
+tree_top_species <- fun_top(
+  tree_data, "Species_LT", "Stem", sum(tree_data$Stem), 10)
+tree_top_family <- fun_top(
+  tree_data, "Family", "Stem", sum(tree_data$Stem), 10)
 fun_contain(tree_top_species, tree_top_family)
+
+shrub_top_species <- fun_top(
+  shrub_data, "Species_LT", "Area", sum(shrub_data$Area), 10)
+shrub_top_family <- fun_top(
+  shrub_data, "Family", "Area", sum(shrub_data$Area), 10)
+intersect(tree_top_family$Family, shrub_top_family$Family)
 fun_contain(shrub_top_species, shrub_top_family)
+
 rm(tree_top_species, tree_top_family, 
    shrub_top_species, shrub_top_family, 
    fun_top, fun_contain)
@@ -250,11 +257,13 @@ table(all_plant_info$Nt_ex)/nrow(all_plant_info)
 
 # the attributes of trees and shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), digits = 2)
+  print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), 
+        digits = 2)
   cat("\n")
 }
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
-  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), digits = 2)
+  print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), 
+        digits = 2)
   cat("\n")
 }
 
@@ -290,10 +299,12 @@ fun_accum(all_plant_data, 600, 50, method = "land_use") +
 
 ## Distribution of species abundance ----
 lu_tree_rank <- 
-  ddply(qua_tree_div, "Land_use_type", y = number_tree_species, fun_rank_data) %>% 
+  ddply(qua_tree_div, "Land_use_type", 
+        y = number_tree_species, fun_rank_data) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 lu_shrub_rank <- 
-  ddply(qua_shrub_div, "Land_use_type", y = number_shrub_species, fun_rank_data) %>% 
+  ddply(qua_shrub_div, "Land_use_type", 
+        y = number_shrub_species, fun_rank_data) %>% 
   left_join(select(all_plant_info, c("Species_LT", "Nt_ex")), by = "Species_LT")
 ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use"),
           fun_rank_plot(lu_shrub_rank, "(b)", method = "land_use"), 
@@ -303,14 +314,16 @@ subset(lu_tree_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
 subset(lu_shrub_rank[,c("rank", "Species_LT", "Nt_ex")], rank <= 3)
 # calculate the EQ evenness index and plot
 community_structure(
-  lu_tree_rank, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>% 
+  lu_tree_rank, time.var = "Land_use_type", 
+  abundance.var = "abundance", metric = "EQ") %>% 
   arrange(desc(EQ))
 community_structure(
-  lu_shrub_rank, time.var = "Land_use_type", abundance.var = "abundance", metric = "EQ") %>%
+  lu_shrub_rank, time.var = "Land_use_type", 
+  abundance.var = "abundance", metric = "EQ") %>%
   arrange(desc(EQ))
 
 ## Species composition ----
-# Bray Curtis dissimilarity of pairs of land use
+# Bray-Curtis dissimilarity of pairs of land use
 lu_dissim <- vegdist(lu_tree_div[2: 133]) %>% as.matrix() %>% round(digits = 2)
 rownames(lu_dissim) <- Land_use_type_faclev
 colnames(lu_dissim) <- Land_use_type_faclev
@@ -375,7 +388,8 @@ shrub_box_pvalue <- fun_get_pvalue(qua_shrub_div)
 fun_box_plot <- function(x, y, z) {
   ggplot(x, aes(Land_use_type, Index_value)) + 
     geom_boxplot() + 
-    facet_grid(Index ~ Attr, scales = "free", space = "free_x", switch = "both") + 
+    facet_grid(Index ~ Attr, scales = "free", 
+               space = "free_x", switch = "both") + 
     scale_y_continuous(expand = expansion(mult = c(0.05,0.3))) +
     geom_text(data = y, aes(x =Inf, y = Inf, label = Label), 
               size=3.5, hjust = 1.05, vjust = 1.5) +
@@ -390,7 +404,8 @@ rm(tree_box_pvalue, qua_tree_div_long,
 
 # pairwise dunn test of indexes ~ land use type
 fun_dunn <- function(x, taxa, index) {
-  dunn_result <- dunn.test(x[ , index], x$Land_use_type, table = FALSE, kw = FALSE)
+  dunn_result <- dunn.test(x[ , index], x$Land_use_type, 
+                           table = FALSE, kw = FALSE)
   x <- data.frame(
     "taxa" = taxa, 
     "index" = index, 
@@ -453,9 +468,11 @@ shrub_mds_selected <- cbind(shrub_mds_selected, shrub_mds_meta$points)
 
 # ANOSIM of trees and shrubs as labels for the nMDS plots
 tree_anosim <- 
-  anosim(tree_mds_selected[2:(number_tree_species+1)], tree_mds_selected$Land_use_type)
+  anosim(tree_mds_selected[2:(number_tree_species+1)], 
+         tree_mds_selected$Land_use_type)
 shrub_anosim <- 
-  anosim(shrub_mds_selected[2:(number_shrub_species+1)], shrub_mds_selected$Land_use_type)
+  anosim(shrub_mds_selected[2:(number_shrub_species+1)], 
+         shrub_mds_selected$Land_use_type)
 
 # get hull for nMDS plots of trees and shrubs
 fun_find_hull <- function(x) {x[chull(x$MDS1, x$MDS2), ]}
@@ -477,8 +494,10 @@ fun_nmds_plot <- function(mds_selected, hull, plot_title, mds_meta, anosim) {
     theme_bw()
 }
 ggarrange(
-  fun_nmds_plot(tree_mds_selected, tree_hulls, "tree", tree_mds_meta, tree_anosim), 
-  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "shrub", shrub_mds_meta, shrub_anosim),
+  fun_nmds_plot(tree_mds_selected, tree_hulls, "tree", 
+                tree_mds_meta, tree_anosim), 
+  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "shrub", 
+                shrub_mds_meta, shrub_anosim),
   common.legend = T, legend = "right"
 )
 
@@ -488,7 +507,8 @@ fun_anosim_pairs <- function(x, y) {
   result <- NULL
   for (i in 1:ncol(anosim_pairs)) {
     set.seed(1234)
-    mds_selected_sub <- subset(x, Land_use_type %in% c(anosim_pairs[1,i], anosim_pairs[2,i]))
+    mds_selected_sub <- 
+      subset(x, Land_use_type %in% c(anosim_pairs[1,i], anosim_pairs[2,i]))
     result <- c(result, anosim(mds_selected_sub[2:(y+1)], 
                                mds_selected_sub$Land_use_type)$signif)
   }
@@ -523,7 +543,8 @@ tree_occup <- ddply(
   .[,-1] %>% t() 
 colnames(tree_occup) = Land_use_type_faclev
 tree_occup_top <- fun_occup_df(tree_occup)
-write.csv(tree_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", row.names = FALSE)
+write.csv(tree_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", 
+          row.names = FALSE)
 
 shrub_occup <- ddply(
   qua_shrub_div, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
@@ -559,13 +580,15 @@ fun_share_prop <- function(occup_top_data, plot_title) {
       k <- k+1
       share_prop$land_use_1[k] <- Land_use_type_faclev[i]
       share_prop$land_use_2[k] <- Land_use_type_faclev[j]
-      share_prop$prop[k] <- (length(intersect(occup_top_data[,i],occup_top_data[,j])))/
+      share_prop$prop[k] <- 
+        (length(intersect(occup_top_data[,i],occup_top_data[,j])))/
         (length(union(occup_top_data[,i],occup_top_data[,j])))
     }
   }
   ggplot(share_prop, aes(land_use_1, land_use_2, fill = prop)) + 
     geom_tile() + geom_text(aes(label = round(prop*100))) +
-    scale_fill_gradient2(high = "red", low = "blue", midpoint = 0.4, limits = c(0,0.8)) +
+    scale_fill_gradient2(high = "red", low = "blue", 
+                         midpoint = 0.4, limits = c(0,0.8)) +
     labs(title = plot_title) + theme(axis.text.x = element_text(angle = 90))
 }
 ggarrange(fun_share_prop(tree_occup_top, "tree"), 
@@ -580,10 +603,12 @@ occup_top_long <- occup_top %>% pivot_longer(
 Species_unique <- occup_top_long %>% group_by(Species) %>% 
   dplyr::summarise(Number = n()) %>% arrange(Number) %>% 
   subset(Number == 1) %>% .$Species 
-occup_top_long[which(occup_top_long$Species %in% Species_unique),] %>% arrange(Land_use_type)
+occup_top_long[which(occup_top_long$Species %in% Species_unique),] %>% 
+  arrange(Land_use_type)
 
-rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, occup_top, occup_top_long, 
-  Species_unique, fun_occup_rate,fun_occup_df, fun_share_prop)
+rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, 
+   occup_top, occup_top_long, Species_unique, 
+   fun_occup_rate,fun_occup_df, fun_share_prop)
 
 
 # Cor among the indexes ----
