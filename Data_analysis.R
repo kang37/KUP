@@ -218,7 +218,8 @@ cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n",
     "total families:", length(unique(all_plant_data$Family)), "\n", "\n")
 
 # species accumulation curve 
-fun_accum(all_plant_data, 600, 600, method = "city") + 
+# extrapolation up to double the reference sample size
+fun_accum(all_plant_data, 348, 350, method = "city") + 
   theme(legend.position = "none")
 
 ## Top taxa ----
