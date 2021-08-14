@@ -295,6 +295,7 @@ city_shrub_rank %>%
 # Land use level ----
 ## Species accumulation curve ----
 fun_accum(all_plant_data, 348, 50, method = "land_use") + 
+  labs(color = "Land use") + 
   scale_color_manual(values = c("#FF0000", "#FF7800", "#DF73FF", 
                                 "#BFBF30", "#6BE400", "#00733E"))
 
