@@ -147,7 +147,7 @@ fun_rank_data <- function(x, y) {
 fun_rank_plot <- function(x, title, method) {
   if (method == "city") {
     plotdata <- ggplot(x, aes(rankfreq, proportion)) + 
-      geom_line()
+      geom_line() + labs(title = title)
   } else {
     plotdata <- ggplot(x, aes(rankfreq, proportion)) + 
       geom_line() + 
