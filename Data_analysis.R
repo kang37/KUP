@@ -344,40 +344,19 @@ fun_occup_df <- function(x){
              "Ind" = names(head(sort(x[,"Ind"],decreasing = TRUE),10)))
 }
 
-tree_occup <- ddply(
-  qua_tree_div, .(Land_use_type), y = number_tree_species, fun_occup_rate) %>% 
+plant_occup <- ddply(
+  qua_plant_div, .(Land_use_type), y = number_plant_species, fun_occup_rate) %>% 
   .[,-1] %>% t() 
-colnames(tree_occup) = Land_use_type_faclev
-tree_occup_top <- fun_occup_df(tree_occup)
-write.csv(tree_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", 
-          row.names = FALSE)
-
-shrub_occup <- ddply(
-  qua_shrub_div, .(Land_use_type), y = number_shrub_species, fun_occup_rate) %>% 
-  .[,-1] %>% t() 
-colnames(shrub_occup) = Land_use_type_faclev
-shrub_occup_top <- fun_occup_df(shrub_occup)
-write.table(shrub_occup_top, "C:/Users/kangj/Documents/R/KUP/occup.csv", 
-            row.names = FALSE, append = TRUE, sep = ",")
-
-occup_top <- rbind(tree_occup_top, shrub_occup_top)
+colnames(plant_occup) = Land_use_type_faclev
+(plant_occup_top <- fun_occup_df(plant_occup))
 
 # shared species over land use types
-# shared species for both trees and shrubs over land use types
-Reduce(intersect, list(tree_occup_top[,1], tree_occup_top[,2], tree_occup_top[,3], 
-                       tree_occup_top[,4], tree_occup_top[,5], tree_occup_top[,6], 
-                       shrub_occup_top[,1], shrub_occup_top[,2], shrub_occup_top[,3], 
-                       shrub_occup_top[,4], shrub_occup_top[,5], shrub_occup_top[,6]))
+Reduce(intersect, list(plant_occup_top[,1], plant_occup_top[,2], 
+                       plant_occup_top[,3], plant_occup_top[,4], 
+                       plant_occup_top[,5], plant_occup_top[,6]))
 
-# shared species for trees over land use types
-Reduce(intersect, list(tree_occup_top[,1], tree_occup_top[,2], tree_occup_top[,3], 
-                       tree_occup_top[,4], tree_occup_top[,5], tree_occup_top[,6]))
-# shared species for shrubs over land use types
-Reduce(intersect, list(shrub_occup_top[,1], shrub_occup_top[,2], shrub_occup_top[,3], 
-                       shrub_occup_top[,4], shrub_occup_top[,5], shrub_occup_top[,6]))
-
-# shared species for trees between land use types
-fun_share_prop <- function(occup_top_data, plot_title) {
+# shared top species between land use types
+fun_share_prop <- function(occup_top_data) {
   share_prop <- as.data.frame(matrix(numeric(0),ncol=3, nrow = 36))
   colnames(share_prop) <- c("land_use_1", "land_use_2", "prop")
   k <- 0
@@ -395,26 +374,19 @@ fun_share_prop <- function(occup_top_data, plot_title) {
     geom_tile() + geom_text(aes(label = round(prop*100))) +
     scale_fill_gradient2(high = "red", low = "blue", 
                          midpoint = 0.4, limits = c(0,0.8)) +
-    labs(title = plot_title) + theme(axis.text.x = element_text(angle = 90))
+    theme(axis.text.x = element_text(angle = 90))
 }
-ggarrange(fun_share_prop(tree_occup_top, "tree"), 
-          fun_share_prop(shrub_occup_top, "shrub"), 
-          fun_share_prop(occup_top, "common"), 
-          nrow = 1, common.legend = TRUE, legend = "right")
+fun_share_prop(plant_occup_top)
 
 # unique ubiquitous species in certain land use types
-occup_top_long <- occup_top %>% pivot_longer(
-  cols = c("Com", "Com.neigh", "R.low", "R.high", "R.other",  "Ind"),  
+occup_top_long <- plant_occup_top %>% pivot_longer(
+  cols = all_of(Land_use_type_faclev),  
   names_to = "Land_use_type", values_to = "Species") %>% unique()
 Species_unique <- occup_top_long %>% group_by(Species) %>% 
   dplyr::summarise(Number = n()) %>% arrange(Number) %>% 
   subset(Number == 1) %>% .$Species 
 occup_top_long[which(occup_top_long$Species %in% Species_unique),] %>% 
   arrange(Land_use_type)
-
-rm(tree_occup, shrub_occup, tree_occup_top, shrub_occup_top, 
-   occup_top, occup_top_long, Species_unique, 
-   fun_occup_rate,fun_occup_df, fun_share_prop)
 
 # Quadrat level ----
 ## Richness ~ land use for all plants ----
