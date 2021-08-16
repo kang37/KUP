@@ -562,7 +562,7 @@ ggarrange(
   common.legend = T, legend = "right"
 )
 
-# pairwise result of ANOSIM of trees by Land_use_type
+# pairwise result of ANOSIM of trees and shrubs by land use
 anosim_pairs <- combn(Land_use_type_faclev, 2)
 fun_anosim_pairs <- function(x, y) {
   result <- NULL
