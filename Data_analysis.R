@@ -597,3 +597,7 @@ chart.Correlation(subset(qua_shrub_div, select = index_faclev))
 qua_tree_div %>% group_by(Land_use_type) %>% 
   dplyr::summarise(Abundance = mean(Abundance), Richness = mean(Richness))
 
+# means of quadrat Abundance and richness for trees
+qua_plant_div %>% group_by(Land_use_type) %>% 
+  dplyr::summarise(Richness = mean(Richness))
+
