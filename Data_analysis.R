@@ -379,13 +379,14 @@ fun_share_prop <- function(occup_top_data) {
 fun_share_prop(plant_occup_top)
 
 # unique ubiquitous species in certain land use types
-occup_top_long <- plant_occup_top %>% pivot_longer(
+plant_occup_top %>% pivot_longer(
   cols = all_of(Land_use_type_faclev),  
-  names_to = "Land_use_type", values_to = "Species") %>% unique()
-Species_unique <- occup_top_long %>% group_by(Species) %>% 
-  dplyr::summarise(Number = n()) %>% arrange(Number) %>% 
-  subset(Number == 1) %>% .$Species 
-occup_top_long[which(occup_top_long$Species %in% Species_unique),] %>% 
+  names_to = "Land_use_type", values_to = "Species") %>%
+  .[which(
+  occup_top_long$Species %in% 
+    # unique ubiquitous species - present once only
+    names(table(as.character(as.matrix(plant_occup_top)))[
+      table(as.character(as.matrix(plant_occup_top))) == 1])),] %>% 
   arrange(Land_use_type)
 
 # Quadrat level ----
