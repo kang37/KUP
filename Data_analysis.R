@@ -459,9 +459,6 @@ fun_box_plot <- function(x, y, z) {
 }
 ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
           fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
-rm(tree_box_pvalue, qua_tree_div_long, 
-   shrub_box_pvalue, qua_shrub_div_long, 
-   fun_box_plot, fun_cons_long, fun_get_pvalue)
 
 # pairwise dunn test of indexes ~ land use type
 fun_dunn <- function(x, taxa, index) {
@@ -501,8 +498,6 @@ fun_dunn_plot <- function(x, title) {
 ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"), 
           fun_dunn_plot(subset(dunn_df, taxa == "shrub"), "Shrub"), 
           nrow = 2)
-rm(dunn_df_1, dunn_df_2, dunn_df, 
-   fun_dunn, fun_dunn_plot)
 
 ## Species composition ----
 # use non-metric multidimensional scaling
