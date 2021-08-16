@@ -325,11 +325,20 @@ community_structure(
   arrange(desc(EQ))
 
 ## Species composition ----
-# Bray-Curtis dissimilarity of pairs of land use
-lu_dissim <- vegdist(lu_tree_div[2: 133]) %>% as.matrix() %>% round(digits = 2)
-rownames(lu_dissim) <- Land_use_type_faclev
-colnames(lu_dissim) <- Land_use_type_faclev
-lu_dissim
+# Bray-Curtis dissimilarity of pairs of land use for trees and shrubs
+lu_tree_dissim <- vegdist(lu_tree_div[2: 133]) %>% 
+  as.matrix() %>% 
+  round(digits = 2)
+rownames(lu_tree_dissim) <- Land_use_type_faclev
+colnames(lu_tree_dissim) <- Land_use_type_faclev
+lu_tree_dissim
+
+lu_shrub_dissim <- vegdist(lu_shrub_div[2: 133]) %>% 
+  as.matrix() %>% 
+  round(digits = 2)
+rownames(lu_shrub_dissim) <- Land_use_type_faclev
+colnames(lu_shrub_dissim) <- Land_use_type_faclev
+lu_shrub_dissim
 
 # plant occupancy of species for different land use types
 fun_occup_rate <- function(x,y) {
