@@ -454,7 +454,8 @@ fun_box_plot <- function(x, y, z) {
     geom_text(data = y, aes(x =Inf, y = Inf, label = Label), 
               size=3.5, hjust = 1.05, vjust = 1.5) +
     theme(axis.text.x = element_text(angle = 90, size = 12)) + 
-    labs(title = z, x = NULL, y = NULL)
+    labs(title = z, x = NULL, y = NULL) + 
+    theme_bw()
 }
 ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
           fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
