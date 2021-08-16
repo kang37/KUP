@@ -538,7 +538,7 @@ fun_nmds_plot <- function(mds_selected, hull, plot_title, mds_meta, anosim) {
   ggplot(mds_selected, aes(MDS1, MDS2, color = Land_use_type)) + 
     geom_point(size=3) +
     geom_polygon(data = hull, alpha = 0, aes(fill=Land_use_type), size=1) +
-    labs(title = plot_title, 
+    labs(title = plot_title, color = "Land use type", fill = "Land use type", 
          subtitle = paste("stress=", sprintf("%.3f",mds_meta$stress),
                           ", R=", sprintf("%.3f",anosim$statistic),
                           ", p=", sprintf("%.3f",anosim$signif),sep = "")) +
