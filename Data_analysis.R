@@ -407,10 +407,10 @@ dunn.test(x = qua_plant_div$Richness, g = qua_plant_div$Land_use_type)
 # Kruskal-Wallis test & box plot for trees 
 # tree diversity longer and shrub diversity longer data set
 fun_cons_long <- function(x) {
-  subset(x, select = c("Abundance", "Richness", "Evenness", "Land_use_type")) %>% 
-    pivot_longer(cols = c("Abundance", "Richness", "Evenness"), 
+  subset(x, select = c("Abundance", "Evenness", "Land_use_type")) %>% 
+    pivot_longer(cols = c("Abundance", "Evenness"), 
                  names_to = "Index", values_to = "Index_value") %>% 
-    mutate(Index = factor(Index, levels = c("Abundance", "Richness", "Evenness")), 
+    mutate(Index = factor(Index, levels = c("Abundance", "Evenness")), 
            Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev), 
            Attr = c("Land use type")) %>% 
     na.omit()
@@ -420,11 +420,11 @@ qua_shrub_div_long <- fun_cons_long(qua_shrub_div)
 
 # get p-values for box plots
 fun_get_pvalue <- function(x) {
-  y <- data.frame(Index = c("Abundance", "Richness", "Evenness"), 
+  y <- data.frame(Index = c("Abundance", "Evenness"), 
                   Pvalue = NA, Label = NA) %>% 
-    mutate(Index = factor(Index, levels = c("Abundance", "Richness", "Evenness")))
+    mutate(Index = factor(Index, levels = c("Abundance", "Evenness")))
   j <- 0
-  for (i in c("Abundance", "Richness", "Evenness")) {
+  for (i in c("Abundance", "Evenness")) {
     j <- j+1
     y$Pvalue[j] <- round(kruskal.test(
       x[, i] ~ x$Land_use_type)$p.value,digits = 3)
@@ -476,10 +476,8 @@ fun_dunn <- function(x, taxa, index) {
     separate(comparison, into = c("comparison_1", "comparison_2"), sep = " - ")
 }
 dunn_df_1 <- rbind(fun_dunn(qua_tree_div, "tree", "Abundance"), 
-                   fun_dunn(qua_tree_div, "tree", "Richness"),
                    fun_dunn(qua_tree_div, "tree", "Evenness"),
                    fun_dunn(qua_shrub_div, "shrub", "Abundance"), 
-                   fun_dunn(qua_shrub_div, "shrub", "Richness"),
                    fun_dunn(qua_shrub_div, "shrub", "Evenness")
 ) 
 dunn_df_2 <- dunn_df_1[, c("taxa", "index", "comparison_2", "comparison_1", "p")]
