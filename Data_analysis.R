@@ -108,7 +108,7 @@ fun_accum <- function(x, y, z, method) {
                  linetype = 2, size = 1)
   }
   plotdata + 
-    labs(x = "Number of quadrats", y = "Nuber of species") + 
+    labs(x = "Number of quadrats", y = "Number of species") + 
     scale_x_continuous(limits = c(0, z)) + 
     theme_bw()
 }
@@ -155,7 +155,7 @@ fun_rank_plot <- function(x, title, method) {
   }
   plotdata + 
     geom_point(aes(color = Nt_ex), alpha = 0.3, size = 2) + 
-    labs(x = "Scaled rank of species", y = "Relative abundance") +
+    labs(x = "Scaled rank of species", y = "Relative abundance (%)") +
     scale_color_discrete("Provenance") +
     theme(strip.text = element_text(size = 12),
           axis.title = element_text(size = 12),
@@ -402,7 +402,7 @@ plant_occup_top %>% pivot_longer(
 ## Richness ~ land use for all plants ----
 ggplot(qua_plant_div) + 
   geom_boxplot(aes(Land_use_type, Richness)) + 
-  labs(x = "Land use zone", y = "Quadrat richness") + 
+  labs(x = "Land use type", y = "Quadrat richness") + 
   geom_text(data = data.frame(
     Land_use_type = Land_use_type_faclev, 
     Label = c(rep("a", 4), "ab", "b")
@@ -557,9 +557,9 @@ fun_nmds_plot <- function(mds_selected, hull, plot_title, mds_meta, anosim) {
     theme_bw()
 }
 ggarrange(
-  fun_nmds_plot(tree_mds_selected, tree_hulls, "tree", 
+  fun_nmds_plot(tree_mds_selected, tree_hulls, "(a)", 
                 tree_mds_meta, tree_anosim), 
-  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "shrub", 
+  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "(b)", 
                 shrub_mds_meta, shrub_anosim),
   common.legend = T, legend = "right"
 )
