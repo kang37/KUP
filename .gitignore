@@ -3,8 +3,5 @@
 .RData
 .Ruserdata
 .httr-oauth
-*.csv
-*.xlsx
-Answer_Prof_Liu_comparison_rank_abundance_curves.R
 Analysis for plants of native species.R
 Files/
