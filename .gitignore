@@ -3,5 +3,7 @@
 .RData
 .Ruserdata
 .httr-oauth
+.DS_Store
 Analysis for plants of native species.R
 Files/
+History/
