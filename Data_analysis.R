@@ -391,8 +391,7 @@ fun_share_prop(plant_occup_top)
 plant_occup_top %>% pivot_longer(
   cols = all_of(Land_use_type_faclev),  
   names_to = "Land_use_type", values_to = "Species") %>%
-  .[which(
-  occup_top_long$Species %in% 
+  .[which(.$Species %in% 
     # unique ubiquitous species - present once only
     names(table(as.character(as.matrix(plant_occup_top)))[
       table(as.character(as.matrix(plant_occup_top))) == 1])),] %>% 
