@@ -170,14 +170,14 @@ Land_use_type_faclev <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow
 index_faclev <- c("Abundance", "Richness", "Shannon", "Simpson", "Evenness")
 
 # information of all the plots
-all_plot_info <- read.csv("In_plot_info.csv", stringsAsFactors = FALSE) %>% 
+all_plot_info <- read.csv("RawData/Plot_info.csv", stringsAsFactors = FALSE) %>% 
   mutate(Land_use_type = factor(Land_use_type, levels = Land_use_type_faclev))
 
 # information of all the plants species: provenance and taxonomy 
-all_plant_info <- read.csv("In_plant_info.csv", stringsAsFactors = FALSE)
+all_plant_info <- read.csv("RawData/Plant_info.csv", stringsAsFactors = FALSE)
 
 # data of all the plants: taxonomy, attributes, abundance, etc.
-all_plant_data <- read.csv("In_plant_data.csv", stringsAsFactors = FALSE) %>%
+all_plant_data <- read.csv("RawData/Plant_data.csv", stringsAsFactors = FALSE) %>%
   left_join(all_plant_info, by = "Species_LT") %>%
   left_join(all_plot_info,by = "Plot_ID")
 qua_plant_div <- all_plant_data %>% 
