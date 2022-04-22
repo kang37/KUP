@@ -214,8 +214,7 @@ number_plant_species <- length(unique(all_plant_data$Species_LT))
 number_tree_species <- length(unique(tree_data$Species_LT))
 number_shrub_species <- length(unique(shrub_data$Species_LT))
 
-
-# City level ----
+# City level analysis ----
 ## Number of species ----
 cat("\n", "total species:", length(unique(all_plant_data$Species_LT)), "\n", 
     "total genera:", length(unique(all_plant_data$Genus)), "\n", 
@@ -296,7 +295,7 @@ city_shrub_rank %>%
   community_structure(abundance.var = "abundance", metric = "EQ") %>%
   arrange(EQ)
 
-# Land use level ----
+# Land use level analysis ----
 ## Species accumulation curve ----
 fun_accum(all_plant_data, 348, 50, method = "land_use") + 
   labs(color = "Land use") + 
@@ -401,7 +400,7 @@ plant_occup_top %>% pivot_longer(
       table(as.character(as.matrix(plant_occup_top))) == 1])),] %>% 
   arrange(Land_use_type)
 
-# Quadrat level ----
+# Quadrat level analysis ----
 ## Richness ~ land use for all plants ----
 ggplot(qua_plant_div) + 
   geom_boxplot(aes(Land_use_type, Richness)) + 
