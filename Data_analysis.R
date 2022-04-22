@@ -168,7 +168,8 @@ fun_rank_plot <- function(x, title, method) {
 
 # Get data ----
 # some default factors
-Land_use_type_faclev <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
+Land_use_type_faclev <- 
+  c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
 index_faclev <- c("Abundance", "Richness", "Shannon", "Simpson", "Evenness")
 
 # information of all the plots
