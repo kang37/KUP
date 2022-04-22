@@ -507,11 +507,6 @@ ggarrange(fun_dunn_plot(subset(dunn_df, taxa == "tree"), "Tree"),
           fun_dunn_plot(subset(dunn_df, taxa == "shrub"), "Shrub"), 
           nrow = 2)
 
-# Cor among the indexes ----
-chart.Correlation(subset(qua_tree_div, select = index_faclev))
-chart.Correlation(subset(qua_shrub_div, select = index_faclev))
-
-
 # Data for discussion ----
 # means of quadrat Abundance and richness for trees
 qua_tree_div %>% group_by(Land_use_type) %>% 
