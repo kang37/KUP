@@ -10,6 +10,9 @@ library(codyn)
 library(ggpubr)
 library(iNEXT)
 
+# Statement ----
+# for convenience, the "canopy layer" in the article is referred as "tree" in the code, and "understory layer" as "shrub"
+
 # Functions ----
 fun_div <- function(x, y, z, k, m, method) {
   perc_planted <- x %>% group_by({{k}}) %>% 
