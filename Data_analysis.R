@@ -263,7 +263,7 @@ table(all_plant_info$Nt_ex)/nrow(all_plant_info)
 # the attributes of trees and shrubs
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   print(tapply(tree_data$Stem, tree_data[,i], sum)/sum(tree_data$Stem), 
-        digits = 2)
+        digits = 3)
   cat("\n")
 }
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
