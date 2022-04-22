@@ -268,7 +268,7 @@ for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
 }
 for (i in c("Pla_spo", "Pub_pri", "Nt_ex")) {
   print(tapply(shrub_data$Area, shrub_data[,i], sum)/sum(shrub_data$Area), 
-        digits = 2)
+        digits = 3)
   cat("\n")
 }
 
