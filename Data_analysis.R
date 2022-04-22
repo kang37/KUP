@@ -134,6 +134,8 @@ fun_contain <- function(x, y) {
   )
 }
 
+# func to generate data for plotting rank-abundance curve
+# func para: x, raw data with species from second column; y, the number of species
 fun_rank_data <- function(x, y) {
   x[2:(y+1)] %>%
     subset(select = colSums(.) != 0) %>%
