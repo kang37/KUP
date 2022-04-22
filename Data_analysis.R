@@ -194,8 +194,10 @@ qua_plant_div <- all_plant_data %>%
   as.data.frame()
 
 # data of trees and shrubs and diversity table of trees and shrubs 
-tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% mutate(Area = NULL)
-shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% mutate(Stem = NULL) %>% 
+tree_data <- subset(all_plant_data, Tree_shrub == "tree") %>% 
+  mutate(Area = NULL)
+shrub_data <- subset(all_plant_data, Tree_shrub == "shrub") %>% 
+  mutate(Stem = NULL) %>% 
   mutate(Area = Area/10000)
 
 lu_tree_div <- fun_div(tree_data, Stem, "Stem", 
