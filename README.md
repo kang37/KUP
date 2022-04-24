@@ -43,12 +43,12 @@ Genus: genus of the species according to the Plant List database.
 
 Family: family of the species according to the Plant List database. 
 
-# About the Code
+## About the Code
 
 **Data_analysis.R** is the main code for data analysis for the research. 
 **Figure.R** is used to export the figures for the research article, which should be run after Data_analysis.R. 
 
-# Other things 
+## Other things 
 
 If anyone is interested in urban biodiversity research, do not hesitate to contact me or star the repo, please. 
 
