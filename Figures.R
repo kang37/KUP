@@ -16,7 +16,7 @@ ggarrange(plotlist = list(
     theme(text = element_text(family = "Times", size = 15)), 
   fun_rank_plot(city_shrub_rank, title = "(b)", method = "city") + 
     theme(text = element_text(family = "Times", size = 15))
-), nrow = 1, common.legend = TRUE)
+), nrow = 1, common.legend = TRUE, legend = "bottom")
 dev.off()
 
 # extrapolation of richness at land use level 
