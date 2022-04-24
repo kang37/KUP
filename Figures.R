@@ -60,7 +60,7 @@ dev.off()
 
 # indexes ~ land use at quadrat level 
 png(filename = "PorcData/Fig7_abund_evenness_quadrat.png", 
-    width = 2400, height = 1500, 
+    width = 1500, height = 900, 
     type = c("cairo"), res = 300)
 ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
           fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
