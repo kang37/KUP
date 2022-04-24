@@ -1,7 +1,9 @@
+## Introduction 
+
 They are the raw data and code for my research project, Kyoto Urban Biodiversity, which focus on the plant diversity in the built-up area of Kyoto city. 
 The manuscript *Dispersed green contributes to urban biodiversity: plant diversity across land use and scales in an Asian city* has been accepted to the *Journal of Forestry Research*, and will be published in May 2022. 
 
-# Codebook for data 
+## Codebook for data 
 
 **Plot_info.csv** gives the land use information of the quadrats. 
 
