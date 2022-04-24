@@ -65,19 +65,3 @@ png(filename = "Out_indexes_quadrat.png",
 ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
           fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
 dev.off()
-
-# nMDS at quadrat level 
-png(filename = "Out_nmds_quadrat.png", 
-    width = 2400, height = 1500, 
-    type = c("cairo"), res = 300)
-ggarrange(
-  fun_nmds_plot(tree_mds_selected, tree_hulls, "(a)", 
-                tree_mds_meta, tree_anosim) + 
-    theme(text = element_text(family = "Times", size = 15)), 
-  fun_nmds_plot(shrub_mds_selected, shrub_hulls, "(b)", 
-                shrub_mds_meta, shrub_anosim) + 
-    theme(text = element_text(family = "Times", size = 15)),
-  common.legend = T, legend = "right"
-)
-dev.off()
-
