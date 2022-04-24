@@ -1,5 +1,5 @@
 # extrapolation of richness at city level
-png(filename = "Fig2_sac_city.png", 
+png(filename = "PorcData/Fig2_sac_city.png", 
     width = 1500, height = 900, 
     type = c("cairo"), res = 150)
 fun_accum(all_plant_data, 348, 350, method = "city") + 
@@ -8,7 +8,7 @@ fun_accum(all_plant_data, 348, 350, method = "city") +
 dev.off()
 
 # rank abundance curves at city level 
-png(filename = "Fig3_rac_city.png", 
+png(filename = "PorcData/Fig3_rac_city.png", 
     width = 1500, height = 900, 
     type = c("cairo"), res = 300)
 ggarrange(plotlist = list(
@@ -20,7 +20,7 @@ ggarrange(plotlist = list(
 dev.off()
 
 # extrapolation of richness at land use level 
-png(filename = "Fig4_sac_landuse.png", 
+png(filename = "PorcData/Fig4_sac_landuse.png", 
     width = 1500, height = 900, 
     type = c("cairo"), res = 300)
 fun_accum(all_plant_data, 348, 50, method = "land_use") + 
@@ -31,7 +31,7 @@ fun_accum(all_plant_data, 348, 50, method = "land_use") +
 dev.off()
 
 # rank abundance curves at land use level
-png(filename = "Fig5_rac_landuse.png", 
+png(filename = "PorcData/Fig5_rac_landuse.png", 
     width = 2200, height = 1500, 
     type = c("cairo"), res = 300)
 ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use") + 
@@ -42,7 +42,7 @@ ggarrange(fun_rank_plot(lu_tree_rank, "(a)", method = "land_use") +
 dev.off()
 
 # richness ~ land use at quadrat level
-png(filename = "Fig6_richness_quadrat.png", 
+png(filename = "PorcData/Fig6_richness_quadrat.png", 
     width = 1500, height = 900, 
     type = c("cairo"), res = 300)
 ggplot(qua_plant_div) + 
@@ -59,7 +59,7 @@ ggplot(qua_plant_div) +
 dev.off()
 
 # indexes ~ land use at quadrat level 
-png(filename = "Fig7_abund_evenness_quadrat.png", 
+png(filename = "PorcData/Fig7_abund_evenness_quadrat.png", 
     width = 2400, height = 1500, 
     type = c("cairo"), res = 300)
 ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
