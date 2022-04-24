@@ -1,7 +1,7 @@
 # extrapolation of richness at city level
 png(filename = "PorcData/Fig2_sac_city.png", 
     width = 1500, height = 900, 
-    type = c("cairo"), res = 150)
+    type = c("cairo"), res = 300)
 fun_accum(all_plant_data, 348, 350, method = "city") + 
   theme(legend.position = "none", 
         text = element_text(family = "Times", size = 15))
@@ -60,8 +60,16 @@ dev.off()
 
 # indexes ~ land use at quadrat level 
 png(filename = "PorcData/Fig7_abund_evenness_quadrat.png", 
-    width = 1500, height = 900, 
+    width = 1500, height = 1500, 
     type = c("cairo"), res = 300)
-ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)"), 
-          fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)"))
+ggarrange(fun_box_plot(qua_tree_div_long, tree_box_pvalue, "(a)") + 
+            theme(axis.text.x = element_text(
+              family = "Times", size = 15, angle = 90),
+              axis.text.y = element_text(family = "Times", size = 15), 
+                  strip.text = element_blank()), 
+          fun_box_plot(qua_shrub_div_long, shrub_box_pvalue, "(b)") + 
+            theme(axis.text.x = element_text(
+              family = "Times", size = 15, angle = 90), 
+              axis.text.y = element_text(family = "Times", size = 15), 
+                  strip.text = element_blank()))
 dev.off()
