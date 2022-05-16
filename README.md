@@ -50,7 +50,8 @@ Family: family of the species according to the Plant List database.
 
 ## Other things 
 
-If anyone is interested in urban biodiversity research, do not hesitate to contact me or star the repo, please. 
+If anyone is interested in urban biodiversity research, please do not hesitate to contact me or star the repo. 
 
+Besides, as a future hobo researcher (since I am looking for a job now) it would be funny to say that I am currently working on several projects without being paid, but I am serious. 
 I also evaluated the ecosystem services of Kyoto city (see my repo named KES). 
 Now I am working on the link between urban biodiversity and ecosystem services. 
