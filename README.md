@@ -48,7 +48,7 @@ Family: family of the species according to the Plant List database.
 **Data_analysis.R** is the main code for data analysis for the research. 
 **Figure.R** is used to export the figures for the research article, which should be run after Data_analysis.R. 
 
-## Other things 
+## One More Word
 
 If anyone is interested in urban biodiversity research, please do not hesitate to contact me or star the repo. 
 
