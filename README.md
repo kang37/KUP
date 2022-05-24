@@ -1,9 +1,9 @@
-## Introduction 
+# Introduction 
 
 They are the raw data and code for my research project, Kyoto Urban Biodiversity, which focus on the plant diversity in the built-up area of Kyoto city. 
 The manuscript *[A dispersed vegetative cover contributes to urban biodiversity: plant diversity across land use types and scale in an Asian city](https://link.springer.com/article/10.1007/s11676-022-01482-5)* is published on the *Journal of Forestry Research*. 
 
-## Codebook for data 
+# Codebook for data 
 
 **Plot_info.csv** gives the land use information of the quadrats. 
 
@@ -43,12 +43,12 @@ Genus: genus of the species according to the Plant List database.
 
 Family: family of the species according to the Plant List database. 
 
-## About the Code
+# About the Code
 
 **Data_analysis.R** is the main code for data analysis for the research. 
 **Figure.R** is used to export the figures for the research article, which should be run after Data_analysis.R. 
 
-## One More Word
+# One More Word
 
 If anyone is interested in urban biodiversity research, please do not hesitate to contact me or star the repo. 
 
