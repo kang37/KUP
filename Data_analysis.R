@@ -1,3 +1,7 @@
+# Statement ----
+# for convenience, the "canopy layer" in the article is referred as "tree" in the code, and "understory layer" as "shrub"
+
+# Package ----
 library(Rmisc)
 library(ggplot2)
 library(dplyr)
@@ -9,9 +13,6 @@ library(BiodiversityR)
 library(codyn)
 library(ggpubr)
 library(iNEXT)
-
-# Statement ----
-# for convenience, the "canopy layer" in the article is referred as "tree" in the code, and "understory layer" as "shrub"
 
 # Functions ----
 fun_div <- function(x, y, z, k, m, method) {
