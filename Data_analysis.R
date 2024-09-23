@@ -73,42 +73,37 @@ fun_accum <- function(x, y, z, method) {
       fun_temp(x, "ResHigh"), 
       fun_temp(x, "ResLow")
     )
-    names(incidence) <- c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
+    names(incidence) <- 
+      c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow")
   }
   
   accum <- iNEXT(incidence, q = 0, datatype = "incidence_freq", 
                  size = seq(1:y), se = FALSE)
   if (method == "city") {
-    accum$iNextEst$city$land_use <- "city"
-    accum <- accum$iNextEst$city
+    accum <- accum$iNextEst$size_based
   } else {
-    accum$iNextEst$Com$land_use <- "Com"
-    accum$iNextEst$"ComNbr"$land_use <- "ComNbr"
-    accum$iNextEst$Ind$land_use <- "Ind"
-    accum$iNextEst$"ResOther"$land_use <- "ResOther"
-    accum$iNextEst$"ResHigh"$land_use <- "ResHigh"
-    accum$iNextEst$"ResLow"$land_use <- "ResLow"
-    accum <- Reduce(rbind, accum$iNextEst)
-    accum$land_use <- factor(
-      accum$land_use, 
+    accum <- accum$iNextEst$size_based
+    accum$Assemblage <- factor(
+      accum$Assemblage, 
       levels = c("Com", "ComNbr", "Ind", "ResOther", "ResHigh", "ResLow"))
   }
-  accum$method[accum$method == "interpolated"] <- "observed"
   
-  hline <- accum %>% group_by(land_use) %>% 
+  hline <- accum %>% group_by(Assemblage) %>% 
     summarise(asymtote = max(qD))
   print(arrange(hline, desc(asymtote)))
   
   if (method == "city") {
     plotdata <- ggplot(accum) + 
-      geom_line(aes(t, qD, color = land_use, linetype = method), size = 1) +
-      geom_hline(data = hline, aes(yintercept = asymtote, color = land_use), 
+      geom_line(aes(t, qD, color = Assemblage, linetype = Method), size = 1) +
+      geom_hline(data = hline, aes(yintercept = asymtote, color = Assemblage), 
                  linetype = 2, size = 1) + 
-      scale_linetype_discrete(limits = c("observed", "extrapolated"))
+      scale_linetype_discrete(
+        limits = c("Rarefaction", "Observed", "Extrapolation")
+      )
   } else {
-    plotdata <- ggplot(accum[which(accum$method == "observed"), ]) + 
-      geom_line(aes(t, qD, color = land_use), size = 1) +
-      geom_hline(data = hline, aes(yintercept = asymtote, color = land_use), 
+    plotdata <- ggplot(accum[which(accum$Method != "Extrapolation"), ]) + 
+      geom_line(aes(t, qD, color = Assemblage), size = 1) +
+      geom_hline(data = hline, aes(yintercept = asymtote, color = Assemblage), 
                  linetype = 2, size = 1)
   }
   plotdata + 
